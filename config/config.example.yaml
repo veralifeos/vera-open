@@ -1,0 +1,111 @@
+# ============================================================================
+# Vera — Configuração
+# Copie este arquivo para config.yaml e preencha com seus dados.
+# Ou rode: python -m vera setup
+# ============================================================================
+
+# Identidade
+name: "Vera"
+language: "pt-BR"
+timezone: "America/Sao_Paulo"
+
+# ─── Backend de dados ───────────────────────────────────────────────────────
+# Onde seus dados ficam armazenados.
+# Suportado: "notion". Futuro: "airtable", "supabase".
+backend:
+  type: "notion"
+  notion:
+    token_env: "NOTION_TOKEN"       # nome da env var com o token
+
+# ─── LLM ────────────────────────────────────────────────────────────────────
+# Provedor de IA para gerar briefings e análises.
+llm:
+  default: "claude"                 # provider para briefings
+  advanced: "claude"                # provider para análise complexa
+  providers:
+    claude:
+      model: "claude-sonnet-4-5-20250929"
+      api_key_env: "ANTHROPIC_API_KEY"
+    ollama:
+      model: "llama3.2:3b"
+      base_url: "http://localhost:11434"
+    openai:
+      model: "gpt-4o"
+      api_key_env: "OPENAI_API_KEY"
+
+# ─── Entrega ────────────────────────────────────────────────────────────────
+# Como os briefings são entregues.
+delivery:
+  telegram:
+    bot_token_env: "TELEGRAM_BOT_TOKEN"
+    chat_id_env: "TELEGRAM_CHAT_ID"
+
+# ─── Horários ───────────────────────────────────────────────────────────────
+schedule:
+  briefing: "09:00"
+  urgency_update: "08:00"
+  weekly_review:
+    day: "saturday"
+    time: "10:00"
+  week_setup:
+    day: "sunday"
+    time: "18:00"
+
+# ─── Persona ────────────────────────────────────────────────────────────────
+# Define o tom e personalidade da assistente.
+# Presets: "executive" (direta, irônica), "coach" (encorajadora), "custom" (seu AGENT.md)
+persona:
+  preset: "executive"
+  custom_prompt_file: null          # path para AGENT.md se preset=custom
+
+# ─── Domínios de vida ───────────────────────────────────────────────────────
+# Cada domínio é opcional exceto tasks. Preencha o collection com o ID
+# do seu database/table. Os fields mapeiam os nomes das colunas.
+domains:
+  tasks:
+    enabled: true
+    collection: ""                  # ID do database Notion (obrigatório)
+    fields:
+      title: "Name"
+      status: "Status"
+      priority: "Prioridade"
+      deadline: "Deadline"
+      category: "Tipo"
+      status_active: ["To Do", "Doing", "Em andamento"]
+      status_done: ["Done", "Concluído"]
+
+  pipeline:
+    enabled: false
+    collection: ""
+    fields:
+      title: "Empresa"
+      stage: "Estágio"
+      priority: "Prioridade"
+      next_action: "Próximo Passo"
+      last_contact: "Data Último Contato"
+
+  contacts:
+    enabled: false
+    collection: ""
+    fields:
+      name: "Nome"
+      status: "Status"
+      type: "Tipo"
+      last_interaction: "Última Interação"
+
+  health:
+    enabled: false
+    collection: ""
+
+  finances:
+    enabled: false
+    collection: ""
+
+  learning:
+    enabled: false
+    collection: ""
+
+# ─── Debug ──────────────────────────────────────────────────────────────────
+debug:
+  dry_run: false
+  verbose: false
