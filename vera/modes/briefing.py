@@ -18,24 +18,15 @@ from vera.config import VeraConfig
 from vera.domains import DOMAIN_REGISTRY
 from vera.last_run import save_last_run
 from vera.llm.base import LLMProvider
+from vera.personas import get_persona_prompt
+from vera.source_health import SourceHealthTracker
 from vera.state import ZOMBIE_THRESHOLD, StateManager
 
 # Máximo de tarefas enviadas ao LLM
 MAX_TAREFAS_PROMPT = 20
 
-# Presets de persona (system prompts built-in)
-_PERSONA_PRESETS = {
-    "executive": (
-        "Você é {name}, secretária executiva. "
-        "Tom: direto, irônico-maternal. Cobra como quem se importa, não como quem julga. "
-        "Nunca motivacional, nunca coach. Prosa corrida, sem frase de efeito."
-    ),
-    "coach": (
-        "Você é {name}, coach pessoal. "
-        "Tom: encorajador mas honesto. Foca em progresso e próximos passos. "
-        "Reconhece avanços sem exagero. Prosa corrida."
-    ),
-}
+# Max palavras por tipo de dia (usado nos presets de persona)
+_MAX_WORDS_DIA = {0: 500, 5: 400, 6: 350}  # seg, sab, dom; default 350
 
 
 # ─── Guards ──────────────────────────────────────────────────────────────────
@@ -123,7 +114,11 @@ def filtrar_e_rankear(
 
 
 def carregar_workspace_files(config: VeraConfig) -> dict:
-    """Carrega AGENT.md e USER.md."""
+    """Carrega AGENT.md e USER.md do workspace/.
+
+    Fallback: se arquivo nao existe, tenta .example.
+    Custom persona file sobrescreve AGENT.md.
+    """
     workspace_path = Path("workspace")
     arquivos = {}
 
@@ -133,8 +128,16 @@ def carregar_workspace_files(config: VeraConfig) -> dict:
             conteudo = caminho.read_text(encoding="utf-8").strip()
             if conteudo:
                 arquivos[nome] = conteudo[:1500]
+        else:
+            # Tenta .example como fallback
+            example_name = nome.replace(".md", ".example.md")
+            example_path = workspace_path / example_name
+            if example_path.exists():
+                conteudo = example_path.read_text(encoding="utf-8").strip()
+                if conteudo:
+                    arquivos[nome] = conteudo[:1500]
 
-    # Custom persona file
+    # Custom persona file sobrescreve AGENT.md
     if config.persona.custom_prompt_file:
         custom_path = Path(config.persona.custom_prompt_file)
         if custom_path.exists():
@@ -145,13 +148,25 @@ def carregar_workspace_files(config: VeraConfig) -> dict:
     return arquivos
 
 
-def _get_system_prompt(config: VeraConfig, workspace: dict) -> str:
-    """Monta system prompt a partir do preset ou custom."""
-    if config.persona.preset == "custom" and workspace.get("AGENT.md"):
-        return workspace["AGENT.md"]
+def _get_system_prompt(config: VeraConfig, workspace: dict, dia_num: int = 2) -> str:
+    """Monta system prompt a partir do preset ou custom.
 
-    preset = _PERSONA_PRESETS.get(config.persona.preset, _PERSONA_PRESETS["executive"])
-    return preset.format(name=config.name)
+    Se AGENT.md existe e preset e "custom", usa AGENT.md.
+    Senao, usa preset do personas.py com max_words por dia.
+    Se USER.md existe, injeta como secao sobre o usuario.
+    """
+    max_words = _MAX_WORDS_DIA.get(dia_num, 350)
+
+    if config.persona.preset == "custom" and workspace.get("AGENT.md"):
+        prompt = workspace["AGENT.md"]
+    else:
+        prompt = get_persona_prompt(config.persona.preset, config.name, max_words)
+
+    # Injeta USER.md se existe
+    if workspace.get("USER.md"):
+        prompt += f"\n\n=== SOBRE O USUARIO ===\n{workspace['USER.md']}"
+
+    return prompt
 
 
 # ─── Contexto para o LLM ────────────────────────────────────────────────────
@@ -530,6 +545,29 @@ async def run_async(
     workspace = carregar_workspace_files(config)
     print(f"   Carregados: {list(workspace.keys())}")
 
+    # Calendar (opcional)
+    calendar_events = []
+    calendar_ctx = ""
+    if _calendar_habilitado(config):
+        try:
+            from vera.integrations.calendar import formatar_eventos_para_contexto
+            calendar_events = await _buscar_eventos_calendar(config)
+            calendar_ctx = formatar_eventos_para_contexto(calendar_events)
+            if calendar_events:
+                print(f"   [calendar] {len(calendar_events)} evento(s)")
+        except Exception as e:
+            print(f"   [calendar] Erro: {e}")
+
+    # Source health alerts
+    source_health_ctx = ""
+    try:
+        tracker = SourceHealthTracker()
+        source_health_ctx = tracker.format_for_briefing()
+        if source_health_ctx:
+            print(f"   [source_health] Alertas detectados")
+    except Exception:
+        pass
+
     # Guard 2: idempotência
     payload_for_hash = {
         "tarefas": sorted([t.get("titulo", "") for t in tarefas]),
@@ -566,6 +604,12 @@ async def run_async(
     tarefas_rankeadas = filtrar_e_rankear(tarefas, state, delta)
     print(f"   {len(tarefas_rankeadas)} tarefas enviadas ao LLM")
 
+    # Injeta calendar e source health nos domain_contexts
+    if calendar_ctx:
+        domain_contexts["_calendar"] = calendar_ctx
+    if source_health_ctx:
+        domain_contexts["_source_health"] = source_health_ctx
+
     # Monta contexto por dia da semana
     if dia_num == 5:
         contexto = montar_contexto_sabado(
@@ -585,7 +629,7 @@ async def run_async(
 
     # Gera briefing via LLM
     print("\n   Gerando briefing via LLM...")
-    system_prompt = _get_system_prompt(config, workspace)
+    system_prompt = _get_system_prompt(config, workspace, dia_num)
 
     mensagem = await gerar_briefing(
         llm, system_prompt, contexto, dia_num, cabecalho, config,
@@ -610,16 +654,34 @@ async def run_async(
         # Observabilidade
         mc = state.get("mention_counts", {})
         high_mc = {k: v["count"] for k, v in mc.items() if v.get("count", 0) >= 4}
+        domains_active = [n for n, c in config.domains.items() if c.enabled]
+        domains_skipped = [n for n, c in config.domains.items() if not c.enabled]
+        duration = time.monotonic() - t0
+
         save_last_run(
             "briefing",
             {
-                "tarefas_total": len(tarefas),
-                "tarefas_enviadas": len(tarefas_rankeadas),
+                "domains_active": domains_active,
+                "domains_skipped": domains_skipped,
+                "tasks_total": len(tarefas),
+                "tasks_in_briefing": len(tarefas_rankeadas),
                 "zombies": len(zombies),
                 "cooldown": len(delta.get("em_cooldown", [])),
-                "novas": len(delta.get("novas", [])),
+                "delta": {
+                    "novas": len(delta.get("novas", [])),
+                    "removidas": len(delta.get("removidas", [])),
+                    "pioraram": len(delta.get("pioraram", [])),
+                },
                 "mention_counts_high": high_mc,
+                "calendar_events": len(calendar_events),
+                "llm_provider": config.llm.default,
+                "idempotent_skip": False,
+                "duration_seconds": round(duration, 1),
+                "source_health_alerts": (
+                    SourceHealthTracker().get_alerts() if source_health_ctx else []
+                ),
                 "payload_hash": payload_hash,
+                "errors": [],
             },
         )
     else:
@@ -629,7 +691,32 @@ async def run_async(
     return mensagem
 
 
+def _calendar_habilitado(config: VeraConfig) -> bool:
+    """Verifica se calendar esta habilitado no config."""
+    integrations = getattr(config, "integrations", None)
+    if not integrations:
+        return False
+    gcal = getattr(integrations, "google_calendar", None)
+    return bool(gcal and gcal.enabled)
+
+
+async def _buscar_eventos_calendar(config: VeraConfig) -> list[dict]:
+    """Busca eventos do Google Calendar se configurado."""
+    from vera.integrations.calendar import GoogleCalendarProvider
+
+    gcal_cfg = config.integrations.google_calendar
+    credentials = os.environ.get(gcal_cfg.credentials_env, "")
+    if not credentials:
+        return []
+
+    provider = GoogleCalendarProvider(
+        credentials_json=credentials,
+        calendar_ids=gcal_cfg.calendar_ids,
+    )
+    return await provider.get_events_today(config.timezone)
+
+
 def run(config: VeraConfig, backend: StorageBackend, llm: LLMProvider,
         force: bool = False, dry_run: bool = False) -> str | None:
-    """Entrypoint síncrono."""
+    """Entrypoint sincrono."""
     return asyncio.run(run_async(config, backend, llm, force=force, dry_run=dry_run))

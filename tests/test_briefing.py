@@ -248,7 +248,7 @@ def test_get_system_prompt_executive():
     config = _minimal_config()
     prompt = _get_system_prompt(config, {})
     assert "Vera" in prompt
-    assert "secretária" in prompt.lower() or "direto" in prompt.lower()
+    assert "secretaria" in prompt.lower() or "executiva" in prompt.lower()
 
 
 def test_get_system_prompt_custom():
