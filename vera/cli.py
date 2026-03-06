@@ -80,13 +80,14 @@ def briefing(
     try:
         resultado = run(config, backend, llm, force=force, dry_run=effective_dry_run)
 
-        # Envia no Telegram se não dry_run
+        # Envia no Telegram se nao dry_run
         if resultado and not effective_dry_run:
             _enviar_telegram(config, resultado)
 
     except Exception as e:
-        typer.echo(f"Erro crítico: {e}")
-        _notificar_erro_telegram(config, str(e))
+        typer.echo(f"Erro critico: {e}")
+        if not effective_dry_run:
+            _notificar_erro_telegram(config, f"{type(e).__name__}: {str(e)[:200]}")
         raise typer.Exit(code=1)
 
 
@@ -200,41 +201,27 @@ def _create_backend(config):
 
 
 def _enviar_telegram(config, mensagem: str) -> None:
-    """Envia mensagem no Telegram (placeholder — Sessão 3 implementa completo)."""
+    """Envia mensagem no Telegram usando modulo integrations."""
+    from vera.integrations.telegram import enviar_telegram
+
     tg_token = os.environ.get(config.delivery.telegram.bot_token_env, "")
     tg_chat_id = os.environ.get(config.delivery.telegram.chat_id_env, "")
 
-    if not tg_token or not tg_chat_id:
-        print("   [telegram] Não configurado — pulando envio.")
-        return
-
-    import aiohttp
-
-    async def _send():
-        url = f"https://api.telegram.org/bot{tg_token}/sendMessage"
-        payload = {
-            "chat_id": tg_chat_id,
-            "text": mensagem[:4096],
-            "parse_mode": "Markdown",
-        }
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=payload) as resp:
-                if resp.status == 200:
-                    print("   [telegram] Briefing enviado!")
-                else:
-                    text = await resp.text()
-                    print(f"   [telegram] Erro {resp.status}: {text[:200]}")
-
     try:
-        asyncio.run(_send())
+        asyncio.run(enviar_telegram(mensagem, tg_token, tg_chat_id))
     except Exception as e:
         print(f"   [telegram] Falha ao enviar: {e}")
 
 
 def _notificar_erro_telegram(config, erro: str) -> None:
-    """Notifica erro no Telegram."""
+    """Notifica erro no Telegram com fallback de 3 niveis."""
+    from vera.integrations.telegram import notificar_erro
+
+    tg_token = os.environ.get(config.delivery.telegram.bot_token_env, "")
+    tg_chat_id = os.environ.get(config.delivery.telegram.chat_id_env, "")
+
     try:
-        _enviar_telegram(config, f"VERA ERRO: {erro[:500]}")
+        asyncio.run(notificar_erro(erro, tg_token, tg_chat_id))
     except Exception:
         pass
 
