@@ -1,27 +1,27 @@
 # ============================================================================
-# Vera — Configuração
-# Copie este arquivo para config.yaml e preencha com seus dados.
-# Ou rode: python -m vera setup
+# Vera Open Configuration
+# Copy to config.yaml and fill in your values, or run: python -m vera setup
 # ============================================================================
 
-# Identidade
+# --- Identity ---
 name: "Vera"
 language: "pt-BR"
 timezone: "America/Sao_Paulo"
 
-# ─── Backend de dados ───────────────────────────────────────────────────────
-# Onde seus dados ficam armazenados.
-# Suportado: "notion". Futuro: "airtable", "supabase".
+# --- Storage Backend ---
+# Where your data lives. Only 'notion' supported in v0.1.
 backend:
   type: "notion"
   notion:
-    token_env: "NOTION_TOKEN"       # nome da env var com o token
+    # Create an integration at https://www.notion.so/my-integrations
+    # Then share each database with the integration
+    token_env: "NOTION_TOKEN"
 
-# ─── LLM ────────────────────────────────────────────────────────────────────
-# Provedor de IA para gerar briefings e análises.
+# --- LLM Provider ---
+# Which AI generates briefings. 'claude' or 'ollama'.
 llm:
-  default: "claude"                 # provider para briefings
-  advanced: "claude"                # provider para análise complexa
+  default: "claude"
+  advanced: "claude"           # For complex analysis (future)
   providers:
     claude:
       model: "claude-sonnet-4-5-20250929"
@@ -29,18 +29,27 @@ llm:
     ollama:
       model: "llama3.2:3b"
       base_url: "http://localhost:11434"
-    openai:
-      model: "gpt-4o"
-      api_key_env: "OPENAI_API_KEY"
+    # openai:                  # Not yet implemented
+    #   model: "gpt-4o"
+    #   api_key_env: "OPENAI_API_KEY"
 
-# ─── Entrega ────────────────────────────────────────────────────────────────
-# Como os briefings são entregues.
+# --- Delivery ---
+# How briefings reach you.
 delivery:
   telegram:
     bot_token_env: "TELEGRAM_BOT_TOKEN"
     chat_id_env: "TELEGRAM_CHAT_ID"
 
-# ─── Horários ───────────────────────────────────────────────────────────────
+# --- Integrations (all optional) ---
+integrations:
+  google_calendar:
+    enabled: false
+    credentials_env: "GOOGLE_CREDENTIALS"
+    # oauth_token_env: "GOOGLE_OAUTH_TOKEN"
+    calendar_ids: ["primary"]
+
+# --- Schedule ---
+# When to run. Used by time window guard (3h before, 2h after).
 schedule:
   briefing: "09:00"
   urgency_update: "08:00"
@@ -51,20 +60,21 @@ schedule:
     day: "sunday"
     time: "18:00"
 
-# ─── Persona ────────────────────────────────────────────────────────────────
-# Define o tom e personalidade da assistente.
-# Presets: "executive" (direta, irônica), "coach" (encorajadora), "custom" (seu AGENT.md)
+# --- Persona ---
+# How Vera communicates. Presets: 'executive', 'coach', 'custom'.
+# 'custom' uses workspace/AGENT.md instead of built-in prompts.
 persona:
   preset: "executive"
-  custom_prompt_file: null          # path para AGENT.md se preset=custom
+  custom_prompt_file: null     # Path to AGENT.md if preset=custom
 
-# ─── Domínios de vida ───────────────────────────────────────────────────────
-# Cada domínio é opcional exceto tasks. Preencha o collection com o ID
-# do seu database/table. Os fields mapeiam os nomes das colunas.
+# --- Life Domains ---
+# Each domain is optional except tasks. Set 'enabled: true' and fill
+# 'collection' with your Notion database ID. The 'fields' map your
+# column names to Vera's internal model.
 domains:
   tasks:
     enabled: true
-    collection: ""                  # ID do database Notion (obrigatório)
+    collection: ""             # Required. Your Tasks database ID
     fields:
       title: "Name"
       status: "Status"
@@ -72,17 +82,17 @@ domains:
       deadline: "Deadline"
       category: "Tipo"
       status_active: ["To Do", "Doing", "Em andamento"]
-      status_done: ["Done", "Concluído"]
+      status_done: ["Done", "Concluido"]
 
   pipeline:
     enabled: false
     collection: ""
     fields:
       title: "Empresa"
-      stage: "Estágio"
+      stage: "Estagio"
       priority: "Prioridade"
-      next_action: "Próximo Passo"
-      last_contact: "Data Último Contato"
+      next_action: "Proximo Passo"
+      last_contact: "Data Ultimo Contato"
 
   contacts:
     enabled: false
@@ -91,21 +101,20 @@ domains:
       name: "Nome"
       status: "Status"
       type: "Tipo"
-      last_interaction: "Última Interação"
+      last_interaction: "Ultima Interacao"
 
-  health:
-    enabled: false
-    collection: ""
+  # Future domains (not yet implemented):
+  # health:
+  #   enabled: false
+  #   collection: ""
+  # finances:
+  #   enabled: false
+  #   collection: ""
+  # learning:
+  #   enabled: false
+  #   collection: ""
 
-  finances:
-    enabled: false
-    collection: ""
-
-  learning:
-    enabled: false
-    collection: ""
-
-# ─── Debug ──────────────────────────────────────────────────────────────────
+# --- Debug ---
 debug:
-  dry_run: false
-  verbose: false
+  dry_run: false               # Run without sending Telegram or saving state
+  verbose: false               # Extra logging

@@ -1,231 +1,187 @@
 # Setup Guide
 
-From zero to your first morning briefing in ~30 minutes.
+Step-by-step guide to get Vera running. From zero to your first briefing in ~20 minutes.
 
----
+## 1. Prerequisites
 
-## Prerequisites
+- **Python 3.11+** -- check with `python --version`
+- **uv** (recommended) -- `pip install uv` or see [docs.astral.sh/uv](https://docs.astral.sh/uv/)
+- **git** -- for cloning and state management
 
-- Python 3.11+ installed ([python.org](https://python.org))
-- A Notion account (free tier works)
-- A Telegram account
-- A GitHub account (for automated scheduling)
-- An Anthropic API key ([console.anthropic.com](https://console.anthropic.com))
+## 2. Install
 
----
+```bash
+git clone https://github.com/veralifeos/vera-open.git
+cd vera-open
+pip install -e .
+# or: uv pip install -e .
+```
 
-## Step 1: Notion Integration
-
-You need a Notion integration token so Vera can read your databases.
+## 3. Create Notion integration
 
 1. Go to [notion.so/my-integrations](https://www.notion.so/my-integrations)
 2. Click **"New integration"**
-3. Name it `Vera Open` (or whatever you prefer)
-4. Select your workspace
-5. Under **Capabilities**, ensure these are enabled:
-   - ✅ Read content
-   - ✅ Update content
-   - ✅ Insert content
-6. Click **Submit**
-7. Copy the **Internal Integration Token** (starts with `ntn_`)
+3. Name it "Vera" (or anything you prefer)
+4. Under Capabilities, ensure **Read content** is checked
+5. Copy the **Internal Integration Secret** (starts with `ntnl_`)
 
-**Important:** You must share each database with this integration. Open each database in Notion → click `•••` (top right) → **Connections** → **Connect to** → select your integration.
+## 4. Connect integration to databases
 
----
+For each Notion database you want Vera to read:
 
-## Step 2: Notion Databases
-
-Vera needs at least one database: **Tasks**. The others are optional but recommended.
-
-**Option A: Use the Vera template**
-Duplicate the template (see [TEMPLATE.md](TEMPLATE.md)) and all databases come pre-configured.
-
-**Option B: Use your existing databases**
-Map your property names in `config.yaml`. See [CUSTOMIZE.md](CUSTOMIZE.md) for details.
+1. Open the database in Notion
+2. Click `...` (top right) -> **Connections** -> **Add connections**
+3. Search for "Vera" and add it
 
 **Finding your database ID:**
+Open the database as a full page. The URL looks like:
+`https://notion.so/workspace/abc123def456...?v=...`
+The database ID is the 32-character hex string before `?v=`.
 
-1. Open the database as a full page in Notion
-2. Look at the URL: `https://notion.so/workspace/abc123def456...?v=...`
-3. The database ID is the 32-character hex string **before** `?v=`
-4. Example: `https://notion.so/myspace/a1b2c3d4e5f6789012345678abcdef01?v=...`
-   → database_id = `a1b2c3d4e5f6789012345678abcdef01`
+Vera's setup wizard can auto-discover databases shared with the integration.
 
----
-
-## Step 3: Telegram Bot
+## 5. Create Telegram bot
 
 1. Open Telegram and search for **@BotFather**
-2. Send `/newbot`
-3. Follow the prompts to name your bot
-4. Copy the **bot token** (format: `1234567890:ABCdefGHIjklMNOpqrsTUVwxyz`)
-
-**Finding your Chat ID:**
-
-1. Send any message to your new bot (e.g., `/start`)
-2. Open this URL in your browser (replace `<TOKEN>` with your bot token):
+2. Send `/newbot` and follow the prompts
+3. Copy the **bot token** (looks like `123456:ABC-DEF...`)
+4. Send any message to your new bot (e.g., `/start`)
+5. Get your chat ID by visiting:
    ```
-   https://api.telegram.org/bot<TOKEN>/getUpdates
+   https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates
    ```
-3. Find `"chat":{"id":123456789}` in the response
-4. That number is your Chat ID
+   Find `"chat":{"id":123456789}` in the response. That number is your Chat ID.
 
----
-
-## Step 4: Anthropic API Key
+## 6. Get Anthropic API key
 
 1. Go to [console.anthropic.com](https://console.anthropic.com)
-2. Sign up or log in
-3. Go to **API Keys** → **Create Key**
+2. Create an account and add credits ($5 minimum)
+3. Go to **API Keys** -> **Create Key**
 4. Copy the key (starts with `sk-ant-`)
 
-Vera uses Claude Sonnet. Typical daily cost: $0.01-0.03/day.
+Vera uses Claude Sonnet. Typical cost: $0.01-0.03/day.
 
----
+## 7. Alternative: Ollama (free, local)
 
-## Step 5: Local Setup
+If you prefer a free, local LLM instead of Claude:
 
 ```bash
-# Clone the repository
-git clone https://github.com/you/vera-open.git
-cd vera-open
-
-# Create your config
-cp config.example.yaml config.yaml
-
-# Create your .env file
-cp .env.example .env
+# Install Ollama (see https://ollama.com)
+ollama pull llama3.2:3b
 ```
 
-Edit `.env` with your actual values:
-```env
-NOTION_TOKEN=ntn_your_actual_token_here
-ANTHROPIC_API_KEY=sk-ant-your_actual_key_here
-TELEGRAM_BOT_TOKEN=1234567890:your_actual_bot_token
-TELEGRAM_CHAT_ID=your_actual_chat_id
+In config.yaml, set `llm.default: "ollama"`. See config.example.yaml for details.
+
+## 8. Configure
+
+### Option A: Setup wizard (recommended)
+
+```bash
+python -m vera setup
 ```
 
-Edit `config.yaml` with your database IDs:
+The wizard walks you through every setting and creates `config.yaml` and `.env`.
+
+### Option B: Manual
+
+```bash
+cp config/config.example.yaml config.yaml
+```
+
+Edit `config.yaml` with your database IDs, LLM provider, and persona choice.
+
+Create `.env` with your secrets:
+```
+NOTION_TOKEN=ntnl_your_token_here
+ANTHROPIC_API_KEY=sk-ant-your_key_here
+TELEGRAM_BOT_TOKEN=123456:ABC-DEF
+TELEGRAM_CHAT_ID=your_chat_id
+```
+
+## 9. First run
+
+```bash
+# Load env vars (if using .env manually)
+export $(cat .env | xargs)
+
+# Validate everything is connected
+python -m vera validate
+
+# Test without sending Telegram or saving state
+python -m vera briefing --dry-run --force
+
+# Run for real
+python -m vera briefing --force
+```
+
+## 10. Deploy to GitHub Actions
+
+1. Fork the repository (or push your configured copy)
+2. Go to **Settings** -> **Secrets and variables** -> **Actions**
+3. Add these repository secrets:
+
+| Secret | Value |
+|---|---|
+| `NOTION_TOKEN` | Your Notion integration token |
+| `ANTHROPIC_API_KEY` | Your Anthropic API key |
+| `TELEGRAM_BOT_TOKEN` | Your Telegram bot token |
+| `TELEGRAM_CHAT_ID` | Your Telegram chat ID |
+
+4. Create `.github/workflows/daily.yml`:
+
 ```yaml
-tasks:
-  database_id: "your_tasks_database_id_here"
-daily_check:
-  enabled: true  # or false if you don't have this database
-  database_id: "your_daily_check_database_id_here"
+name: Vera Daily Briefing
+on:
+  schedule:
+    - cron: '0 12 * * *'  # 09:00 BRT (UTC-3)
+  workflow_dispatch:
+
+jobs:
+  briefing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -e .
+      - run: python -m vera briefing
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          FORCE_RUN: "true"
 ```
 
-Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+5. To test: go to **Actions** -> **Vera Daily Briefing** -> **Run workflow**
 
----
-
-## Step 5b: Tell Vera About Yourself (Optional but Recommended)
+## 11. Customize persona
 
 ```bash
+cp workspace/AGENT.example.md workspace/AGENT.md
 cp workspace/USER.example.md workspace/USER.md
 ```
 
-Edit `workspace/USER.md` with free-form information about yourself: who you are, what you're working on, how you prefer to communicate. This is the single highest-impact customization — it turns generic briefings into ones that feel written for you specifically.
+- **AGENT.md**: how Vera communicates (tone, rules, limits)
+- **USER.md**: who you are (context that makes briefings personal)
 
-See [CUSTOMIZE.md](CUSTOMIZE.md#user-context-workspaceusermd) for examples.
+Set `persona.preset: custom` in config.yaml to use AGENT.md instead of built-in presets.
 
----
+## 12. Google Calendar (optional)
 
-## Step 6: Validate
+Requires the `[calendar]` extra: `pip install -e ".[calendar]"`
 
-```bash
-# Load .env into your shell
-export $(cat .env | xargs)
+1. Create a Google Cloud project and enable the Calendar API
+2. Create a service account and download the JSON key
+3. Share your calendar with the service account email
+4. Set `GOOGLE_CREDENTIALS` env var to the JSON content or file path
+5. In config.yaml:
 
-# Validate config + secrets
-python -m src.main --mode validate
+```yaml
+integrations:
+  google_calendar:
+    enabled: true
+    credentials_env: "GOOGLE_CREDENTIALS"
+    calendar_ids: ["primary"]
 ```
-
-You should see:
-```
-✅ Config válida!
-   Nome: Vera
-   Idioma: pt-BR
-   ...
-```
-
-If you see errors, check [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
-
----
-
-## Step 7: First Run (Dry Run)
-
-Set `debug.dry_run: true` in `config.yaml`, then:
-
-```bash
-export $(cat .env | xargs)
-python -m src.main --mode daily
-```
-
-This runs the full pipeline but **doesn't send the Telegram message** — it prints the briefing to the console instead. Verify it looks correct.
-
----
-
-## Step 8: First Real Briefing
-
-Set `debug.dry_run: false` in `config.yaml`, then:
-
-```bash
-export $(cat .env | xargs)
-python -m src.main --mode daily
-```
-
-Check Telegram. Your briefing should arrive within 60 seconds.
-
----
-
-## Step 9: GitHub Actions (Automated Daily Runs)
-
-1. Push your repository to GitHub (**do not push** `.env` or `config.yaml` — they're in `.gitignore`)
-
-2. Add secrets in your GitHub repo:
-   - Go to **Settings** → **Secrets and variables** → **Actions**
-   - Add these repository secrets:
-     | Name | Value |
-     |---|---|
-     | `NOTION_TOKEN` | Your Notion integration token |
-     | `ANTHROPIC_API_KEY` | Your Anthropic API key |
-     | `TELEGRAM_BOT_TOKEN` | Your Telegram bot token |
-     | `TELEGRAM_CHAT_ID` | Your Telegram chat ID |
-
-3. Push `config.yaml` **or** commit it to the repo:
-   
-   Since `config.yaml` is in `.gitignore` by default (it could contain sensitive info if you're careless), you have two options:
-   
-   **Option A (recommended):** Force-add it:
-   ```bash
-   git add -f config.yaml
-   # If you created workspace/USER.md, add it too:
-   git add -f workspace/USER.md
-   git commit -m "Add config and user context"
-   git push
-   ```
-   
-   **Option B:** Rename `config.example.yaml` to `config.yaml` in the repo and make sure all your database IDs are filled in. Secrets stay in GitHub Secrets.
-
-4. The workflow runs automatically at 9:00 AM BRT (12:00 UTC) every day.
-
-5. To test immediately: go to **Actions** → **Daily Briefing** → **Run workflow**.
-
-**Note:** GitHub Actions cron can delay 5-20 minutes. This is normal and documented by GitHub.
-
----
-
-## Done
-
-Your daily briefing is now automated. Every morning, Vera will:
-
-1. Read your Notion databases
-2. Calculate urgency scores and write them back
-3. Detect gaps and patterns
-4. Generate a personalized briefing
-5. Send it to your Telegram
-
-To customize the briefing style, scoring weights, or add more databases, see [CUSTOMIZE.md](CUSTOMIZE.md).
