@@ -1,8 +1,5 @@
 """Testes do briefing history."""
 
-import json
-from pathlib import Path
-
 import pytest
 
 from vera.briefing_history import (

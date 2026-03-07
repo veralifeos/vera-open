@@ -1,7 +1,5 @@
 """Testes do source health tracking."""
 
-import json
-
 import pytest
 
 from vera.source_health import SourceHealthTracker

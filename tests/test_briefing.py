@@ -1,17 +1,14 @@
 """Testes do briefing pipeline."""
 
 import asyncio
-from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
-
-import pytest
+from datetime import datetime
+from unittest.mock import MagicMock, patch
 
 from vera.backends.base import StorageBackend
 from vera.config import VeraConfig
 from vera.modes.briefing import (
     MAX_TAREFAS_PROMPT,
     _get_system_prompt,
-    carregar_workspace_files,
     filtrar_e_rankear,
     gerar_briefing,
     montar_contexto,
@@ -21,7 +18,6 @@ from vera.modes.briefing import (
     score_tarefa,
     verificar_janela_horario,
 )
-
 
 # ─── Fixtures ────────────────────────────────────────────────────────────────
 
@@ -173,7 +169,10 @@ def test_filtrar_e_rankear_exclui_zombies():
     """Exclui tarefas zombie."""
     tarefas = [_tarefa("t1", "Normal"), _tarefa("t2", "Zombie")]
     state = {"mention_counts": {}}
-    delta = {"em_cooldown": [], "zombies": [{"id": "t2", "titulo": "Zombie", "count": 8, "first_seen": ""}]}
+    delta = {
+        "em_cooldown": [],
+        "zombies": [{"id": "t2", "titulo": "Zombie", "count": 8, "first_seen": ""}],
+    }
     result = filtrar_e_rankear(tarefas, state, delta)
     assert len(result) == 1
 
@@ -220,7 +219,9 @@ def test_montar_contexto_zombies():
 def test_montar_contexto_domain_contexts():
     """Domain contexts são injetados."""
     domain_contexts = {"pipeline": "PIPELINE: 5 oportunidades"}
-    ctx = montar_contexto([], {"novas": [], "pioraram": []}, [], domain_contexts, {}, {}, "2026-03-06", 2)
+    ctx = montar_contexto(
+        [], {"novas": [], "pioraram": []}, [], domain_contexts, {}, {}, "2026-03-06", 2
+    )
     assert "PIPELINE: 5 oportunidades" in ctx
 
 
@@ -266,9 +267,7 @@ def test_gerar_briefing_weekday():
     """Gera briefing para dia de semana."""
     llm = MockLLM()
     config = _minimal_config()
-    result = asyncio.run(
-        gerar_briefing(llm, "system", "contexto", 2, "VERA — Quarta", config)
-    )
+    result = asyncio.run(gerar_briefing(llm, "system", "contexto", 2, "VERA — Quarta", config))
     assert "VERA" in result
 
 
@@ -276,9 +275,7 @@ def test_gerar_briefing_sabado():
     """Gera briefing para sábado."""
     llm = MockLLM()
     config = _minimal_config()
-    result = asyncio.run(
-        gerar_briefing(llm, "system", "contexto", 5, "VERA — Sábado", config)
-    )
+    result = asyncio.run(gerar_briefing(llm, "system", "contexto", 5, "VERA — Sábado", config))
     assert "VERA" in result
 
 
@@ -286,23 +283,20 @@ def test_gerar_briefing_domingo():
     """Gera briefing para domingo."""
     llm = MockLLM()
     config = _minimal_config()
-    result = asyncio.run(
-        gerar_briefing(llm, "system", "contexto", 6, "VERA — Domingo", config)
-    )
+    result = asyncio.run(gerar_briefing(llm, "system", "contexto", 6, "VERA — Domingo", config))
     assert "VERA" in result
 
 
 def test_gerar_briefing_erro_llm():
     """Erro no LLM retorna mensagem de erro."""
+
     class FailLLM:
         async def generate(self, **kwargs):
             raise Exception("API down")
 
     llm = FailLLM()
     config = _minimal_config()
-    result = asyncio.run(
-        gerar_briefing(llm, "system", "contexto", 2, "VERA — Quarta", config)
-    )
+    result = asyncio.run(gerar_briefing(llm, "system", "contexto", 2, "VERA — Quarta", config))
     assert "Erro técnico" in result
 
 
@@ -330,12 +324,22 @@ def test_run_async_dry_run(tmp_path):
 
     with patch("vera.modes.briefing.StateManager") as MockState:
         mock_mgr = MagicMock()
-        mock_mgr.load.return_value = {"last_run_date": None, "last_payload_hash": None,
-                                       "mention_counts": {}, "last_snapshot": {}, "briefing_count": 0}
+        mock_mgr.load.return_value = {
+            "last_run_date": None,
+            "last_payload_hash": None,
+            "mention_counts": {},
+            "last_snapshot": {},
+            "briefing_count": 0,
+        }
         mock_mgr.compute_hash.return_value = "abc123"
         mock_mgr.is_duplicate.return_value = False
-        mock_mgr.compute_delta.return_value = {"novas": ["Tarefa Teste"], "pioraram": [],
-                                                 "removidas": [], "zombies": [], "em_cooldown": []}
+        mock_mgr.compute_delta.return_value = {
+            "novas": ["Tarefa Teste"],
+            "pioraram": [],
+            "removidas": [],
+            "zombies": [],
+            "em_cooldown": [],
+        }
         mock_mgr.update_mention_counts.return_value = mock_mgr.load.return_value
         mock_mgr.build_snapshot.return_value = {}
         MockState.return_value = mock_mgr
@@ -357,8 +361,13 @@ def test_run_async_idempotente(tmp_path):
 
     with patch("vera.modes.briefing.StateManager") as MockState:
         mock_mgr = MagicMock()
-        mock_mgr.load.return_value = {"last_run_date": "2026-03-06", "last_payload_hash": "abc",
-                                       "mention_counts": {}, "last_snapshot": {}, "briefing_count": 1}
+        mock_mgr.load.return_value = {
+            "last_run_date": "2026-03-06",
+            "last_payload_hash": "abc",
+            "mention_counts": {},
+            "last_snapshot": {},
+            "briefing_count": 1,
+        }
         mock_mgr.compute_hash.return_value = "abc"
         mock_mgr.is_duplicate.return_value = True
         MockState.return_value = mock_mgr

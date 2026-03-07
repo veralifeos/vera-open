@@ -1,7 +1,6 @@
 """Testes dos LLM providers."""
 
 import asyncio
-import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -9,7 +8,6 @@ import pytest
 from vera.llm.base import LLMProvider
 from vera.llm.claude import ClaudeProvider
 from vera.llm.ollama import OllamaProvider
-
 
 # ─── Testes da interface ─────────────────────────────────────────────────────
 
@@ -93,16 +91,12 @@ def test_claude_generate_structured_code_block(monkeypatch):
     provider = ClaudeProvider(api_key="sk-ant-test")
 
     mock_message = MagicMock()
-    mock_message.content = [
-        MagicMock(text='```json\n{"value": 42}\n```')
-    ]
+    mock_message.content = [MagicMock(text='```json\n{"value": 42}\n```')]
 
     mock_create = MagicMock(return_value=mock_message)
     monkeypatch.setattr(provider._client.messages, "create", mock_create)
 
-    result = asyncio.run(
-        provider.generate_structured("system", "user", schema={"value": "number"})
-    )
+    result = asyncio.run(provider.generate_structured("system", "user", schema={"value": "number"}))
     assert result["value"] == 42
 
 
@@ -134,20 +128,23 @@ def test_ollama_generate():
 
     mock_resp = AsyncMock()
     mock_resp.status = 200
-    mock_resp.json = AsyncMock(
-        return_value={"message": {"content": "  Resposta do Ollama  "}}
-    )
+    mock_resp.json = AsyncMock(return_value={"message": {"content": "  Resposta do Ollama  "}})
 
     mock_session = AsyncMock()
-    mock_session.post = MagicMock(return_value=AsyncMock(
-        __aenter__=AsyncMock(return_value=mock_resp),
-        __aexit__=AsyncMock(return_value=False),
-    ))
+    mock_session.post = MagicMock(
+        return_value=AsyncMock(
+            __aenter__=AsyncMock(return_value=mock_resp),
+            __aexit__=AsyncMock(return_value=False),
+        )
+    )
 
-    with patch("aiohttp.ClientSession", return_value=AsyncMock(
-        __aenter__=AsyncMock(return_value=mock_session),
-        __aexit__=AsyncMock(return_value=False),
-    )):
+    with patch(
+        "aiohttp.ClientSession",
+        return_value=AsyncMock(
+            __aenter__=AsyncMock(return_value=mock_session),
+            __aexit__=AsyncMock(return_value=False),
+        ),
+    ):
         result = asyncio.run(provider.generate("system", "user"))
         assert result == "Resposta do Ollama"
 
@@ -158,20 +155,23 @@ def test_ollama_generate_structured():
 
     mock_resp = AsyncMock()
     mock_resp.status = 200
-    mock_resp.json = AsyncMock(
-        return_value={"message": {"content": '{"score": 7}'}}
-    )
+    mock_resp.json = AsyncMock(return_value={"message": {"content": '{"score": 7}'}})
 
     mock_session = AsyncMock()
-    mock_session.post = MagicMock(return_value=AsyncMock(
-        __aenter__=AsyncMock(return_value=mock_resp),
-        __aexit__=AsyncMock(return_value=False),
-    ))
+    mock_session.post = MagicMock(
+        return_value=AsyncMock(
+            __aenter__=AsyncMock(return_value=mock_resp),
+            __aexit__=AsyncMock(return_value=False),
+        )
+    )
 
-    with patch("aiohttp.ClientSession", return_value=AsyncMock(
-        __aenter__=AsyncMock(return_value=mock_session),
-        __aexit__=AsyncMock(return_value=False),
-    )):
+    with patch(
+        "aiohttp.ClientSession",
+        return_value=AsyncMock(
+            __aenter__=AsyncMock(return_value=mock_session),
+            __aexit__=AsyncMock(return_value=False),
+        ),
+    ):
         result = asyncio.run(
             provider.generate_structured("system", "user", schema={"score": "number"})
         )

@@ -1,17 +1,15 @@
 """Testes dos domínios de vida."""
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from vera.backends.base import StorageBackend
-from vera.domains.base import Domain
-from vera.domains.tasks import TasksDomain
-from vera.domains.pipeline import PipelineDomain
-from vera.domains.contacts import ContactsDomain
 from vera.domains import DOMAIN_REGISTRY
-
+from vera.domains.base import Domain
+from vera.domains.contacts import ContactsDomain
+from vera.domains.pipeline import PipelineDomain
+from vera.domains.tasks import TasksDomain
 
 # ─── Fixtures ────────────────────────────────────────────────────────────────
 
@@ -154,9 +152,11 @@ def test_tasks_context_gera_texto():
     backend = MockBackend()
     domain = TasksDomain(config, backend)
 
-    data = {"tarefas": [
-        {"titulo": "T1", "deadline": "2026-03-10", "prioridade": "Alta"},
-    ]}
+    data = {
+        "tarefas": [
+            {"titulo": "T1", "deadline": "2026-03-10", "prioridade": "Alta"},
+        ]
+    }
     analysis = {"total": 1, "atrasadas": [], "hoje": [], "sem_deadline": []}
     text = domain.context(data, analysis)
     assert "TAREFAS: 1 ativas" in text
@@ -178,16 +178,18 @@ def test_tasks_context_com_atrasadas():
 
 def test_tasks_fields_customizados():
     """Funciona com nomes de campos customizados."""
-    records = [{
-        "id": "t1",
-        "properties": {
-            "Título": {"type": "title", "title": [{"plain_text": "Minha Tarefa"}]},
-            "Estado": {"type": "select", "select": {"name": "Aberto"}},
-            "Importância": {"type": "select", "select": {"name": "Crítica"}},
-            "Prazo": {"type": "date", "date": {"start": "2026-04-01"}},
-            "Área": {"type": "select", "select": {"name": "Projeto"}},
-        },
-    }]
+    records = [
+        {
+            "id": "t1",
+            "properties": {
+                "Título": {"type": "title", "title": [{"plain_text": "Minha Tarefa"}]},
+                "Estado": {"type": "select", "select": {"name": "Aberto"}},
+                "Importância": {"type": "select", "select": {"name": "Crítica"}},
+                "Prazo": {"type": "date", "date": {"start": "2026-04-01"}},
+                "Área": {"type": "select", "select": {"name": "Projeto"}},
+            },
+        }
+    ]
     backend = MockBackend(records)
     config = {
         "collection": "db123",

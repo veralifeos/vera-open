@@ -1,15 +1,11 @@
 """Testes do setup wizard."""
 
-import os
-import tempfile
-from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
-import pytest
 import yaml
 from typer.testing import CliRunner
 
-from vera.cli import app, _detect_timezone, _try_notion_discovery
+from vera.cli import _detect_timezone, _try_notion_discovery, app
 
 runner = CliRunner()
 
@@ -56,22 +52,24 @@ def test_setup_wizard_gera_config(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
     # Simula inputs do usuário
-    inputs = "\n".join([
-        "Vera",           # nome
-        "pt-BR",          # idioma
-        "America/Sao_Paulo",  # timezone
-        "2",              # backend: Outro
-        "1",              # LLM: Claude
-        "sk-ant-test",    # API key
-        "n",              # Telegram: não
-        "1",              # Persona: executiva
-        "",               # Tasks collection ID
-        "n",              # Pipeline: não
-        "n",              # Contacts: não
-        "n",              # Health: não
-        "n",              # Finances: não
-        "n",              # Learning: não
-    ])
+    inputs = "\n".join(
+        [
+            "Vera",  # nome
+            "pt-BR",  # idioma
+            "America/Sao_Paulo",  # timezone
+            "2",  # backend: Outro
+            "1",  # LLM: Claude
+            "sk-ant-test",  # API key
+            "n",  # Telegram: não
+            "1",  # Persona: executiva
+            "",  # Tasks collection ID
+            "n",  # Pipeline: não
+            "n",  # Contacts: não
+            "n",  # Health: não
+            "n",  # Finances: não
+            "n",  # Learning: não
+        ]
+    )
 
     result = runner.invoke(app, ["setup"], input=inputs)
     assert result.exit_code == 0
@@ -108,24 +106,26 @@ def test_setup_wizard_notion_auto_discovery(tmp_path, monkeypatch):
     )
 
     with patch("vera.backends.notion.NotionBackend", return_value=mock_backend):
-        inputs = "\n".join([
-            "Vera",           # nome
-            "pt-BR",          # idioma
-            "America/Sao_Paulo",  # timezone
-            "1",              # backend: Notion
-            "ntnl_test",      # token
-            "2",              # LLM: Ollama
-            "llama3.2:3b",    # model
-            "http://localhost:11434",  # url
-            "n",              # Telegram
-            "1",              # Persona
-            # tasks collection auto-detectado, não pede
-            "n",              # Pipeline
-            "n",              # Contacts
-            "n",              # Health
-            "n",              # Finances
-            "n",              # Learning
-        ])
+        inputs = "\n".join(
+            [
+                "Vera",  # nome
+                "pt-BR",  # idioma
+                "America/Sao_Paulo",  # timezone
+                "1",  # backend: Notion
+                "ntnl_test",  # token
+                "2",  # LLM: Ollama
+                "llama3.2:3b",  # model
+                "http://localhost:11434",  # url
+                "n",  # Telegram
+                "1",  # Persona
+                # tasks collection auto-detectado, não pede
+                "n",  # Pipeline
+                "n",  # Contacts
+                "n",  # Health
+                "n",  # Finances
+                "n",  # Learning
+            ]
+        )
 
         result = runner.invoke(app, ["setup"], input=inputs)
         assert result.exit_code == 0
@@ -142,19 +142,25 @@ def test_setup_wizard_ollama(tmp_path, monkeypatch):
     """Setup com Ollama não gera .env com API key."""
     monkeypatch.chdir(tmp_path)
 
-    inputs = "\n".join([
-        "Vera",
-        "pt-BR",
-        "America/Sao_Paulo",
-        "2",              # backend: Outro
-        "2",              # LLM: Ollama
-        "llama3.2:3b",
-        "http://localhost:11434",
-        "n",              # Telegram
-        "1",              # Persona
-        "",               # Tasks collection
-        "n", "n", "n", "n", "n",  # Domínios opcionais
-    ])
+    inputs = "\n".join(
+        [
+            "Vera",
+            "pt-BR",
+            "America/Sao_Paulo",
+            "2",  # backend: Outro
+            "2",  # LLM: Ollama
+            "llama3.2:3b",
+            "http://localhost:11434",
+            "n",  # Telegram
+            "1",  # Persona
+            "",  # Tasks collection
+            "n",
+            "n",
+            "n",
+            "n",
+            "n",  # Domínios opcionais
+        ]
+    )
 
     result = runner.invoke(app, ["setup"], input=inputs)
     assert result.exit_code == 0

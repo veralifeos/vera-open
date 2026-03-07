@@ -1,11 +1,8 @@
 """Testes do state management."""
 
-import json
-from pathlib import Path
-
 import pytest
 
-from vera.state import ZOMBIE_THRESHOLD, StateManager
+from vera.state import StateManager
 
 
 @pytest.fixture
@@ -16,8 +13,20 @@ def state_mgr(tmp_path):
 @pytest.fixture
 def tarefas_exemplo():
     return [
-        {"id": "t1", "titulo": "Tarefa 1", "status": "To Do", "deadline": "2026-03-10", "prioridade": "Alta"},
-        {"id": "t2", "titulo": "Tarefa 2", "status": "Doing", "deadline": "2026-03-05", "prioridade": "Média"},
+        {
+            "id": "t1",
+            "titulo": "Tarefa 1",
+            "status": "To Do",
+            "deadline": "2026-03-10",
+            "prioridade": "Alta",
+        },
+        {
+            "id": "t2",
+            "titulo": "Tarefa 2",
+            "status": "Doing",
+            "deadline": "2026-03-05",
+            "prioridade": "Média",
+        },
         {"id": "t3", "titulo": "Tarefa 3", "status": "To Do", "deadline": None, "prioridade": ""},
     ]
 
@@ -35,7 +44,11 @@ def test_load_state_vazio(state_mgr):
 
 def test_save_e_load_roundtrip(state_mgr):
     """Salva e carrega state preservando dados."""
-    state = {"last_run_date": "2026-03-05", "mention_counts": {"t1": {"count": 3}}, "last_snapshot": {}}
+    state = {
+        "last_run_date": "2026-03-05",
+        "mention_counts": {"t1": {"count": 3}},
+        "last_snapshot": {},
+    }
     state_mgr.save(state)
     loaded = state_mgr.load()
     assert loaded["last_run_date"] == "2026-03-05"
@@ -108,8 +121,16 @@ def test_update_mention_counts_incrementa(state_mgr, tarefas_exemplo):
 def test_update_mention_counts_acumula(state_mgr, tarefas_exemplo):
     """Contadores acumulam entre runs."""
     state = {
-        "mention_counts": {"t1": {"count": 3, "first_seen": "2026-03-01", "last_seen": "2026-03-04",
-                                   "cooldown_until": None, "last_status": "To Do", "last_deadline": "2026-03-10"}},
+        "mention_counts": {
+            "t1": {
+                "count": 3,
+                "first_seen": "2026-03-01",
+                "last_seen": "2026-03-04",
+                "cooldown_until": None,
+                "last_status": "To Do",
+                "last_deadline": "2026-03-10",
+            }
+        },
         "last_snapshot": {},
     }
     delta = {"em_cooldown": [], "zombies": []}
@@ -188,8 +209,15 @@ def test_compute_delta_zombie(state_mgr):
     """Detecta zombie com count >= threshold e sem mudança."""
     state = {
         "last_snapshot": {"t1": {"titulo": "T1", "status": "To Do", "deadline": "2026-03-10"}},
-        "mention_counts": {"t1": {"count": 8, "last_status": "To Do", "last_deadline": "2026-03-10",
-                                   "first_seen": "2026-02-01", "cooldown_until": None}},
+        "mention_counts": {
+            "t1": {
+                "count": 8,
+                "last_status": "To Do",
+                "last_deadline": "2026-03-10",
+                "first_seen": "2026-02-01",
+                "cooldown_until": None,
+            }
+        },
     }
     tarefas = [{"id": "t1", "titulo": "T1", "status": "To Do", "deadline": "2026-03-10"}]
     delta = state_mgr.compute_delta(state, tarefas, "2026-03-06")
@@ -201,8 +229,14 @@ def test_compute_delta_zombie_resetado(state_mgr):
     """Zombie reseta se status mudou."""
     state = {
         "last_snapshot": {"t1": {"titulo": "T1", "status": "To Do", "deadline": "2026-03-10"}},
-        "mention_counts": {"t1": {"count": 8, "last_status": "To Do", "last_deadline": "2026-03-10",
-                                   "cooldown_until": None}},
+        "mention_counts": {
+            "t1": {
+                "count": 8,
+                "last_status": "To Do",
+                "last_deadline": "2026-03-10",
+                "cooldown_until": None,
+            }
+        },
     }
     # Status mudou para Doing
     tarefas = [{"id": "t1", "titulo": "T1", "status": "Doing", "deadline": "2026-03-10"}]

@@ -1,18 +1,15 @@
 """Testes da integracao Telegram."""
 
 import asyncio
-import sys
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from vera.integrations.telegram import (
     _chunkar_mensagem,
-    _enviar_sync_fallback,
     enviar_telegram,
     notificar_erro,
 )
-
 
 # ─── Chunking ─────────────────────────────────────────────────────────────────
 
@@ -87,6 +84,7 @@ def test_enviar_telegram_erro_levanta():
     mock_session.__aexit__ = AsyncMock(return_value=False)
 
     import aiohttp
+
     with patch("vera.integrations.telegram.aiohttp.ClientSession", return_value=mock_session):
         with pytest.raises(aiohttp.ClientResponseError):
             asyncio.run(enviar_telegram("teste", "tok123", "chat456"))
@@ -105,7 +103,11 @@ def test_notificar_erro_nivel1_sucesso():
 
 def test_notificar_erro_nivel2_fallback():
     """Nivel 1 falha, nivel 2 (sync) funciona."""
-    with patch("vera.integrations.telegram.enviar_telegram", new_callable=AsyncMock, side_effect=Exception("fail")):
+    with patch(
+        "vera.integrations.telegram.enviar_telegram",
+        new_callable=AsyncMock,
+        side_effect=Exception("fail"),
+    ):
         with patch("vera.integrations.telegram._enviar_sync_fallback") as mock_sync:
             asyncio.run(notificar_erro("teste erro", "tok", "chat"))
             mock_sync.assert_called_once()
@@ -113,8 +115,14 @@ def test_notificar_erro_nivel2_fallback():
 
 def test_notificar_erro_nivel3_stderr(capsys):
     """Tudo falha, vai para stderr."""
-    with patch("vera.integrations.telegram.enviar_telegram", new_callable=AsyncMock, side_effect=Exception("fail")):
-        with patch("vera.integrations.telegram._enviar_sync_fallback", side_effect=Exception("fail2")):
+    with patch(
+        "vera.integrations.telegram.enviar_telegram",
+        new_callable=AsyncMock,
+        side_effect=Exception("fail"),
+    ):
+        with patch(
+            "vera.integrations.telegram._enviar_sync_fallback", side_effect=Exception("fail2")
+        ):
             asyncio.run(notificar_erro("teste erro", "tok", "chat"))
 
     captured = capsys.readouterr()

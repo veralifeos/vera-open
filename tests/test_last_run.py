@@ -1,7 +1,6 @@
 """Testes do last_run."""
 
 import json
-from pathlib import Path
 
 import pytest
 

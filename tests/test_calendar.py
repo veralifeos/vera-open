@@ -1,8 +1,6 @@
 """Testes da integracao Google Calendar."""
 
-import asyncio
-from unittest.mock import MagicMock, patch
-from zoneinfo import ZoneInfo
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -11,7 +9,6 @@ from vera.integrations.calendar import (
     GoogleCalendarProvider,
     formatar_eventos_para_contexto,
 )
-
 
 # ─── Interface ─────────────────────────────────────────────────────────────────
 
@@ -33,7 +30,13 @@ def test_formatar_eventos_vazio():
 def test_formatar_eventos_normais():
     """Eventos timed formatados com horario."""
     events = [
-        {"title": "Call", "start": "09:00", "end": "10:00", "location": "Google Meet", "all_day": False},
+        {
+            "title": "Call",
+            "start": "09:00",
+            "end": "10:00",
+            "location": "Google Meet",
+            "all_day": False,
+        },
         {"title": "Treino", "start": "18:00", "end": "19:00", "location": None, "all_day": False},
     ]
     result = formatar_eventos_para_contexto(events)
@@ -124,8 +127,13 @@ def test_google_calendar_vazio():
 
 def test_google_calendar_multiplos_calendarios():
     """Busca em multiplos calendarios."""
-    items = [{"summary": "Ev1", "start": {"dateTime": "2026-03-06T10:00:00-03:00"},
-              "end": {"dateTime": "2026-03-06T11:00:00-03:00"}}]
+    items = [
+        {
+            "summary": "Ev1",
+            "start": {"dateTime": "2026-03-06T10:00:00-03:00"},
+            "end": {"dateTime": "2026-03-06T11:00:00-03:00"},
+        }
+    ]
 
     mock_service = MagicMock()
     mock_events = MagicMock()

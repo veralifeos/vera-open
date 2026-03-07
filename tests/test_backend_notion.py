@@ -1,13 +1,12 @@
 """Testes do StorageBackend e NotionBackend."""
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from vera.backends.base import StorageBackend
 from vera.backends.notion import NotionBackend
-
 
 # ─── Testes da interface ─────────────────────────────────────────────────────
 
@@ -150,7 +149,9 @@ def test_create_record(backend):
     mock_response = {"id": "new_page_id", "object": "page"}
 
     with patch.object(backend, "_request", new_callable=AsyncMock, return_value=mock_response):
-        result = asyncio.run(backend.create_record("db123", {"Name": {"title": [{"text": {"content": "Test"}}]}}))
+        result = asyncio.run(
+            backend.create_record("db123", {"Name": {"title": [{"text": {"content": "Test"}}]}})
+        )
         assert result["id"] == "new_page_id"
 
 
@@ -159,5 +160,7 @@ def test_update_record(backend):
     mock_response = {"id": "page_id", "object": "page"}
 
     with patch.object(backend, "_request", new_callable=AsyncMock, return_value=mock_response):
-        result = asyncio.run(backend.update_record("page_id", {"Status": {"status": {"name": "Done"}}}))
+        result = asyncio.run(
+            backend.update_record("page_id", {"Status": {"status": {"name": "Done"}}})
+        )
         assert result["id"] == "page_id"

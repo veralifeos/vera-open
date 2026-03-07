@@ -1,13 +1,7 @@
 """Testes de workspace files e persona presets."""
 
-from pathlib import Path
-from unittest.mock import MagicMock
-
-import pytest
-
 from vera.modes.briefing import _get_system_prompt, carregar_workspace_files
-from vera.personas import PRESETS, get_persona_prompt
-
+from vera.personas import get_persona_prompt
 
 # ─── Fixtures ─────────────────────────────────────────────────────────────────
 

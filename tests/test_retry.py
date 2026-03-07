@@ -6,7 +6,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import aiohttp
 import pytest
 
-
 # ─── Notion retry ─────────────────────────────────────────────────────────────
 
 
@@ -84,6 +83,7 @@ def test_claude_retry_sucesso_na_segunda():
 
     with patch("vera.llm.claude.Anthropic", return_value=MockClient()):
         from vera.llm.claude import ClaudeProvider
+
         provider = ClaudeProvider(model="test", api_key="sk-test")
         provider._client = MockClient()
 

@@ -1,7 +1,6 @@
 """Testes do sistema de configuração."""
 
 import os
-import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -9,7 +8,6 @@ import pytest
 import yaml
 
 from vera.config import VeraConfig, check_required_secrets, load_config
-
 
 # ─── Fixtures ────────────────────────────────────────────────────────────────
 
@@ -136,9 +134,7 @@ def test_config_ollama_sem_api_key():
     data = _minimal_config()
     data["llm"] = {
         "default": "ollama",
-        "providers": {
-            "ollama": {"model": "llama3.2:3b", "base_url": "http://localhost:11434"}
-        },
+        "providers": {"ollama": {"model": "llama3.2:3b", "base_url": "http://localhost:11434"}},
     }
     config = VeraConfig(**data)
     with patch.dict(os.environ, {"NOTION_TOKEN": "token"}, clear=True):
