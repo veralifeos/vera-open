@@ -20,9 +20,9 @@ def get_domain(name: str) -> type[Domain] | None:
 
 def _auto_register() -> None:
     """Auto-registra domínios built-in."""
-    from vera.domains.tasks import TasksDomain
-    from vera.domains.pipeline import PipelineDomain
     from vera.domains.contacts import ContactsDomain
+    from vera.domains.pipeline import PipelineDomain
+    from vera.domains.tasks import TasksDomain
 
     register_domain("tasks", TasksDomain)
     register_domain("pipeline", PipelineDomain)

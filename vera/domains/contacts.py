@@ -29,9 +29,7 @@ class ContactsDomain(Domain):
 
         name_field = fields.get("name", "Nome")
         name_prop = props.get(name_field, {})
-        nome = "".join(
-            t.get("plain_text", "") for t in name_prop.get("title", [])
-        )
+        nome = "".join(t.get("plain_text", "") for t in name_prop.get("title", []))
 
         return {
             "id": record.get("id", ""),

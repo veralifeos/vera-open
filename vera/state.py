@@ -32,9 +32,7 @@ class StateManager:
     def __init__(self, state_dir: Path | None = None):
         self.state_dir = state_dir or (_REPO_ROOT / "state")
         self.state_path = self.state_dir / "briefing_state.json"
-        self._fallback_path = Path(
-            os.environ.get("VERA_STATE_PATH", "/tmp/vera_state.json")
-        )
+        self._fallback_path = Path(os.environ.get("VERA_STATE_PATH", "/tmp/vera_state.json"))
 
     def load(self) -> dict:
         """Carrega state: Git file → fallback local → vazio."""
@@ -82,9 +80,7 @@ class StateManager:
             self.state_dir.mkdir(parents=True, exist_ok=True)
             self.state_path.write_text(conteudo, encoding="utf-8")
             mc_count = len(state.get("mention_counts", {}))
-            print(
-                f"   [state] Salvo em {self.state_path.name} | {mc_count} mention_counts"
-            )
+            print(f"   [state] Salvo em {self.state_path.name} | {mc_count} mention_counts")
             return True
         except Exception as e:
             print(f"   [state] Falha ao salvar: {e}")
@@ -114,14 +110,12 @@ class StateManager:
             return True
         return False
 
-    def update_mention_counts(
-        self, state: dict, tasks: list[dict], delta: dict
-    ) -> dict:
+    def update_mention_counts(self, state: dict, tasks: list[dict], delta: dict) -> dict:
         """Incrementa contadores para tasks ativas. Reseta para concluídas/removidas."""
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        cooldown_ate = (
-            datetime.now(timezone.utc) + timedelta(days=COOLDOWN_DAYS)
-        ).strftime("%Y-%m-%d")
+        cooldown_ate = (datetime.now(timezone.utc) + timedelta(days=COOLDOWN_DAYS)).strftime(
+            "%Y-%m-%d"
+        )
         mention_counts = state.get("mention_counts", {})
         ids_cooldown = set(delta.get("em_cooldown", []))
         ids_zombies = {z["id"] for z in delta.get("zombies", [])}
@@ -150,29 +144,20 @@ class StateManager:
 
             if tid in ids_zombies:
                 mc["cooldown_until"] = cooldown_ate
-                print(
-                    f"   [state] Zumbi em cooldown: {tarefa.get('titulo', '?')[:50]} ({mc['count']}x)"
-                )
+                titulo = tarefa.get("titulo", "?")[:50]
+                print(f"   [state] Zumbi em cooldown: {titulo} ({mc['count']}x)")
 
             mention_counts[tid] = mc
 
         state["mention_counts"] = mention_counts
         return state
 
-    def get_zombies(
-        self, state: dict, threshold: int = ZOMBIE_THRESHOLD
-    ) -> list[str]:
+    def get_zombies(self, state: dict, threshold: int = ZOMBIE_THRESHOLD) -> list[str]:
         """IDs de tasks com mention_count >= threshold."""
         mention_counts = state.get("mention_counts", {})
-        return [
-            tid
-            for tid, mc in mention_counts.items()
-            if mc.get("count", 0) >= threshold
-        ]
+        return [tid for tid, mc in mention_counts.items() if mc.get("count", 0) >= threshold]
 
-    def compute_delta(
-        self, state: dict, current_tasks: list[dict], today: str
-    ) -> dict:
+    def compute_delta(self, state: dict, current_tasks: list[dict], today: str) -> dict:
         """Compara current vs last_snapshot.
 
         Retorna: novas, removidas, pioraram, melhoraram, zombies, em_cooldown.
@@ -212,9 +197,9 @@ class StateManager:
                 delta["em_cooldown"].append(tid)
             elif mc.get("count", 0) >= ZOMBIE_THRESHOLD:
                 # Só é zombie se não mudou desde última vez
-                mudou = tarefa.get("status") != mc.get(
-                    "last_status"
-                ) or tarefa.get("deadline") != mc.get("last_deadline")
+                mudou = tarefa.get("status") != mc.get("last_status") or tarefa.get(
+                    "deadline"
+                ) != mc.get("last_deadline")
                 if not mudou:
                     delta["zombies"].append(
                         {
@@ -235,9 +220,7 @@ class StateManager:
         # Removidas (estavam no snapshot anterior mas não mais)
         for tid in snapshot_anterior:
             if tid not in current_ids:
-                delta["removidas"].append(
-                    snapshot_anterior[tid].get("titulo", "Sem título")
-                )
+                delta["removidas"].append(snapshot_anterior[tid].get("titulo", "Sem título"))
 
         return delta
 

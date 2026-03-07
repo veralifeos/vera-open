@@ -22,9 +22,7 @@ class SourceHealthTracker:
 
     def _save(self, data: dict) -> None:
         self._path.parent.mkdir(parents=True, exist_ok=True)
-        self._path.write_text(
-            json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"
-        )
+        self._path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
     def record(self, source_name: str, result_count: int) -> None:
         """Registra resultado de uma fonte. Reseta contador se > 0."""
@@ -38,10 +36,13 @@ class SourceHealthTracker:
                 "last_updated": now,
             }
         else:
-            entry = data.get(source_name, {
-                "consecutive_zeros": 0,
-                "last_count": 0,
-            })
+            entry = data.get(
+                source_name,
+                {
+                    "consecutive_zeros": 0,
+                    "last_count": 0,
+                },
+            )
             entry["consecutive_zeros"] = entry.get("consecutive_zeros", 0) + 1
             entry["last_count"] = 0
             entry["last_updated"] = now
@@ -69,8 +70,6 @@ class SourceHealthTracker:
         lines = ["=== ALERTAS DO SISTEMA ==="]
         for source in alerts:
             zeros = data[source].get("consecutive_zeros", 0)
-            lines.append(
-                f"Fonte \"{source}\" sem resultados ha {zeros} execucoes consecutivas"
-            )
+            lines.append(f'Fonte "{source}" sem resultados ha {zeros} execucoes consecutivas')
 
         return "\n".join(lines)

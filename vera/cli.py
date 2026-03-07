@@ -1,10 +1,8 @@
 """Vera CLI — interface Typer com subcommands."""
 
 import asyncio
-import json
 import logging
 import os
-import sys
 from pathlib import Path
 
 import typer
@@ -184,7 +182,8 @@ def validate() -> None:
     typer.echo("\n  Domínios configurados:")
     for name, domain_cfg in config.domains.items():
         status = "ativo" if domain_cfg.enabled else "desativado"
-        collection = domain_cfg.collection[:8] + "..." if domain_cfg.collection else "sem collection"
+        coll = domain_cfg.collection
+        collection = coll[:8] + "..." if coll else "sem collection"
         typer.echo(f"    - {name}: {status} ({collection})")
 
     typer.echo("\nValidação completa!")
@@ -391,15 +390,19 @@ def setup() -> None:
     domains: dict = {}
 
     # Tasks — obrigatório
-    tasks_domain: dict = {"enabled": True, "collection": "", "fields": {
-        "title": "Name",
-        "status": "Status",
-        "priority": "Prioridade",
-        "deadline": "Deadline",
-        "category": "Tipo",
-        "status_active": ["To Do", "Doing", "Em andamento"],
-        "status_done": ["Done", "Concluído"],
-    }}
+    tasks_domain: dict = {
+        "enabled": True,
+        "collection": "",
+        "fields": {
+            "title": "Name",
+            "status": "Status",
+            "priority": "Prioridade",
+            "deadline": "Deadline",
+            "category": "Tipo",
+            "status_active": ["To Do", "Doing", "Em andamento"],
+            "status_done": ["Done", "Concluído"],
+        },
+    }
 
     # Auto-fill de discovered databases
     if discovered:

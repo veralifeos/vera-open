@@ -20,15 +20,10 @@ class TasksDomain(Domain):
 
         # Filtro: status em qualquer dos valores ativos
         filters = {
-            "or": [
-                {"property": status_field, "status": {"equals": s}}
-                for s in status_active
-            ]
+            "or": [{"property": status_field, "status": {"equals": s}} for s in status_active]
         }
 
-        sorts = [
-            {"property": fields.get("deadline", "Deadline"), "direction": "ascending"}
-        ]
+        sorts = [{"property": fields.get("deadline", "Deadline"), "direction": "ascending"}]
 
         collection_id = self.config.get("collection", "")
         if not collection_id:
@@ -51,9 +46,7 @@ class TasksDomain(Domain):
         # Extrai título
         title_field = fields.get("title", "Name")
         title_prop = props.get(title_field, {})
-        titulo = "".join(
-            t.get("plain_text", "") for t in title_prop.get("title", [])
-        )
+        titulo = "".join(t.get("plain_text", "") for t in title_prop.get("title", []))
 
         # Extrai status
         status_field = fields.get("status", "Status")

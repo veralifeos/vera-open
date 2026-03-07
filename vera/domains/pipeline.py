@@ -11,7 +11,6 @@ class PipelineDomain(Domain):
 
     async def collect(self) -> dict:
         """Coleta dados do pipeline."""
-        fields = self.config.get("fields", {})
         collection_id = self.config.get("collection", "")
         if not collection_id:
             return {"oportunidades": []}
@@ -30,9 +29,7 @@ class PipelineDomain(Domain):
 
         title_field = fields.get("title", "Empresa")
         title_prop = props.get(title_field, {})
-        titulo = "".join(
-            t.get("plain_text", "") for t in title_prop.get("title", [])
-        )
+        titulo = "".join(t.get("plain_text", "") for t in title_prop.get("title", []))
 
         stage_field = fields.get("stage", "Estágio")
         stage_prop = props.get(stage_field, {})

@@ -58,7 +58,8 @@ class GoogleCalendarProvider(CalendarProvider):
 
         info = json.loads(creds_data)
         credentials = service_account.Credentials.from_service_account_info(
-            info, scopes=["https://www.googleapis.com/auth/calendar.readonly"],
+            info,
+            scopes=["https://www.googleapis.com/auth/calendar.readonly"],
         )
         self._service = build("calendar", "v3", credentials=credentials)
         return self._service

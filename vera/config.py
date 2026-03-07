@@ -10,7 +10,6 @@ from typing import Any
 import yaml
 from pydantic import BaseModel, Field, model_validator
 
-
 # ─── Models ──────────────────────────────────────────────────────────────────
 
 
@@ -67,6 +66,7 @@ class PersonaConfig(BaseModel):
 
 class DomainFieldsConfig(BaseModel):
     """Campos de um domínio — aceita qualquer campo customizado."""
+
     model_config = {"extra": "allow"}
 
 

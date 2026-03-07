@@ -76,6 +76,7 @@ async def enviar_telegram(mensagem: str, bot_token: str, chat_id: str) -> bool:
                     )
             if i < len(chunks) - 1:
                 import asyncio
+
                 await asyncio.sleep(0.3)
 
     print(f"   [telegram] Enviado ({len(chunks)} parte(s))")
@@ -121,14 +122,17 @@ def _enviar_sync_fallback(mensagem: str, bot_token: str, chat_id: str) -> None:
     import urllib.request
 
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-    data = json.dumps({
-        "chat_id": chat_id,
-        "text": mensagem[:MAX_MESSAGE_LENGTH],
-        "parse_mode": "Markdown",
-    }).encode("utf-8")
+    data = json.dumps(
+        {
+            "chat_id": chat_id,
+            "text": mensagem[:MAX_MESSAGE_LENGTH],
+            "parse_mode": "Markdown",
+        }
+    ).encode("utf-8")
 
     req = urllib.request.Request(
-        url, data=data,
+        url,
+        data=data,
         headers={"Content-Type": "application/json"},
     )
     urllib.request.urlopen(req, timeout=10)

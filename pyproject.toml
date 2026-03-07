@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vera-open"
-version = "2.0.0"
+version = "0.1.0"
 description = "AI-native Life Operating System — daily briefings, task management, and life domains"
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -41,8 +41,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/ffidelis16/vera-open"
-Issues = "https://github.com/ffidelis16/vera-open/issues"
+Homepage = "https://github.com/veralifeos/vera-open"
+Issues = "https://github.com/veralifeos/vera-open/issues"
 
 [project.scripts]
 vera = "vera.cli:app"

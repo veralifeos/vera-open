@@ -82,8 +82,7 @@ class OllamaProvider(LLMProvider):
         """Gera resposta JSON estruturada via Ollama."""
         schema_str = json.dumps(schema, ensure_ascii=False, indent=2)
         full_prompt = (
-            f"{user_prompt}\n\n"
-            f"Responda APENAS com JSON válido no seguinte schema:\n{schema_str}"
+            f"{user_prompt}\n\nResponda APENAS com JSON válido no seguinte schema:\n{schema_str}"
         )
 
         url = f"{self._base_url}/api/chat"

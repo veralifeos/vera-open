@@ -13,14 +13,15 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from vera.backends.base import StorageBackend
-from vera.briefing_history import format_for_prompt as history_prompt, save_history
+from vera.briefing_history import format_for_prompt as history_prompt
+from vera.briefing_history import save_history
 from vera.config import VeraConfig
 from vera.domains import DOMAIN_REGISTRY
 from vera.last_run import save_last_run
 from vera.llm.base import LLMProvider
 from vera.personas import get_persona_prompt
 from vera.source_health import SourceHealthTracker
-from vera.state import ZOMBIE_THRESHOLD, StateManager
+from vera.state import StateManager
 
 # Máximo de tarefas enviadas ao LLM
 MAX_TAREFAS_PROMPT = 20
@@ -89,19 +90,13 @@ def score_tarefa(tarefa: dict, mention_counts: dict) -> float:
     return score
 
 
-def filtrar_e_rankear(
-    tarefas: list[dict], state: dict, delta: dict
-) -> list[dict]:
+def filtrar_e_rankear(tarefas: list[dict], state: dict, delta: dict) -> list[dict]:
     """Filtra zombies/cooldown e rankeia por score."""
     mention_counts = state.get("mention_counts", {})
     ids_cooldown = set(delta.get("em_cooldown", []))
     ids_zombies = {z["id"] for z in delta.get("zombies", [])}
 
-    ativas = [
-        t
-        for t in tarefas
-        if t["id"] not in ids_cooldown and t["id"] not in ids_zombies
-    ]
+    ativas = [t for t in tarefas if t["id"] not in ids_cooldown and t["id"] not in ids_zombies]
 
     for t in ativas:
         t["_score"] = score_tarefa(t, mention_counts)
@@ -141,9 +136,7 @@ def carregar_workspace_files(config: VeraConfig) -> dict:
     if config.persona.custom_prompt_file:
         custom_path = Path(config.persona.custom_prompt_file)
         if custom_path.exists():
-            arquivos["AGENT.md"] = custom_path.read_text(encoding="utf-8").strip()[
-                :1500
-            ]
+            arquivos["AGENT.md"] = custom_path.read_text(encoding="utf-8").strip()[:1500]
 
     return arquivos
 
@@ -256,11 +249,7 @@ def montar_contexto_sabado(
     ctx = (
         f"DATA: {today} (Sábado — retrospectiva semanal)\n\n"
         f"ABERTAS PRIORITÁRIAS ({len(tarefas_rankeadas)}):\n"
-        + (
-            "\n".join(f"- {t}" for t in top_abertas)
-            if top_abertas
-            else "- Nenhuma"
-        )
+        + ("\n".join(f"- {t}" for t in top_abertas) if top_abertas else "- Nenhuma")
         + f"\n\nZUMBIS: {zombies_fmt}"
     )
 
@@ -318,11 +307,7 @@ def montar_contexto_domingo(
         f"SEMANA QUE VEM: {deadlines_count} deadlines | "
         f"{len(tarefas_rankeadas)} tarefas abertas | {len(zombies)} zumbis\n\n"
         f"TOP 5 PRIORIDADES:\n"
-        + (
-            "\n".join(f"- {t}" for t in urgentes_semana)
-            if urgentes_semana
-            else "- Nenhuma urgente"
-        )
+        + ("\n".join(f"- {t}" for t in urgentes_semana) if urgentes_semana else "- Nenhuma urgente")
     )
 
     for domain_name, domain_ctx in domain_contexts.items():
@@ -349,9 +334,18 @@ _DIAS_SEMANA = {
 }
 
 _MESES = {
-    1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril",
-    5: "Maio", 6: "Junho", 7: "Julho", 8: "Agosto",
-    9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro",
+    1: "Janeiro",
+    2: "Fevereiro",
+    3: "Março",
+    4: "Abril",
+    5: "Maio",
+    6: "Junho",
+    7: "Julho",
+    8: "Agosto",
+    9: "Setembro",
+    10: "Outubro",
+    11: "Novembro",
+    12: "Dezembro",
 }
 
 _INSTRUCOES_DIA = {
@@ -367,7 +361,7 @@ REGRAS DE TOM POR CONTAGEM DE MENÇÕES:
 - 1x (sem anotação): primeira vez, tom normal
 - 2-3x (citada Nx): tom normal, cita se relevante
 - 4-6x: PARA DE ESCALAR TOM. Oferece 2-3 ações concretas para desbloquear.
-  Exemplo: "[Tarefa X] está na lista há 2 semanas. Opções: (1) quebrar em pedaço menor, (2) delegar, (3) arquivar."
+  Ex: "[Tarefa X] há 2 semanas. Opções: (1) quebrar menor, (2) delegar, (3) arquivar."
 - 7x ou mais: "vou parar de mencionar [X] até você me dizer o que fazer com ela"
 """
 
@@ -479,7 +473,7 @@ async def run_async(
     cabecalho = f"VERA — {_DIAS_SEMANA[dia_num]}, {agora.day}/{_MESES[agora.month]}"
 
     print("=" * 60)
-    print(f"   VERA v2.0 — Briefing")
+    print("   VERA v0.1 — Briefing")
     print("=" * 60)
     print(f"   {agora.strftime('%d/%m/%Y %H:%M')} ({config.timezone})")
 
@@ -551,6 +545,7 @@ async def run_async(
     if _calendar_habilitado(config):
         try:
             from vera.integrations.calendar import formatar_eventos_para_contexto
+
             calendar_events = await _buscar_eventos_calendar(config)
             calendar_ctx = formatar_eventos_para_contexto(calendar_events)
             if calendar_events:
@@ -564,7 +559,7 @@ async def run_async(
         tracker = SourceHealthTracker()
         source_health_ctx = tracker.format_for_briefing()
         if source_health_ctx:
-            print(f"   [source_health] Alertas detectados")
+            print("   [source_health] Alertas detectados")
     except Exception:
         pass
 
@@ -572,11 +567,7 @@ async def run_async(
     payload_for_hash = {
         "tarefas": sorted([t.get("titulo", "") for t in tarefas]),
         "domains": sorted(
-            [
-                (name, str(analysis))
-                for name, analysis in domain_analyses.items()
-                if name != "tasks"
-            ]
+            [(name, str(analysis)) for name, analysis in domain_analyses.items() if name != "tasks"]
         ),
     }
     payload_hash = state_mgr.compute_hash(payload_for_hash)
@@ -613,18 +604,31 @@ async def run_async(
     # Monta contexto por dia da semana
     if dia_num == 5:
         contexto = montar_contexto_sabado(
-            tarefas_rankeadas, delta, zombies, domain_contexts,
-            mention_counts, hoje,
+            tarefas_rankeadas,
+            delta,
+            zombies,
+            domain_contexts,
+            mention_counts,
+            hoje,
         )
     elif dia_num == 6:
         contexto = montar_contexto_domingo(
-            tarefas_rankeadas, zombies, domain_contexts,
-            mention_counts, hoje,
+            tarefas_rankeadas,
+            zombies,
+            domain_contexts,
+            mention_counts,
+            hoje,
         )
     else:
         contexto = montar_contexto(
-            tarefas_rankeadas, delta, zombies, domain_contexts,
-            mention_counts, workspace, hoje, dia_num,
+            tarefas_rankeadas,
+            delta,
+            zombies,
+            domain_contexts,
+            mention_counts,
+            workspace,
+            hoje,
+            dia_num,
         )
 
     # Gera briefing via LLM
@@ -632,7 +636,12 @@ async def run_async(
     system_prompt = _get_system_prompt(config, workspace, dia_num)
 
     mensagem = await gerar_briefing(
-        llm, system_prompt, contexto, dia_num, cabecalho, config,
+        llm,
+        system_prompt,
+        contexto,
+        dia_num,
+        cabecalho,
+        config,
     )
 
     print("\n" + "=" * 60)
@@ -716,7 +725,12 @@ async def _buscar_eventos_calendar(config: VeraConfig) -> list[dict]:
     return await provider.get_events_today(config.timezone)
 
 
-def run(config: VeraConfig, backend: StorageBackend, llm: LLMProvider,
-        force: bool = False, dry_run: bool = False) -> str | None:
+def run(
+    config: VeraConfig,
+    backend: StorageBackend,
+    llm: LLMProvider,
+    force: bool = False,
+    dry_run: bool = False,
+) -> str | None:
     """Entrypoint sincrono."""
     return asyncio.run(run_async(config, backend, llm, force=force, dry_run=dry_run))

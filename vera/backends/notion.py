@@ -62,9 +62,7 @@ class NotionBackend(StorageBackend):
         """Faz request com rate limit e retry."""
         async with self._limiter:
             timeout = aiohttp.ClientTimeout(total=15)
-            async with session.request(
-                method, url, json=payload, timeout=timeout
-            ) as resp:
+            async with session.request(method, url, json=payload, timeout=timeout) as resp:
                 if resp.status >= 400:
                     text = await resp.text()
                     raise aiohttp.ClientResponseError(
@@ -216,14 +214,10 @@ class NotionBackend(StorageBackend):
             for prop in props.values():
                 prop_type = prop.get("type", "")
                 if prop_type == "title":
-                    texts.append(
-                        "".join(t.get("plain_text", "") for t in prop.get("title", []))
-                    )
+                    texts.append("".join(t.get("plain_text", "") for t in prop.get("title", [])))
                 elif prop_type == "rich_text":
                     texts.append(
-                        "".join(
-                            t.get("plain_text", "") for t in prop.get("rich_text", [])
-                        )
+                        "".join(t.get("plain_text", "") for t in prop.get("rich_text", []))
                     )
             return " ".join(t for t in texts if t)
         return ""
