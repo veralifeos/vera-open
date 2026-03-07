@@ -1,63 +1,85 @@
-# Vera Open
+# Vera
 
-**Morning OS for Notion users** — AI-powered daily briefings delivered via Telegram.
+**AI-powered Life Operating System. Open source.**
 
-Vera reads your Notion workspace every morning, calculates what matters most, and sends you a concise briefing via Telegram. No app to open, no dashboard to check. Your day's priorities arrive where you already are.
+Vera reads your Notion workspace, calculates what matters most, and sends you a daily briefing via Telegram. No app to open, no dashboard to check. Your priorities arrive where you already are.
+
+It runs on GitHub Actions (free tier) and costs ~$0.01-0.03/day in AI API usage. Zero infrastructure to maintain.
 
 ---
 
 ## What it does
 
-- **Reads your tasks** from Notion and calculates urgency scores (0-100) based on deadlines, priority, and staleness
-- **Tracks your patterns** via daily check-ins (energy, mood, focus, sleep)
-- **Prioritizes your day** — top 3 tasks, overdue alerts, blocked items
-- **Detects gaps** — stale tasks, missing deadlines, declining energy trends
-- **Generates a briefing** using Claude AI, personalized to your data and preferred tone
-- **Knows who you are** — drop a `USER.md` with your context and briefings adapt to your role, habits, and communication style
-- **Sends via Telegram** every morning, automatically
+- **Task prioritization** — reads your Notion tasks, scores urgency (deadline + priority + staleness), ranks what matters today
+- **State tracking** — remembers what was mentioned before, detects new/worsening tasks, identifies zombie tasks stuck for weeks
+- **Pipeline monitoring** — tracks opportunities, job applications, or deals across stages
+- **Contact management** — surfaces relationships that need follow-up
+- **Calendar awareness** — pulls today's events from Google Calendar (optional)
+- **Daily briefing** — generates a concise, personalized briefing via Claude or Ollama
+- **Telegram delivery** — sends the briefing with chunking, retry, and error alerting
+- **Weekend modes** — Saturday retrospective, Sunday strategic planning
 
 ## How it works
 
 ```
-Notion databases → Python collectors → Scoring engine → Claude AI → Telegram
-                        (parallel)        (urgency,         (synthesis)
-                                          priorities,
-                                          gap audit)
+Notion databases ──> Domain collectors ──> State engine ──> LLM ──> Telegram
+   (tasks,              (parallel)         (delta,        (Claude    (chunked,
+    pipeline,                               mentions,      or         retried)
+    contacts)                               zombies)       Ollama)
+                              |                               |
+                         Google Calendar                 Persona preset
+                          (optional)                   (executive/coach)
 ```
 
-Runs on GitHub Actions (free tier). Costs ~$0.01-0.03/day in AI API usage. Zero infrastructure to maintain.
+The state engine tracks every task across runs: what's new, what worsened, what's been stuck. Mention counts escalate tone automatically (normal -> suggest actions -> stop mentioning -> zombie cooldown). This prevents the briefing from nagging about the same tasks forever.
 
 ## Quick start
 
 ```bash
 # 1. Clone
-git clone https://github.com/you/vera-open.git
+git clone https://github.com/veralifeos/vera-open.git
 cd vera-open
 
-# 2. Copy and edit config
-cp config.example.yaml config.yaml
-# Edit config.yaml with your Notion database IDs
+# 2. Install
+pip install -e .
+# or: uv pip install -e .
 
-# 3. Set up secrets (for local testing)
-cp .env.example .env
-# Fill in your API keys
+# 3. Run the setup wizard
+python -m vera setup
+# Creates config.yaml and .env with your Notion token, API keys, etc.
 
-# 4. (Optional) Tell Vera about yourself
+# 4. Validate everything works
+python -m vera validate
+
+# 5. Test with a dry run (no Telegram, no state saved)
+python -m vera briefing --dry-run --force
+
+# 6. Run for real
+python -m vera briefing --force
+
+# 7. (Optional) Tell Vera about yourself
 cp workspace/USER.example.md workspace/USER.md
-# Edit with your context — makes briefings dramatically better
-
-# 5. Install dependencies
-pip install -r requirements.txt
-
-# 6. Validate your setup
-python -m src.main --mode validate
-
-# 7. Run a dry run
-# (set debug.dry_run: true in config.yaml first)
-python -m src.main --mode daily
+# Edit USER.md — makes briefings dramatically better
 ```
 
-For the full setup guide including Notion integration, Telegram bot creation, and GitHub Actions deployment, see **[SETUP.md](docs/SETUP.md)**.
+For the full setup guide including Telegram bot creation and GitHub Actions deployment, see [docs/SETUP.md](docs/SETUP.md).
+
+## Notion template
+
+Vera works with any Notion setup as long as you have a Tasks database. If you're starting fresh, duplicate the template:
+
+**[Duplicate the Vera template](LINK_AQUI)**
+
+| Database | Purpose | Required? |
+|---|---|---|
+| **Tasks** | To-do list with status, priority, deadline | Yes |
+| **Pipeline** | Opportunities, applications, deals | No |
+| **Contacts** | People and relationship tracking | No |
+| **Health** | Exercise, sleep, mood logs | No |
+| **Finances** | Income and expenses | No |
+| **Learning** | Courses, books, articles | No |
+
+See [docs/NOTION_TEMPLATE.md](docs/NOTION_TEMPLATE.md) for database schemas and field mapping.
 
 ## Requirements
 
@@ -67,122 +89,122 @@ For the full setup guide including Notion integration, Telegram bot creation, an
 | **Anthropic** | API key (Claude Sonnet) | ~$0.01-0.03/day |
 | **Telegram** | Bot token + your Chat ID | Free |
 | **GitHub** | Repository with Actions enabled | Free (2,000 min/mo) |
-| **Python** | 3.11+ | — |
+| **Python** | 3.11+ | -- |
+
+Ollama can replace Anthropic for a fully free, local setup.
 
 ## Configuration
 
-Vera is fully config-driven. Everything lives in `config.yaml`:
+Vera is config-driven. Everything lives in `config.yaml`:
 
-- **Persona** — `executive` (direct, metrics-focused) or `coach` (supportive, growth-oriented), or bring your own prompt
-- **Databases** — map your Notion property names to Vera's internal model
-- **Scoring** — adjust urgency weights (deadline proximity, priority, staleness)
-- **Schedule** — set your briefing time and weekly review day
-- **Language** — pt-BR, en-US, es-ES
+- **Backend** -- where your data lives (Notion, future: Airtable, Supabase)
+- **LLM** -- which AI generates briefings (Claude, Ollama, future: OpenAI)
+- **Domains** -- which life areas to track (tasks required, rest optional)
+- **Persona** -- `executive` (direct, ironic) or `coach` (supportive), or custom via `workspace/AGENT.md`
+- **Schedule** -- briefing time, weekend modes
+- **Integrations** -- Google Calendar (optional)
 
-See **[CUSTOMIZE.md](docs/CUSTOMIZE.md)** for all options.
-
-## Notion template
-
-Vera works with any Notion setup as long as you have a Tasks database. But if you're starting fresh, use the included template:
-
-**[→ Duplicate the Vera Open template](https://notion.so)** *(link after publish)*
-
-The template includes 4 databases pre-configured to work with Vera's defaults:
-
-| Database | Purpose | Required? |
-|---|---|---|
-| **Tasks** | Your to-do list with status, priority, deadline | ✅ Yes |
-| **Daily Check** | Daily energy/mood/focus/sleep log | Recommended |
-| **Pipeline** | Deals, leads, job applications | Optional |
-| **Energy Timing** | Your energy patterns by time of day | Optional |
-
-See **[TEMPLATE.md](docs/TEMPLATE.md)** for database schemas.
+See [config/config.example.yaml](config/config.example.yaml) for all options with comments.
 
 ## Project structure
 
 ```
 vera-open/
-├── src/
-│   ├── main.py          # CLI entrypoint + async orchestrator
-│   ├── config.py         # Pydantic config models + YAML loader
-│   ├── notion.py         # Async Notion API client
-│   ├── tasks.py          # Tasks collector + urgency calculator
-│   ├── checks.py         # Daily check-in collector
-│   ├── pipeline.py       # Pipeline collector
-│   ├── timing.py         # Energy timing collector
-│   ├── scorer.py         # Daily scores + streaks
-│   ├── methodology.py    # Task prioritization
-│   ├── auditor.py        # Gap detection + pattern analysis
-│   ├── synthesize.py     # AI prompt builder + Claude API
-│   ├── telegram.py       # Telegram delivery (HTML)
-│   └── presets/          # Persona prompt templates
-├── workspace/
-│   └── USER.example.md   # Your context (who you are, how you work)
-├── .github/workflows/
-│   ├── daily.yml         # Daily briefing (9h BRT)
-│   └── weekly.yml        # Weekly review (Sat 10h BRT)
-├── config.example.yaml   # Configuration template
-├── requirements.txt      # Python dependencies (4 packages)
+├── vera/                    # Core package
+│   ├── backends/            # StorageBackend ABC + NotionBackend
+│   ├── llm/                 # LLMProvider ABC + Claude + Ollama
+│   ├── domains/             # Domain ABC + Tasks, Pipeline, Contacts
+│   ├── modes/               # Briefing pipeline (collect → analyze → generate)
+│   ├── integrations/        # Telegram, Google Calendar
+│   ├── config.py            # Pydantic models + YAML loader
+│   ├── state.py             # State management (delta, mentions, zombies)
+│   ├── personas.py          # Executive/coach prompt presets
+│   ├── briefing_history.py  # Anti-repetition (circular buffer of past briefings)
+│   ├── source_health.py     # Data source monitoring
+│   ├── last_run.py          # Observability per execution
+│   └── cli.py               # Typer CLI (setup, validate, briefing)
+├── workspace/               # User-specific files (gitignored)
+│   ├── AGENT.example.md     # Persona template
+│   └── USER.example.md      # Personal context template
+├── config/
+│   └── config.example.yaml  # Full configuration reference
+├── state/                   # Persisted state (gitignored in production)
+├── tests/                   # 170+ tests, zero external calls
 └── docs/
-    ├── SETUP.md
-    ├── CUSTOMIZE.md
-    ├── TEMPLATE.md
-    └── TROUBLESHOOTING.md
+    ├── SETUP.md             # Step-by-step setup guide
+    └── NOTION_TEMPLATE.md   # Database schemas
 ```
 
 ## How Vera thinks
 
-**Urgency score (0-100)** — weighted combination of:
-- Deadline proximity (40%) — past-due = 100, tomorrow = 85, next week = 50
-- Priority level (30%) — maps your 1-5 scale to 0-100
-- Staleness (20%) — days since last edit (untouched tasks rise in urgency)
-- Dependencies (10%) — reserved for v1.1
+**Urgency score** -- weighted combination of:
+- **Deadline proximity** (40%) -- past-due = max score, today = high, next week = medium
+- **Priority level** (25%) -- maps your priority labels (Alta/Media/Baixa) to score
+- **Staleness** (20%) -- mention count penalty (tasks mentioned 4+ times lose priority)
+- **Dependencies** (15%) -- reserved for v0.2
 
 **Priority tiers:**
-- 🔴 **Overdue** — urgency ≥ 95 (past deadline)
-- 🟡 **Top 3** — highest urgency active tasks
-- 🟢 **Should do** — next tier (positions 4-8)
-- ⏸️ **Blocked** — tasks in blocked/waiting status
+- **Overdue** -- past deadline, always surfaces
+- **Top priority** -- highest scored active tasks (max 20 sent to LLM)
+- **Zombie** -- mentioned 8+ times without status change, enters cooldown
+- **Cooldown** -- temporarily hidden from briefing (7 days)
 
-**Gap detection:**
-- Tasks without deadlines (>3 = warning)
-- Tasks untouched for 7+ days
-- Missing daily check-ins
-- Declining energy trends
-- Urgency overload (>5 tasks at 70+)
+**Mention count escalation:**
+- 1-3x: normal tone
+- 4-6x: suggests concrete actions to unblock
+- 7x: "I'll stop mentioning this until you tell me what to do"
+- 8+: zombie cooldown, excluded from briefing
 
 ## Modes
 
-| Command | What it does | When |
-|---|---|---|
-| `--mode validate` | Checks config + environment | Anytime |
-| `--mode daily` | Full daily briefing pipeline | Every morning |
-| `--mode weekly_review` | Weekly retrospective | Saturdays |
-| `--mode week_setup` | Plan the upcoming week | Sundays/Mondays |
+| Command | What it does |
+|---|---|
+| `vera setup` | Interactive wizard -- creates config.yaml and .env |
+| `vera validate` | Checks config, secrets, backend connection, LLM |
+| `vera briefing` | Full briefing pipeline (respects time window) |
+| `vera briefing --dry-run` | Runs pipeline without sending Telegram or saving state |
+| `vera briefing --force` | Ignores time window guard and idempotency check |
 
 ## Troubleshooting
 
-See **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** for common issues.
+**"Fora da janela"** -- Vera only runs within 3h before / 2h after your configured briefing time. Use `--force` to override.
+
+**"Abortando (idempotencia)"** -- Same data as last run. Use `--force` or wait for data to change.
+
+**No Telegram message** -- Run `vera validate` to check bot token and chat ID. Check that `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are set.
+
+**Notion connection fails** -- Ensure the integration has access to each database (Share -> Add connection).
 
 ## Roadmap
 
-**v1.0** (current)
-- [x] Daily briefing pipeline
-- [x] Urgency scoring
-- [x] Multi-database support
-- [x] Configurable personas
-- [x] Gap detection
+**v0.1.0** (current)
+- [x] Daily briefing pipeline with state management
+- [x] Notion backend with auto-discovery
+- [x] Multi-LLM support (Claude + Ollama)
+- [x] Google Calendar integration (optional)
+- [x] Configurable personas (executive/coach/custom)
+- [x] Retry with exponential backoff on all integrations
+- [x] 3-level error alerting via Telegram
+- [x] 3 life domains: Tasks, Pipeline, Contacts
+- [x] Setup wizard + validation
+- [x] 170+ tests
 
-**v1.1** (planned)
-- [ ] Bidirectional Telegram (reply to reschedule, mark done)
-- [ ] Weekly review with charts
-- [ ] Dependency tracking between tasks
+**v0.2** (planned)
+- [ ] Research mode (job search, market monitoring)
+- [ ] Health, Finances, Learning domains
+- [ ] Bidirectional Telegram (reply to mark done, reschedule)
+- [ ] Weekly scoring with trend analysis
+
+**v0.3** (future)
+- [ ] Multi-backend (Airtable, Supabase)
 - [ ] Custom scoring formulas
+- [ ] Dependency tracking between tasks
+- [ ] Web dashboard
 
 ## License
 
-MIT — fork it, customize it, make it yours.
+Apache 2.0 -- fork it, customize it, make it yours.
 
 ---
 
-*Built by someone who got tired of opening Notion to figure out what to do today.*
+*Built for people who want their productivity system to talk to them, not the other way around.*
