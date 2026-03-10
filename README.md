@@ -93,6 +93,30 @@ See [docs/NOTION_TEMPLATE.md](docs/NOTION_TEMPLATE.md) for database schemas and 
 
 Ollama can replace Anthropic for a fully free, local setup.
 
+## Research Packs
+
+Vera monitors the internet for you. Research Packs are modular intelligence modules that collect, score, deduplicate, and synthesize information from multiple sources.
+
+```bash
+# Run a research pack
+python -m vera research news --dry-run
+python -m vera research jobs --dry-run
+python -m vera research financial --dry-run
+
+# List available packs
+python -m vera research --list
+```
+
+**Included packs:**
+
+| Pack | Sources | What it monitors |
+|---|---|---|
+| **News** | RSS/Atom feeds | Topics you define (AI, geopolitics, open source, etc.) |
+| **Jobs** | 9 job boards | Himalayas, Remotive, RemoteOK, Arbeitnow, Jooble, JSearch, Greenhouse, Lever, Ashby |
+| **Financial** | Finnhub, SEC EDGAR, CoinGecko, DeFiLlama, RSS | Earnings, SEC filings, crypto prices, DeFi TVL, financial news |
+
+When enabled, research results appear as a **RADAR** section in your daily briefing. Configure packs in `config/packs/`. See [docs/RESEARCH_PACKS.md](docs/RESEARCH_PACKS.md) for details. Want to create your own pack? See [docs/CREATING_PACKS.md](docs/CREATING_PACKS.md).
+
 ## Configuration
 
 Vera is config-driven. Everything lives in `config.yaml`:
@@ -103,6 +127,7 @@ Vera is config-driven. Everything lives in `config.yaml`:
 - **Persona** -- `executive` (direct, ironic) or `coach` (supportive), or custom via `workspace/AGENT.md`
 - **Schedule** -- briefing time, weekend modes
 - **Integrations** -- Google Calendar (optional)
+- **Research** -- enable/disable research packs and configure per-pack YAML
 
 See [config/config.example.yaml](config/config.example.yaml) for all options with comments.
 
@@ -122,14 +147,22 @@ vera-open/
 │   ├── briefing_history.py  # Anti-repetition (circular buffer of past briefings)
 │   ├── source_health.py     # Data source monitoring
 │   ├── last_run.py          # Observability per execution
-│   └── cli.py               # Typer CLI (setup, validate, briefing)
+│   ├── cli.py               # Typer CLI (setup, validate, briefing, research)
+│   └── research/            # Research Pack framework
+│       ├── base.py          # ResearchPack ABC, ResearchItem, ResearchResult
+│       ├── sources/         # Source ABC + RSSSource + APISource
+│       ├── scoring.py       # Keywords + embeddings + LLM scoring
+│       ├── dedup.py         # TTL-based deduplication
+│       ├── synthesis.py     # LLM summarization by topic
+│       ├── registry.py      # Pack auto-discovery
+│       └── packs/           # news/, jobs/, financial/
 ├── workspace/               # User-specific files (gitignored)
 │   ├── AGENT.example.md     # Persona template
 │   └── USER.example.md      # Personal context template
 ├── config/
 │   └── config.example.yaml  # Full configuration reference
 ├── state/                   # Persisted state (gitignored in production)
-├── tests/                   # 170+ tests, zero external calls
+├── tests/                   # 300+ tests, zero external calls
 └── docs/
     ├── SETUP.md             # Step-by-step setup guide
     └── NOTION_TEMPLATE.md   # Database schemas
@@ -164,6 +197,9 @@ vera-open/
 | `vera briefing` | Full briefing pipeline (respects time window) |
 | `vera briefing --dry-run` | Runs pipeline without sending Telegram or saving state |
 | `vera briefing --force` | Ignores time window guard and idempotency check |
+| `vera research <pack>` | Run a research pack (news, jobs, financial) |
+| `vera research --list` | List available research packs |
+| `vera research <pack> --dry-run` | Run without saving dedup state |
 
 ## Troubleshooting
 
@@ -177,7 +213,16 @@ vera-open/
 
 ## Roadmap
 
-**v0.1.0** (current)
+**v0.2.0** (current)
+- [x] Research Pack framework (modular, extensible)
+- [x] News/Topic Monitoring Pack (RSS feeds, keyword + embedding scoring)
+- [x] Job Search Pack (9 sources, hybrid 3-layer scoring, Notion auto-save)
+- [x] Financial/Investment Pack (SEC EDGAR, Finnhub, CoinGecko, DeFiLlama)
+- [x] Daily briefing RADAR integration
+- [x] Pack creation guide for contributors
+- [x] 300+ tests
+
+**v0.1.0**
 - [x] Daily briefing pipeline with state management
 - [x] Notion backend with auto-discovery
 - [x] Multi-LLM support (Claude + Ollama)
@@ -187,10 +232,8 @@ vera-open/
 - [x] 3-level error alerting via Telegram
 - [x] 3 life domains: Tasks, Pipeline, Contacts
 - [x] Setup wizard + validation
-- [x] 170+ tests
 
-**v0.2** (planned)
-- [ ] Research mode (job search, market monitoring)
+**v0.3** (planned)
 - [ ] Health, Finances, Learning domains
 - [ ] Bidirectional Telegram (reply to mark done, reschedule)
 - [ ] Weekly scoring with trend analysis

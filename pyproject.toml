@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vera-open"
-version = "0.1.0"
+version = "0.2.0"
 description = "AI-native Life Operating System — daily briefings, task management, and life domains"
 readme = "README.md"
 license = {text = "Apache-2.0"}

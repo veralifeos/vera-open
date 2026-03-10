@@ -473,7 +473,7 @@ async def run_async(
     cabecalho = f"VERA — {_DIAS_SEMANA[dia_num]}, {agora.day}/{_MESES[agora.month]}"
 
     print("=" * 60)
-    print("   VERA v0.1 — Briefing")
+    print("   VERA v0.2 — Briefing")
     print("=" * 60)
     print(f"   {agora.strftime('%d/%m/%Y %H:%M')} ({config.timezone})")
 
