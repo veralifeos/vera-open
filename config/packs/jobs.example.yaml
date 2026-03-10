@@ -1,0 +1,41 @@
+# Job Search Pack — config de exemplo
+# Copie para config/packs/jobs.yaml e customize
+
+pack:
+  name: "jobs"
+  display_name: "Job Search"
+  description: "Monitor job listings across multiple sources with hybrid scoring"
+  version: "0.1.0"
+
+criteria:
+  keywords: ["CRO", "growth marketing", "product marketing", "RevOps"]
+  location: "remote"
+  seniority: ["senior", "lead", "manager"]
+  salary_min: 12000
+  salary_currency: "BRL"
+  stack: ["GA4", "HubSpot", "Figma", "Notion"]
+  exclude_keywords: ["intern", "junior"]
+
+sources:
+  himalayas: { enabled: true }
+  remotive: { enabled: true }
+  remoteok: { enabled: true }
+  arbeitnow: { enabled: true }
+  jooble: { enabled: true, api_key_env: "JOOBLE_API_KEY" }
+  jsearch: { enabled: false, api_key_env: "RAPIDAPI_KEY" }
+  greenhouse: { enabled: true, boards: [] }
+  lever: { enabled: true, boards: [] }
+  ashby: { enabled: true, boards: [] }
+
+scoring:
+  weights: { rules: 0.40, embedding: 0.35, llm: 0.25 }
+  use_llm_scoring: true
+  llm_threshold: 0.6
+  relevance_threshold: 0.5
+
+dedup:
+  ttl_days: 30
+
+notion:
+  save_to_pipeline: true
+  min_score_to_save: 0.6

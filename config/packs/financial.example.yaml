@@ -1,0 +1,62 @@
+# Financial/Investment Pack — config de exemplo
+# Copie para config/packs/financial.yaml e customize
+
+pack:
+  name: "financial"
+  display_name: "Market Intel"
+  description: "Monitor SEC filings, earnings, crypto, and financial news"
+  version: "0.1.0"
+
+api_keys:
+  finnhub_env: "FINNHUB_API_KEY"
+  coingecko_env: "COINGECKO_API_KEY"
+
+edgar:
+  user_agent: "Vera Open vera.os.app@gmail.com"
+
+watchlist:
+  stocks:
+    - ticker: "AAPL"
+      name: "Apple"
+      cik: "0000320193"
+    - ticker: "MSFT"
+      name: "Microsoft"
+      cik: "0000789019"
+
+  crypto:
+    - id: "bitcoin"
+      symbol: "BTC"
+    - id: "ethereum"
+      symbol: "ETH"
+
+categories:
+  sec_filings:
+    enabled: true
+    filing_types: ["10-K", "10-Q", "8-K", "S-1"]
+  earnings:
+    enabled: true
+    days_ahead: 7
+  crypto:
+    enabled: true
+    price_change_threshold: 5.0
+  news:
+    enabled: true
+    sources:
+      - type: rss
+        url: "https://feeds.reuters.com/reuters/businessNews"
+        name: "Reuters Business"
+      - type: rss
+        url: "https://www.cnbc.com/id/100003114/device/rss/rss.html"
+        name: "CNBC"
+
+scoring:
+  weights: { keyword: 0.5, embedding: 0.5 }
+  relevance_threshold: 0.4
+
+dedup:
+  ttl_days: 3
+
+synthesis:
+  max_words_per_category: 60
+
+disclaimer: "This is not financial advice. Always do your own research."
