@@ -595,11 +595,23 @@ async def run_async(
     tarefas_rankeadas = filtrar_e_rankear(tarefas, state, delta)
     print(f"   {len(tarefas_rankeadas)} tarefas enviadas ao LLM")
 
-    # Injeta calendar e source health nos domain_contexts
+    # Research Packs (RADAR section)
+    research_ctx = ""
+    if _research_habilitado(config):
+        try:
+            research_ctx = await _executar_research_packs(config, llm)
+            if research_ctx:
+                print("   [research] RADAR section gerada")
+        except Exception as e:
+            print(f"   [research] Erro: {e}")
+
+    # Injeta calendar, source health e research nos domain_contexts
     if calendar_ctx:
         domain_contexts["_calendar"] = calendar_ctx
     if source_health_ctx:
         domain_contexts["_source_health"] = source_health_ctx
+    if research_ctx:
+        domain_contexts["_research"] = research_ctx
 
     # Monta contexto por dia da semana
     if dia_num == 5:
@@ -723,6 +735,110 @@ async def _buscar_eventos_calendar(config: VeraConfig) -> list[dict]:
         calendar_ids=gcal_cfg.calendar_ids,
     )
     return await provider.get_events_today(config.timezone)
+
+
+def _research_habilitado(config: VeraConfig) -> bool:
+    """Verifica se research esta habilitado no config."""
+    research = getattr(config, "research", None)
+    if not research:
+        return False
+    return bool(research.enabled and research.packs)
+
+
+async def _executar_research_packs(config: VeraConfig, llm: LLMProvider) -> str:
+    """Executa packs de research habilitados e retorna contexto RADAR."""
+    from pathlib import Path
+
+    from vera.research.dedup import DedupEngine
+    from vera.research.registry import registry
+
+    registry.discover()
+    parts = []
+
+    for pack_name, pack_cfg in config.research.packs.items():
+        if not pack_cfg.enabled:
+            continue
+
+        pack_cls = registry.get(pack_name)
+        if not pack_cls:
+            continue
+
+        try:
+            # Carrega pack config
+            pack_config = _load_pack_config_for_briefing(pack_cfg.config_path, pack_name)
+            pack_instance = pack_cls()
+
+            # Collect
+            items = await pack_instance.collect(pack_config)
+            if not items:
+                continue
+
+            # Dedup
+            dedup_ttl = pack_config.get("dedup", {}).get("ttl_days", 30)
+            dedup = DedupEngine(Path(f"state/dedup/{pack_name}.json"), default_ttl_days=dedup_ttl)
+            new_items = dedup.filter_new(items)
+            if not new_items:
+                continue
+
+            # Score
+            scored = await pack_instance.score(new_items, pack_config)
+            threshold = pack_config.get("scoring", {}).get("relevance_threshold", 0.5)
+            relevant = [i for i in scored if i.score >= threshold]
+            if not relevant:
+                continue
+
+            # Format for briefing
+            from datetime import datetime, timezone
+
+            from vera.research.base import ResearchResult
+
+            result = ResearchResult(
+                pack_name=pack_name,
+                items=relevant,
+                new_count=len(relevant),
+                total_checked=len(items),
+                sources_checked=0,
+                sources_failed=[],
+                timestamp=datetime.now(timezone.utc),
+            )
+            formatted = pack_instance.format_for_briefing(result)
+            if formatted:
+                parts.append(formatted)
+
+            # Save dedup state
+            dedup.mark_items(new_items, dedup_ttl)
+            dedup.save()
+
+        except Exception as e:
+            print(f"   [research] Pack '{pack_name}' erro: {e}")
+
+    if not parts:
+        return ""
+
+    return "=== RADAR ===\n" + "\n\n".join(parts)
+
+
+def _load_pack_config_for_briefing(config_path: str, pack_name: str) -> dict:
+    """Carrega config de pack para uso no briefing."""
+    from pathlib import Path
+
+    import yaml as _yaml
+
+    if config_path:
+        p = Path(config_path)
+        if p.exists():
+            with open(p, encoding="utf-8") as f:
+                return _yaml.safe_load(f) or {}
+
+    for candidate in [
+        Path(f"config/packs/{pack_name}.yaml"),
+        Path(f"config/packs/{pack_name}.example.yaml"),
+    ]:
+        if candidate.exists():
+            with open(candidate, encoding="utf-8") as f:
+                return _yaml.safe_load(f) or {}
+
+    return {}
 
 
 def run(

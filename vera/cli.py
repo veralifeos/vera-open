@@ -89,6 +89,203 @@ def briefing(
         raise typer.Exit(code=1)
 
 
+# ─── Research ─────────────────────────────────────────────────────────────────
+
+
+@app.command()
+def research(
+    pack: str = typer.Argument(
+        None, help="Nome do pack (news, jobs, financial). Omitir com --list."
+    ),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Executa sem gravar state."),
+    force: bool = typer.Option(False, "--force", "-f", help="Ignorar dedup."),
+    list_packs: bool = typer.Option(False, "--list", help="Listar packs disponíveis."),
+) -> None:
+    """Executa um Research Pack (news, jobs, financial)."""
+    from vera.research.registry import registry
+
+    # Auto-discover packs
+    registry.discover()
+
+    if list_packs:
+        available = registry.list_available()
+        if available:
+            typer.echo("Packs disponíveis:")
+            for name in available:
+                pack_cls = registry.get(name)
+                desc = getattr(pack_cls, "description", "") if pack_cls else ""
+                typer.echo(f"  - {name}: {desc}")
+        else:
+            typer.echo("Nenhum pack disponível.")
+        return
+
+    if not pack:
+        typer.echo("Especifique um pack ou use --list. Ex: vera research news")
+        raise typer.Exit(code=1)
+
+    pack_cls = registry.get(pack)
+    if not pack_cls:
+        available = registry.list_available()
+        typer.echo(f"Pack '{pack}' não encontrado. Disponíveis: {available}")
+        raise typer.Exit(code=1)
+
+    # Carrega config principal
+    from vera.config import load_config
+
+    try:
+        config = load_config()
+    except (FileNotFoundError, ValueError) as e:
+        typer.echo(f"Erro ao carregar config: {e}")
+        raise typer.Exit(code=1)
+
+    # Carrega pack config
+    pack_config = _load_pack_config(pack, config)
+
+    # Cria LLM provider para synthesis
+    try:
+        llm = _create_llm_provider(config, config.llm.default)
+    except Exception as e:
+        typer.echo(f"Erro ao criar LLM provider: {e}")
+        raise typer.Exit(code=1)
+
+    # Executa pipeline do pack
+    try:
+        result = asyncio.run(
+            _run_research_pack(pack_cls, pack_config, llm, dry_run=dry_run, force=force)
+        )
+        if result:
+            typer.echo(
+                f"\n{result.pack_name}: {result.new_count} novos de "
+                f"{result.total_checked} verificados "
+                f"({result.sources_checked} fontes)"
+            )
+            if result.sources_failed:
+                typer.echo(f"  Fontes com erro: {result.sources_failed}")
+            if result.synthesis:
+                typer.echo(f"\n{result.synthesis}")
+    except Exception as e:
+        typer.echo(f"Erro no pack '{pack}': {e}")
+        raise typer.Exit(code=1)
+
+
+async def _run_research_pack(pack_cls, pack_config, llm, dry_run=False, force=False):
+    """Executa pipeline completo de um research pack."""
+    from datetime import datetime, timezone
+    from pathlib import Path
+
+    from vera.research.base import ResearchResult
+    from vera.research.dedup import DedupEngine
+    from vera.research.synthesis import SynthesisEngine
+
+    pack_instance = pack_cls()
+    pack_name = pack_instance.name
+
+    print(f"\n   RESEARCH: {pack_name}")
+    print("=" * 40)
+
+    # 1. Collect
+    print("   Coletando...")
+    items = await pack_instance.collect(pack_config)
+    total_checked = len(items)
+    print(f"   {total_checked} items coletados")
+
+    # 2. Dedup
+    dedup_ttl = pack_config.get("dedup", {}).get("ttl_days", 30)
+    dedup_path = Path(f"state/dedup/{pack_name}.json")
+    dedup = DedupEngine(dedup_path, default_ttl_days=dedup_ttl)
+
+    if force:
+        new_items = items
+        print(f"   --force: ignorando dedup ({len(items)} items)")
+    else:
+        new_items = dedup.filter_new(items)
+        print(f"   {len(new_items)} novos (dedup filtrou {total_checked - len(new_items)})")
+
+    # 3. Score
+    if new_items:
+        print("   Scoring...")
+        scored_items = await pack_instance.score(new_items, pack_config)
+    else:
+        scored_items = []
+
+    # 4. Filter by threshold
+    threshold = pack_config.get("scoring", {}).get("relevance_threshold", 0.5)
+    relevant = [i for i in scored_items if i.score >= threshold]
+    print(f"   {len(relevant)} acima do threshold ({threshold})")
+
+    # 5. Synthesize
+    synthesis_text = ""
+    if relevant:
+        print("   Sintetizando...")
+        engine = SynthesisEngine(llm)
+        # Agrupa por topico
+        topics: dict[str, list] = {}
+        for item in relevant:
+            t = item.topic or "Geral"
+            topics.setdefault(t, []).append(item)
+
+        max_words = pack_config.get("synthesis", {}).get("max_words_per_topic", 80)
+        synthesis_text = await engine.synthesize_pack(
+            ResearchResult(
+                pack_name=pack_name,
+                items=relevant,
+                new_count=len(relevant),
+                total_checked=total_checked,
+                sources_checked=0,
+                sources_failed=[],
+                timestamp=datetime.now(timezone.utc),
+            ),
+            topics,
+            max_words_per_topic=max_words,
+        )
+
+    # 6. Persist dedup
+    if not dry_run and new_items:
+        dedup.mark_items(new_items, dedup_ttl)
+        dedup.cleanup_expired()
+        dedup.save()
+        print("   State salvo.")
+    elif dry_run:
+        print("   DRY RUN — state não salvo.")
+
+    return ResearchResult(
+        pack_name=pack_name,
+        items=relevant,
+        new_count=len(relevant),
+        total_checked=total_checked,
+        sources_checked=0,
+        sources_failed=[],
+        timestamp=datetime.now(timezone.utc),
+        synthesis=synthesis_text,
+    )
+
+
+def _load_pack_config(pack_name: str, config) -> dict:
+    """Carrega config de um pack (YAML separado)."""
+    import yaml as _yaml
+
+    # Tenta path do config principal
+    research_cfg = getattr(config, "research", None)
+    if research_cfg and research_cfg.packs:
+        pack_cfg = research_cfg.packs.get(pack_name)
+        if pack_cfg and pack_cfg.config_path:
+            cfg_path = Path(pack_cfg.config_path)
+            if cfg_path.exists():
+                with open(cfg_path, encoding="utf-8") as f:
+                    return _yaml.safe_load(f) or {}
+
+    # Fallback: config/packs/{pack_name}.yaml
+    for candidate in [
+        Path(f"config/packs/{pack_name}.yaml"),
+        Path(f"config/packs/{pack_name}.example.yaml"),
+    ]:
+        if candidate.exists():
+            with open(candidate, encoding="utf-8") as f:
+                return _yaml.safe_load(f) or {}
+
+    return {}
+
+
 # ─── Validate ────────────────────────────────────────────────────────────────
 
 

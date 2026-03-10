@@ -87,6 +87,20 @@ class IntegrationsConfig(BaseModel):
     google_calendar: GoogleCalendarConfig = Field(default_factory=GoogleCalendarConfig)
 
 
+class ResearchPackConfig(BaseModel):
+    """Config de um pack de research."""
+
+    enabled: bool = False
+    config_path: str = ""
+
+
+class ResearchConfig(BaseModel):
+    """Config do sistema de Research Packs."""
+
+    enabled: bool = False
+    packs: dict[str, ResearchPackConfig] = Field(default_factory=dict)
+
+
 class DebugConfig(BaseModel):
     dry_run: bool = False
     verbose: bool = False
@@ -105,6 +119,7 @@ class VeraConfig(BaseModel):
     schedule: ScheduleConfig = Field(default_factory=ScheduleConfig)
     persona: PersonaConfig = Field(default_factory=PersonaConfig)
     integrations: IntegrationsConfig = Field(default_factory=IntegrationsConfig)
+    research: ResearchConfig = Field(default_factory=ResearchConfig)
     domains: dict[str, DomainConfig] = Field(default_factory=dict)
     debug: DebugConfig = Field(default_factory=DebugConfig)
 
