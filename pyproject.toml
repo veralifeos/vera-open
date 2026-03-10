@@ -23,6 +23,8 @@ dependencies = [
     "aiohttp>=3.9.0",
     "aiolimiter>=1.1.0",
     "anthropic>=0.40.0",
+    "feedparser>=6.0",
+    "httpx>=0.27",
     "pydantic>=2.0",
     "pyyaml>=6.0",
     "tenacity>=8.2.0",
@@ -35,6 +37,10 @@ calendar = [
     "google-api-python-client>=2.100.0",
     "google-auth>=2.23.0",
 ]
+embeddings = ["sentence-transformers>=2.0"]
+embeddings-light = ["light-embed>=1.0"]
+financial = ["edgartools>=5.0"]
+all = ["vera-open[embeddings,financial,calendar]"]
 dev = [
     "pytest>=7.0",
     "pytest-asyncio>=0.21",
