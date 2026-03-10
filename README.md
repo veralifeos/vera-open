@@ -64,6 +64,22 @@ cp workspace/USER.example.md workspace/USER.md
 
 For the full setup guide including Telegram bot creation and GitHub Actions deployment, see [docs/SETUP.md](docs/SETUP.md).
 
+### Docker (recommended for self-hosting)
+
+```bash
+git clone https://github.com/veralifeos/vera-open.git
+cd vera-open
+cp config/config.example.yaml config/config.yaml
+cp .env.example .env
+# Edit config.yaml and .env with your tokens
+
+docker compose build
+docker compose run --rm vera validate
+docker compose run --rm vera briefing --dry-run
+```
+
+See [docs/DOCKER.md](docs/DOCKER.md) for scheduled runs, build options, and troubleshooting.
+
 ## Notion template
 
 Vera works with any Notion setup as long as you have a Tasks database. If you're starting fresh, duplicate the template:

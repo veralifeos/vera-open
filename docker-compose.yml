@@ -1,0 +1,12 @@
+services:
+  vera:
+    build: .
+    container_name: vera
+    env_file: .env
+    volumes:
+      - ./config:/app/config
+      - ./workspace:/app/workspace
+      - ./state:/app/state
+    command: briefing
+    # Job, not a daemon — don't restart
+    restart: "no"
