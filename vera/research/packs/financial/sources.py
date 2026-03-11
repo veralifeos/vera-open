@@ -26,8 +26,15 @@ def _fin_id(title: str, source: str) -> str:
     return hashlib.md5(f"{title.lower().strip()}|{source}".encode()).hexdigest()
 
 
-def _parse_date(date_str: str | None) -> datetime | None:
+def _parse_date(date_str: str | int | None) -> datetime | None:
     if not date_str:
+        return None
+    if isinstance(date_str, int):
+        try:
+            return datetime.utcfromtimestamp(date_str)
+        except (ValueError, OSError):
+            return None
+    if not isinstance(date_str, str):
         return None
     for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%d", "%Y-%m-%dT%H:%M:%SZ"):
         try:
@@ -321,14 +328,14 @@ class DeFiLlamaSource(Source):
 
         # Top 10 por TVL
         if isinstance(protocols, list):
-            protocols.sort(key=lambda p: p.get("tvl", 0), reverse=True)
+            protocols.sort(key=lambda p: p.get("tvl") or 0, reverse=True)
             return [{"_type": "defi", **p} for p in protocols[:10]]
         return []
 
     def parse(self, raw: dict) -> ResearchItem | None:
         name = raw.get("name", "")
-        tvl = raw.get("tvl", 0)
-        change_1d = raw.get("change_1d", 0)
+        tvl = raw.get("tvl") or 0
+        change_1d = raw.get("change_1d") or 0
         if not name:
             return None
 

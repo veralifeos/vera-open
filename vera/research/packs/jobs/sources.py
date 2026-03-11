@@ -28,8 +28,16 @@ def _job_id(title: str, company: str, source: str) -> str:
     return hashlib.md5(normalized.encode()).hexdigest()
 
 
-def _parse_date(date_str: str | None) -> datetime | None:
+def _parse_date(date_str: str | int | None) -> datetime | None:
     if not date_str:
+        return None
+    # Unix timestamp (int ou string numérica)
+    if isinstance(date_str, int):
+        try:
+            return datetime.utcfromtimestamp(date_str)
+        except (ValueError, OSError):
+            return None
+    if not isinstance(date_str, str):
         return None
     for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%d", "%Y-%m-%dT%H:%M:%SZ"):
         try:

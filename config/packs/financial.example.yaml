@@ -43,8 +43,8 @@ categories:
     enabled: true
     sources:
       - type: rss
-        url: "https://feeds.reuters.com/reuters/businessNews"
-        name: "Reuters Business"
+        url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10001147"
+        name: "CNBC Economy"
       - type: rss
         url: "https://www.cnbc.com/id/100003114/device/rss/rss.html"
         name: "CNBC"
