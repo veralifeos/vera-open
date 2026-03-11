@@ -29,6 +29,8 @@ jobs:
   research-and-briefing:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
