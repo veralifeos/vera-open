@@ -3,8 +3,6 @@
 # ============================================================
 # Runs every day at 9:00 AM BRT (12:00 UTC).
 # Also triggerable manually via workflow_dispatch.
-# Note: GitHub Actions cron has delays of 15-60+ minutes.
-# For time-sensitive monitoring, use self-hosted (systemd/crontab).
 # ============================================================
 
 name: Daily Briefing
@@ -19,6 +17,13 @@ on:
         description: "Ignorar janela de horário e idempotência"
         required: false
         default: "false"
+
+env:
+  VERA_CONFIG: config/config.ci.yaml
+  NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
 jobs:
   research-and-briefing:
@@ -37,33 +42,22 @@ jobs:
 
       - name: Research — News
         run: uv run python -m vera research news --force 2>&1 || true
-        env:
-          VERA_CONFIG: config.yaml
 
       - name: Research — Jobs
         run: uv run python -m vera research jobs --force 2>&1 || true
         env:
-          VERA_CONFIG: config.yaml
           JOOBLE_API_KEY: ${{ secrets.JOOBLE_API_KEY }}
           RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
 
       - name: Research — Financial
         run: uv run python -m vera research financial --force 2>&1 || true
         env:
-          VERA_CONFIG: config.yaml
           FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
           COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
 
       - name: Run briefing
         run: |
           uv run python -m vera briefing ${{ github.event.inputs.force_run == 'true' && '--force' || '' }}
-        env:
-          VERA_CONFIG: config.yaml
-          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
 
       - name: Commit state
         run: |

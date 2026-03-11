@@ -82,17 +82,17 @@ domains:
       deadline: "Deadline"
       category: "Tipo"
       status_active: ["To Do", "Doing", "Em andamento"]
-      status_done: ["Done", "Concluido"]
+      status_done: ["Done", "Concluído"]
 
   pipeline:
     enabled: false
     collection: ""
     fields:
-      title: "Empresa"
-      stage: "Estagio"
+      title: "Nome"
+      stage: "Estágio"
       priority: "Prioridade"
-      next_action: "Proximo Passo"
-      last_contact: "Data Ultimo Contato"
+      next_action: "Próximo Passo"
+      last_contact: "Data Último Contato"
 
   contacts:
     enabled: false
@@ -101,7 +101,7 @@ domains:
       name: "Nome"
       status: "Status"
       type: "Tipo"
-      last_interaction: "Ultima Interacao"
+      last_interaction: "Última Interação"
 
   # Future domains (not yet implemented):
   # health:
