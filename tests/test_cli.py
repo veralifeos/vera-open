@@ -66,6 +66,26 @@ def test_cli_research_all_help():
     assert "--all" in result.output
 
 
+def test_cli_status_help():
+    """status --help funciona."""
+    result = runner.invoke(app, ["status", "--help"])
+    assert result.exit_code == 0
+
+
+def test_cli_bot_help():
+    """bot --help funciona."""
+    result = runner.invoke(app, ["bot", "--help"])
+    assert result.exit_code == 0
+
+
+def test_cli_status_sem_state(tmp_path, monkeypatch):
+    """Status sem state mostra mensagem adequada."""
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(app, ["status"])
+    assert result.exit_code == 0
+    assert "Status" in result.output
+
+
 def test_cli_briefing_sem_config(tmp_path, monkeypatch):
     """Briefing sem config.yaml retorna erro."""
     monkeypatch.chdir(tmp_path)

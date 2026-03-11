@@ -6,20 +6,16 @@ import os
 from datetime import datetime
 
 import httpx
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
+from tenacity import retry
 
 from vera.research.base import ResearchItem
+from vera.research.retry import RETRY_KWARGS
 from vera.research.sources.base import Source
 from vera.research.sources.rss import RSSSource
 
 logger = logging.getLogger(__name__)
 
-_RETRY_KWARGS = {
-    "stop": stop_after_attempt(3),
-    "wait": wait_exponential(multiplier=2, min=2, max=8),
-    "retry": retry_if_exception_type((httpx.HTTPError, TimeoutError)),
-    "reraise": True,
-}
+_RETRY_KWARGS = RETRY_KWARGS
 
 
 def _fin_id(title: str, source: str) -> str:

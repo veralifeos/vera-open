@@ -50,11 +50,13 @@ docs/CREATING_PACKS.md   # Como criar packs customizados
 - BYOK pattern: API keys ausentes desabilitam fontes silenciosamente
 
 ## Testes
-uv run pytest tests/ -- ~300 testes, zero chamadas externas, tudo mockado
+uv run pytest tests/ -- ~334 testes, zero chamadas externas, tudo mockado
 
 ## CLI
-- `vera briefing` — gera briefing diario
-- `vera research <pack>` — executa pack de research (--dry-run, --force, --list)
+- `vera briefing` — gera briefing diario (--weekly para review semanal)
+- `vera research <pack>` — executa pack de research (--dry-run, --force, --list, --all)
+- `vera status` — mostra saude do sistema
+- `vera bot` — inicia bot Telegram (polling, responde /status /next /help)
 - `vera validate` — valida config
 - `vera setup` — wizard interativo
 

@@ -12,13 +12,20 @@ All notable changes to Vera Open.
   - Weekly metrics: completed, open, new, zombies, briefing count
   - Structured LLM prompt: retrospective → open items → patterns → next week priorities
   - Works on any day (not just Saturday), triggered manually or via CI
+- **`vera status`** — system health dashboard showing last run, task counts, zombies, cooldowns, research pack dedup stats, and source health alerts
+- **`vera bot`** — polling-based Telegram bot that responds to commands:
+  - `/status` — system status (last run, tasks, zombies, high-mention tasks)
+  - `/next` — top 3 priority tasks (excludes zombies and cooldowns)
+  - `/help` — list available commands
 - `TasksDomain.collect_completed()` method for querying done tasks
-- 9 new tests (318 total)
+- `vera/research/retry.py` — shared retry configuration for all research HTTP calls
+- 16 new tests (334 total)
 
 ### Changed
 
 - CI daily workflow: 3 research steps → 1 (`research --all --force`)
 - CI weekly workflow: `briefing --force` → `briefing --weekly --force`
+- Research sources import `RETRY_KWARGS` from shared module (was duplicated in 3 files)
 - Version bump: 0.2.1 → 0.3.0
 
 ## [0.2.1] — 2026-03-11

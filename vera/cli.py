@@ -363,6 +363,90 @@ def _load_pack_config(pack_name: str, config) -> dict:
     return {}
 
 
+# ─── Status ──────────────────────────────────────────────────────────────────
+
+
+@app.command()
+def status() -> None:
+    """Mostra status do sistema: último run, saúde das fontes, métricas."""
+    import json
+
+    from vera.last_run import LAST_RUN_PATH
+    from vera.source_health import SourceHealthTracker
+    from vera.state import StateManager
+
+    typer.echo("=" * 50)
+    typer.echo("  VERA — Status do Sistema")
+    typer.echo("=" * 50)
+
+    # 1. Último briefing
+    typer.echo("\n  Briefing:")
+    state_mgr = StateManager()
+    state_path = state_mgr.state_path
+    if state_path.exists():
+        try:
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            last_run = state.get("last_run_date", "nunca")
+            briefing_count = state.get("briefing_count", 0)
+            mc = state.get("mention_counts", {})
+            zombies = sum(1 for v in mc.values() if v.get("count", 0) >= 8)
+            cooldowns = sum(1 for v in mc.values() if v.get("cooldown_until"))
+            typer.echo(f"    Último run: {last_run}")
+            typer.echo(f"    Briefings gerados: {briefing_count}")
+            typer.echo(f"    Tarefas rastreadas: {len(mc)}")
+            typer.echo(f"    Zombies: {zombies} | Cooldown: {cooldowns}")
+        except Exception as e:
+            typer.echo(f"    Erro ao ler state: {e}")
+    else:
+        typer.echo("    Nenhum state encontrado (primeira execução?)")
+
+    # 2. Último run (observabilidade)
+    typer.echo("\n  Última execução:")
+    if LAST_RUN_PATH.exists():
+        try:
+            last_run_data = json.loads(LAST_RUN_PATH.read_text(encoding="utf-8"))
+            for mode, info in last_run_data.items():
+                ts = info.get("timestamp", "?")[:19]
+                duration = info.get("duration_seconds", "?")
+                typer.echo(f"    [{mode}] {ts} ({duration}s)")
+                if mode == "briefing":
+                    tasks_total = info.get("tasks_total", "?")
+                    tasks_in = info.get("tasks_in_briefing", "?")
+                    llm = info.get("llm_provider", "?")
+                    typer.echo(f"      Tarefas: {tasks_in}/{tasks_total} enviadas ao LLM ({llm})")
+        except Exception as e:
+            typer.echo(f"    Erro ao ler last_run: {e}")
+    else:
+        typer.echo("    Nenhum registro de execução")
+
+    # 3. Research packs (dedup state)
+    typer.echo("\n  Research Packs:")
+    dedup_dir = Path("state/dedup")
+    if dedup_dir.exists():
+        for dedup_file in sorted(dedup_dir.glob("*.json")):
+            try:
+                dedup_data = json.loads(dedup_file.read_text(encoding="utf-8"))
+                items = dedup_data.get("items", {})
+                pack_name = dedup_file.stem
+                typer.echo(f"    [{pack_name}] {len(items)} itens no dedup")
+            except Exception:
+                typer.echo(f"    [{dedup_file.stem}] erro ao ler")
+    else:
+        typer.echo("    Nenhum pack executado ainda")
+
+    # 4. Source health
+    typer.echo("\n  Saúde das fontes:")
+    tracker = SourceHealthTracker()
+    alerts = tracker.get_alerts()
+    if alerts:
+        for source in alerts:
+            typer.echo(f"    [ALERTA] {source} — sem resultados há 3+ execuções")
+    else:
+        typer.echo("    Todas as fontes OK")
+
+    typer.echo("")
+
+
 # ─── Validate ────────────────────────────────────────────────────────────────
 
 
@@ -528,6 +612,37 @@ def _create_llm_provider(config, provider_name: str):
         raise NotImplementedError("OpenAI provider ainda não implementado. Use Claude ou Ollama.")
     else:
         raise ValueError(f"Provider '{provider_name}' não suportado")
+
+
+# ─── Bot ─────────────────────────────────────────────────────────────────────
+
+
+@app.command()
+def bot() -> None:
+    """Inicia bot Telegram (polling). Responde /status, /next, /help."""
+    from vera.config import load_config
+    from vera.integrations.telegram_bot import VeraBot
+
+    try:
+        config = load_config()
+    except (FileNotFoundError, ValueError) as e:
+        typer.echo(f"Erro ao carregar config: {e}")
+        raise typer.Exit(code=1)
+
+    bot_token = os.environ.get(config.delivery.telegram.bot_token_env, "")
+    chat_id = os.environ.get(config.delivery.telegram.chat_id_env, "")
+
+    if not bot_token or not chat_id:
+        typer.echo("TELEGRAM_BOT_TOKEN e TELEGRAM_CHAT_ID são obrigatórios.")
+        raise typer.Exit(code=1)
+
+    typer.echo("Vera Bot iniciando... (Ctrl+C para parar)")
+    vera_bot = VeraBot(bot_token, chat_id, config)
+
+    try:
+        asyncio.run(vera_bot.start())
+    except KeyboardInterrupt:
+        typer.echo("\nBot encerrado.")
 
 
 # ─── Setup ───────────────────────────────────────────────────────────────────

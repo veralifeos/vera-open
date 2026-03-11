@@ -165,3 +165,43 @@ def test_telegram_retry_sucesso():
 
     assert result is True
     assert call_count == 2
+
+
+# ─── Shared retry module ─────────────────────────────────────────────────
+
+
+def test_shared_retry_kwargs_structure():
+    """Módulo compartilhado RETRY_KWARGS tem chaves esperadas."""
+    from vera.research.retry import RETRY_KWARGS
+
+    assert "stop" in RETRY_KWARGS
+    assert "wait" in RETRY_KWARGS
+    assert "retry" in RETRY_KWARGS
+    assert "reraise" in RETRY_KWARGS
+
+
+def test_shared_retry_httpx_is_callable():
+    """retry_httpx é um decorator utilizável."""
+    from vera.research.retry import retry_httpx
+
+    assert callable(retry_httpx)
+
+
+def test_sources_use_shared_retry():
+    """Todas as sources usam RETRY_KWARGS do módulo compartilhado."""
+    from vera.research.retry import RETRY_KWARGS
+
+    # RSS
+    from vera.research.sources.rss import _RETRY_KWARGS as rss_kwargs
+
+    assert rss_kwargs is RETRY_KWARGS
+
+    # Jobs
+    from vera.research.packs.jobs.sources import _RETRY_KWARGS as jobs_kwargs
+
+    assert jobs_kwargs is RETRY_KWARGS
+
+    # Financial
+    from vera.research.packs.financial.sources import _RETRY_KWARGS as fin_kwargs
+
+    assert fin_kwargs is RETRY_KWARGS

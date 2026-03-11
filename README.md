@@ -179,7 +179,7 @@ vera-open/
 ├── config/
 │   └── config.example.yaml  # Full configuration reference
 ├── state/                   # Persisted state (gitignored in production)
-├── tests/                   # 318 tests, zero external calls
+├── tests/                   # 334 tests, zero external calls
 └── docs/
     ├── SETUP.md             # Step-by-step setup guide
     └── NOTION_TEMPLATE.md   # Database schemas
@@ -215,6 +215,8 @@ vera-open/
 | `vera briefing --dry-run` | Runs pipeline without sending Telegram or saving state |
 | `vera briefing --force` | Ignores time window guard and idempotency check |
 | `vera briefing --weekly` | Weekly review with retrospective and completion stats |
+| `vera status` | System health: last run, tasks, zombies, source alerts |
+| `vera bot` | Start Telegram bot (responds to /status, /next, /help) |
 | `vera research <pack>` | Run a research pack (news, jobs, financial) |
 | `vera research --all` | Run all packs in parallel |
 | `vera research --list` | List available research packs |
@@ -241,9 +243,10 @@ vera-open/
 **v0.3.0** (current)
 - [x] `vera research --all` — run all packs in parallel
 - [x] `vera briefing --weekly` — real weekly review with completed tasks and metrics
-- [x] CI daily workflow uses `--all` (single step instead of 3)
-- [x] CI weekly workflow uses `--weekly`
-- [x] 318 tests
+- [x] `vera status` — system health dashboard
+- [x] `vera bot` — Telegram bot with /status, /next, /help
+- [x] Consolidated retry module for research HTTP calls
+- [x] 334 tests
 
 **v0.2.1**
 - [x] Full smoke test: every pipeline bug fixed
