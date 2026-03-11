@@ -19,8 +19,13 @@ class TasksDomain(Domain):
         status_active = fields.get("status_active", ["To Do", "Doing"])
 
         # Filtro: status em qualquer dos valores ativos
+        # Notion API: campo "Status" pode ser tipo "select" ou "status"
+        # Lê o tipo do filtro do config (default: "select" para databases PT-BR)
+        filter_type = fields.get("status_filter_type", "select")
         filters = {
-            "or": [{"property": status_field, "status": {"equals": s}} for s in status_active]
+            "or": [
+                {"property": status_field, filter_type: {"equals": s}} for s in status_active
+            ]
         }
 
         sorts = [{"property": fields.get("deadline", "Deadline"), "direction": "ascending"}]

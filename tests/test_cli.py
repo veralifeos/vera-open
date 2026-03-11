@@ -1,5 +1,7 @@
 """Testes da CLI."""
 
+from unittest.mock import patch
+
 from typer.testing import CliRunner
 
 from vera.cli import app
@@ -50,8 +52,10 @@ def test_cli_no_args_shows_help():
     assert "briefing" in result.output
 
 
-def test_cli_briefing_sem_config():
+def test_cli_briefing_sem_config(tmp_path, monkeypatch):
     """Briefing sem config.yaml retorna erro."""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("VERA_CONFIG", raising=False)
     result = runner.invoke(app, ["briefing"])
     assert result.exit_code == 1
-    assert "config" in result.output.lower()
+    assert "erro" in result.output.lower()

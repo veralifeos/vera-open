@@ -17,8 +17,9 @@ def test_detect_timezone():
     assert "/" in tz  # formato IANA
 
 
-def test_notion_discovery_sem_token():
+def test_notion_discovery_sem_token(monkeypatch):
     """Auto-discovery retorna lista vazia sem token válido."""
+    monkeypatch.delenv("NOTION_TOKEN", raising=False)
     result = _try_notion_discovery("")
     assert result == []
 

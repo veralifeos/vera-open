@@ -1,5 +1,7 @@
 """Telegram integration — envio de mensagens com chunking e fallback de 3 niveis."""
 
+import os
+import ssl
 import sys
 from datetime import datetime, timezone
 
@@ -56,7 +58,13 @@ async def enviar_telegram(mensagem: str, bot_token: str, chat_id: str) -> bool:
     base_url = TELEGRAM_API.format(token=bot_token)
     chunks = _chunkar_mensagem(mensagem)
 
-    async with aiohttp.ClientSession() as session:
+    # SSL: desabilita verificação se VERA_SSL_VERIFY=0 (proxy/antivírus local)
+    ssl_context: ssl.SSLContext | bool | None = None
+    if os.environ.get("VERA_SSL_VERIFY", "1") == "0":
+        ssl_context = False
+
+    connector = aiohttp.TCPConnector(ssl=ssl_context) if ssl_context is False else None
+    async with aiohttp.ClientSession(connector=connector) as session:
         for i, chunk in enumerate(chunks):
             url = f"{base_url}/sendMessage"
             payload = {

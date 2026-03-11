@@ -6,6 +6,12 @@ import os
 from pathlib import Path
 
 import typer
+from dotenv import load_dotenv
+
+# Carrega .env automaticamente (busca no cwd e diretório pai)
+# encoding="utf-8-sig" ignora BOM se presente (comum em Windows)
+load_dotenv(encoding="utf-8-sig")
+load_dotenv(Path("config/.env"), encoding="utf-8-sig")
 
 from vera import __version__
 
@@ -357,7 +363,9 @@ def validate() -> None:
 
             async def _test_telegram():
                 url = f"https://api.telegram.org/bot{tg_token}/getMe"
-                async with aiohttp.ClientSession() as session:
+                ssl_ctx = False if os.environ.get("VERA_SSL_VERIFY", "1") == "0" else None
+                connector = aiohttp.TCPConnector(ssl=ssl_ctx) if ssl_ctx is False else None
+                async with aiohttp.ClientSession(connector=connector) as session:
                     async with session.get(url) as resp:
                         data = await resp.json()
                         return data
