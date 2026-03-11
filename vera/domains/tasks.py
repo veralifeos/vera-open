@@ -92,6 +92,32 @@ class TasksDomain(Domain):
             "categoria": categoria,
         }
 
+    async def collect_completed(self) -> list[dict]:
+        """Coleta tarefas concluídas do backend (para weekly review)."""
+        fields = self.config.get("fields", {})
+        status_field = fields.get("status", "Status")
+        status_done = fields.get("status_done", ["Done", "Concluído"])
+        filter_type = fields.get("status_filter_type", "select")
+
+        filters = {
+            "or": [
+                {"property": status_field, filter_type: {"equals": s}} for s in status_done
+            ]
+        }
+
+        collection_id = self.config.get("collection", "")
+        if not collection_id:
+            return []
+
+        records = await self.backend.query(
+            collection_id=collection_id,
+            filters=filters,
+            sorts=[{"timestamp": "last_edited_time", "direction": "descending"}],
+            max_pages=1,
+        )
+
+        return [self._parse_tarefa(r) for r in records]
+
     def analyze(self, data: dict) -> dict:
         """Analisa tarefas: atrasadas, por prioridade, score."""
         tarefas = data.get("tarefas", [])

@@ -238,3 +238,40 @@ def test_contacts_sem_collection():
     domain = ContactsDomain({"collection": "", "fields": {}}, backend)
     result = asyncio.run(domain.collect())
     assert result == {"contatos": []}
+
+
+# ─── Testes do collect_completed ────────────────────────────────────────
+
+
+def test_tasks_collect_completed_sem_collection():
+    """Retorna lista vazia se collection não configurada."""
+    backend = MockBackend()
+    config = {"collection": "", "fields": {"status_done": ["Done"]}}
+    domain = TasksDomain(config, backend)
+    result = asyncio.run(domain.collect_completed())
+    assert result == []
+
+
+def test_tasks_collect_completed_com_dados():
+    """Coleta tarefas concluídas."""
+    records = [
+        _task_record("Concluída 1", "Done", "2026-03-05"),
+        _task_record("Concluída 2", "Done"),
+    ]
+    backend = MockBackend(records)
+    config = {
+        "collection": "db123",
+        "fields": {
+            "title": "Name",
+            "status": "Status",
+            "priority": "Prioridade",
+            "deadline": "Deadline",
+            "category": "Tipo",
+            "status_done": ["Done"],
+        },
+    }
+    domain = TasksDomain(config, backend)
+    result = asyncio.run(domain.collect_completed())
+    assert len(result) == 2
+    assert result[0]["titulo"] == "Concluída 1"
+    assert result[0]["status"] == "Done"

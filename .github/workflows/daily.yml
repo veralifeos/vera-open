@@ -42,18 +42,11 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Research — News
-        run: uv run python -m vera research news --force 2>&1 || true
-
-      - name: Research — Jobs
-        run: uv run python -m vera research jobs --force 2>&1 || true
+      - name: Research — All packs
+        run: uv run python -m vera research --all --force 2>&1 || true
         env:
           JOOBLE_API_KEY: ${{ secrets.JOOBLE_API_KEY }}
           RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
-
-      - name: Research — Financial
-        run: uv run python -m vera research financial --force 2>&1 || true
-        env:
           FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
           COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
 

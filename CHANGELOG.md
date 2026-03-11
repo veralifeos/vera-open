@@ -2,6 +2,25 @@
 
 All notable changes to Vera Open.
 
+## [0.3.0] — 2026-03-11
+
+### Added
+
+- **`vera research --all`** — runs all available research packs in parallel via `asyncio.gather`. One pack failure doesn't block others. CI daily workflow now uses a single step instead of three.
+- **`vera briefing --weekly`** — dedicated weekly review mode with:
+  - Completed task collection from Notion (cross-referenced with state for recency)
+  - Weekly metrics: completed, open, new, zombies, briefing count
+  - Structured LLM prompt: retrospective → open items → patterns → next week priorities
+  - Works on any day (not just Saturday), triggered manually or via CI
+- `TasksDomain.collect_completed()` method for querying done tasks
+- 9 new tests (318 total)
+
+### Changed
+
+- CI daily workflow: 3 research steps → 1 (`research --all --force`)
+- CI weekly workflow: `briefing --force` → `briefing --weekly --force`
+- Version bump: 0.2.1 → 0.3.0
+
 ## [0.2.1] — 2026-03-11
 
 Full smoke test: every bug found in the end-to-end pipeline was fixed in this release.

@@ -53,8 +53,11 @@ def briefing(
     dry_run: bool = typer.Option(
         False, "--dry-run", help="Executa sem enviar Telegram nem gravar state."
     ),
+    weekly: bool = typer.Option(
+        False, "--weekly", "-w", help="Relatório semanal com retrospectiva e métricas."
+    ),
 ) -> None:
-    """Gera e envia o briefing diário."""
+    """Gera e envia o briefing diário (ou semanal com --weekly)."""
     from vera.config import load_config
     from vera.modes.briefing import run
 
@@ -82,7 +85,7 @@ def briefing(
     effective_dry_run = dry_run or config.debug.dry_run
 
     try:
-        resultado = run(config, backend, llm, force=force, dry_run=effective_dry_run)
+        resultado = run(config, backend, llm, force=force, dry_run=effective_dry_run, weekly=weekly)
 
         # Envia no Telegram se nao dry_run
         if resultado and not effective_dry_run:
@@ -101,11 +104,12 @@ def briefing(
 @app.command()
 def research(
     pack: str = typer.Argument(
-        None, help="Nome do pack (news, jobs, financial). Omitir com --list."
+        None, help="Nome do pack (news, jobs, financial). Omitir com --list ou --all."
     ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Executa sem gravar state."),
     force: bool = typer.Option(False, "--force", "-f", help="Ignorar dedup."),
     list_packs: bool = typer.Option(False, "--list", help="Listar packs disponíveis."),
+    all_packs: bool = typer.Option(False, "--all", help="Executar todos os packs em paralelo."),
 ) -> None:
     """Executa um Research Pack (news, jobs, financial)."""
     from vera.research.registry import registry
@@ -125,8 +129,55 @@ def research(
             typer.echo("Nenhum pack disponível.")
         return
 
+    if all_packs:
+        available = registry.list_available()
+        if not available:
+            typer.echo("Nenhum pack disponível.")
+            raise typer.Exit(code=1)
+
+        from vera.config import load_config
+
+        try:
+            config = load_config()
+        except (FileNotFoundError, ValueError) as e:
+            typer.echo(f"Erro ao carregar config: {e}")
+            raise typer.Exit(code=1)
+
+        try:
+            llm = _create_llm_provider(config, config.llm.default)
+        except Exception as e:
+            typer.echo(f"Erro ao criar LLM provider: {e}")
+            raise typer.Exit(code=1)
+
+        try:
+            results = asyncio.run(
+                _run_all_research_packs(
+                    available, registry, config, llm, dry_run=dry_run, force=force
+                )
+            )
+
+            typer.echo(f"\n{'=' * 40}")
+            typer.echo("RESEARCH — Resumo")
+            typer.echo(f"{'=' * 40}")
+            for pack_name, result in results.items():
+                if isinstance(result, Exception):
+                    typer.echo(f"  {pack_name}: ERRO — {result}")
+                elif result:
+                    typer.echo(
+                        f"  {result.pack_name}: {result.new_count} novos de "
+                        f"{result.total_checked} verificados"
+                    )
+                    if result.sources_failed:
+                        typer.echo(f"    Fontes com erro: {result.sources_failed}")
+                else:
+                    typer.echo(f"  {pack_name}: sem resultados")
+        except Exception as e:
+            typer.echo(f"Erro ao executar packs: {e}")
+            raise typer.Exit(code=1)
+        return
+
     if not pack:
-        typer.echo("Especifique um pack ou use --list. Ex: vera research news")
+        typer.echo("Especifique um pack, use --list ou --all. Ex: vera research news")
         raise typer.Exit(code=1)
 
     pack_cls = registry.get(pack)
@@ -264,6 +315,26 @@ async def _run_research_pack(pack_cls, pack_config, llm, dry_run=False, force=Fa
         timestamp=datetime.now(timezone.utc),
         synthesis=synthesis_text,
     )
+
+
+async def _run_all_research_packs(available, registry, config, llm, dry_run=False, force=False):
+    """Executa todos os packs disponíveis em paralelo."""
+    coros = {}
+    for pack_name in available:
+        pack_cls = registry.get(pack_name)
+        if not pack_cls:
+            continue
+        pack_config = _load_pack_config(pack_name, config)
+        coros[pack_name] = _run_research_pack(
+            pack_cls, pack_config, llm, dry_run=dry_run, force=force
+        )
+
+    results = {}
+    gathered = await asyncio.gather(*coros.values(), return_exceptions=True)
+    for pack_name, result in zip(coros.keys(), gathered):
+        results[pack_name] = result
+
+    return results
 
 
 def _load_pack_config(pack_name: str, config) -> dict:

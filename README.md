@@ -179,7 +179,7 @@ vera-open/
 ├── config/
 │   └── config.example.yaml  # Full configuration reference
 ├── state/                   # Persisted state (gitignored in production)
-├── tests/                   # 309 tests, zero external calls
+├── tests/                   # 318 tests, zero external calls
 └── docs/
     ├── SETUP.md             # Step-by-step setup guide
     └── NOTION_TEMPLATE.md   # Database schemas
@@ -214,7 +214,9 @@ vera-open/
 | `vera briefing` | Full briefing pipeline (respects time window) |
 | `vera briefing --dry-run` | Runs pipeline without sending Telegram or saving state |
 | `vera briefing --force` | Ignores time window guard and idempotency check |
+| `vera briefing --weekly` | Weekly review with retrospective and completion stats |
 | `vera research <pack>` | Run a research pack (news, jobs, financial) |
+| `vera research --all` | Run all packs in parallel |
 | `vera research --list` | List available research packs |
 | `vera research <pack> --dry-run` | Run without saving dedup state |
 
@@ -236,13 +238,19 @@ vera-open/
 
 ## Roadmap
 
-**v0.2.1** (current)
+**v0.3.0** (current)
+- [x] `vera research --all` — run all packs in parallel
+- [x] `vera briefing --weekly` — real weekly review with completed tasks and metrics
+- [x] CI daily workflow uses `--all` (single step instead of 3)
+- [x] CI weekly workflow uses `--weekly`
+- [x] 318 tests
+
+**v0.2.1**
 - [x] Full smoke test: every pipeline bug fixed
 - [x] Keyword-only scoring when embedder unavailable
 - [x] GitHub Actions CI fully green
 - [x] `.env` auto-loading with BOM handling
 - [x] SSL bypass for local dev (`VERA_SSL_VERIFY=0`)
-- [x] 309 tests
 
 **v0.2.0**
 - [x] Research Pack framework (modular, extensible)

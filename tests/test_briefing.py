@@ -14,6 +14,7 @@ from vera.modes.briefing import (
     montar_contexto,
     montar_contexto_domingo,
     montar_contexto_sabado,
+    montar_contexto_weekly,
     run_async,
     score_tarefa,
     verificar_janela_horario,
@@ -376,3 +377,101 @@ def test_run_async_idempotente(tmp_path):
             result = asyncio.run(run_async(config, backend, llm, force=False, dry_run=True))
 
     assert result is None  # Abortou por idempotência
+
+
+# ─── Weekly review ────────────────────────────────────────────────────────
+
+
+def test_montar_contexto_weekly_basico():
+    """Contexto weekly contém seções esperadas."""
+    tarefas = [_tarefa("t1", "Tarefa Aberta", deadline="2026-03-10")]
+    completed = [_tarefa("t2", "Tarefa Concluída")]
+    delta = {"novas": ["Nova"], "pioraram": [], "em_cooldown": [], "zombies": []}
+    ctx = montar_contexto_weekly(
+        tarefas, completed, delta, [], {}, {}, "2026-03-07", 5
+    )
+    assert "Relatório Semanal" in ctx
+    assert "CONCLUÍDAS RECENTEMENTE" in ctx
+    assert "Tarefa Concluída" in ctx
+    assert "ABERTAS PRIORITÁRIAS" in ctx
+    assert "Tarefa Aberta" in ctx
+    assert "MÉTRICAS DA SEMANA" in ctx
+    assert "Briefings gerados: 5" in ctx
+
+
+def test_montar_contexto_weekly_sem_concluidas():
+    """Weekly sem concluídas não mostra seção."""
+    tarefas = [_tarefa("t1", "Aberta")]
+    delta = {"novas": [], "pioraram": [], "em_cooldown": [], "zombies": []}
+    ctx = montar_contexto_weekly(tarefas, [], delta, [], {}, {}, "2026-03-07", 3)
+    assert "CONCLUÍDAS" not in ctx
+    assert "Concluídas: 0" in ctx
+
+
+def test_montar_contexto_weekly_com_zombies():
+    """Weekly mostra zombies."""
+    zombies = [{"titulo": "Zumbi", "count": 9, "first_seen": "2026-02-01"}]
+    delta = {"novas": [], "pioraram": [], "em_cooldown": [], "zombies": []}
+    ctx = montar_contexto_weekly([], [], delta, zombies, {}, {}, "2026-03-07", 2)
+    assert "ZUMBIS" in ctx
+    assert "Zumbi" in ctx
+
+
+def test_gerar_briefing_weekly():
+    """Gera briefing weekly com prompt específico."""
+    llm = MockLLM()
+    config = _minimal_config()
+    result = asyncio.run(
+        gerar_briefing(llm, "system", "contexto", 5, "VERA — Semanal", config, weekly=True)
+    )
+    assert "VERA" in result
+
+
+def test_run_async_weekly_mode(tmp_path):
+    """Pipeline completo em modo weekly."""
+    config = _minimal_config()
+
+    task_records = [
+        {
+            "id": "t1",
+            "properties": {
+                "Name": {"type": "title", "title": [{"plain_text": "Tarefa Ativa"}]},
+                "Status": {"type": "select", "select": {"name": "To Do"}},
+                "Prioridade": {"type": "select", "select": {"name": "Alta"}},
+                "Deadline": {"type": "date", "date": {"start": "2026-03-10"}},
+                "Tipo": {"type": "select", "select": None},
+            },
+        }
+    ]
+    backend = MockBackend(task_records)
+    llm = MockLLM()
+
+    with patch("vera.modes.briefing.StateManager") as MockState:
+        mock_mgr = MagicMock()
+        mock_mgr.load.return_value = {
+            "last_run_date": None,
+            "last_payload_hash": None,
+            "mention_counts": {"t1": {"count": 3, "first_seen": "2026-03-01", "last_seen": "2026-03-06"}},
+            "last_snapshot": {},
+            "briefing_count": 5,
+        }
+        mock_mgr.compute_hash.return_value = "abc123"
+        mock_mgr.is_duplicate.return_value = False
+        mock_mgr.compute_delta.return_value = {
+            "novas": [],
+            "pioraram": [],
+            "removidas": [],
+            "zombies": [],
+            "em_cooldown": [],
+        }
+        mock_mgr.update_mention_counts.return_value = mock_mgr.load.return_value
+        mock_mgr.build_snapshot.return_value = {}
+        MockState.return_value = mock_mgr
+
+        with patch("vera.modes.briefing.verificar_janela_horario", return_value=True):
+            result = asyncio.run(
+                run_async(config, backend, llm, force=True, dry_run=True, weekly=True)
+            )
+
+    assert result is not None
+    assert "VERA" in result

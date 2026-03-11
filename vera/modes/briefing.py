@@ -321,6 +321,74 @@ def montar_contexto_domingo(
     return ctx
 
 
+def montar_contexto_weekly(
+    tarefas_rankeadas: list[dict],
+    completed_tasks: list[dict],
+    delta: dict,
+    zombies: list[dict],
+    domain_contexts: dict[str, str],
+    mention_counts: dict,
+    today: str,
+    briefing_count: int,
+) -> str:
+    """Contexto para weekly review — inclui tarefas concluídas e métricas."""
+    mc = mention_counts
+
+    ctx = f"DATA: {today} (Relatório Semanal)\n\n"
+
+    # Concluídas
+    if completed_tasks:
+        ctx += f"=== CONCLUÍDAS RECENTEMENTE ({len(completed_tasks)}) ===\n"
+        for t in completed_tasks[:10]:
+            cat = f" [{t['categoria']}]" if t.get("categoria") else ""
+            ctx += f"- {t['titulo']}{cat}\n"
+        if len(completed_tasks) > 10:
+            ctx += f"  ... e mais {len(completed_tasks) - 10}\n"
+        ctx += "\n"
+
+    # Abertas
+    if tarefas_rankeadas:
+        ctx += f"=== ABERTAS PRIORITÁRIAS ({len(tarefas_rankeadas)}) ===\n"
+        for t in tarefas_rankeadas[:10]:
+            count = mc.get(t["id"], {}).get("count", 0)
+            mc_str = f" ({count}x)" if count >= 2 else ""
+            dl = f" | deadline: {t['deadline']}" if t.get("deadline") else ""
+            prio = f" | {t['prioridade']}" if t.get("prioridade") else ""
+            ctx += f"- {t['titulo']}{mc_str}{dl}{prio}\n"
+        ctx += "\n"
+
+    # Novas da semana
+    if delta.get("novas"):
+        ctx += "=== ENTRARAM NO RADAR ===\n"
+        ctx += "\n".join(f"- {n}" for n in delta["novas"][:5]) + "\n\n"
+
+    # Zombies
+    if zombies:
+        ctx += f"=== ZUMBIS ({len(zombies)}) ===\n"
+        for z in zombies[:5]:
+            ctx += f"- {z['titulo']} — {z['count']}x desde {z['first_seen']}\n"
+        ctx += "\n"
+
+    # Métricas
+    ctx += "=== MÉTRICAS DA SEMANA ===\n"
+    ctx += f"- Concluídas: {len(completed_tasks)}\n"
+    ctx += f"- Abertas: {len(tarefas_rankeadas)}\n"
+    ctx += f"- Novas: {len(delta.get('novas', []))}\n"
+    ctx += f"- Zumbis: {len(zombies)}\n"
+    ctx += f"- Briefings gerados: {briefing_count}\n"
+
+    # Domínios
+    for domain_name, domain_ctx in domain_contexts.items():
+        if domain_ctx.strip():
+            ctx += f"\n{domain_ctx}\n"
+
+    hist = history_prompt()
+    if hist:
+        ctx += f"\n{hist}"
+
+    return ctx
+
+
 # ─── Geração via LLM ────────────────────────────────────────────────────────
 
 _DIAS_SEMANA = {
@@ -373,10 +441,34 @@ async def gerar_briefing(
     dia_num: int,
     cabecalho: str,
     config: VeraConfig,
+    weekly: bool = False,
 ) -> str:
     """Gera briefing via LLM."""
 
-    if dia_num == 5:
+    if weekly:
+        user_prompt = f"""INSTRUÇÃO: Gere um relatório semanal completo.
+
+ESTRUTURA:
+1. RETROSPECTIVA — O que foi concluído esta semana. Reconheça o progresso real, sem elogios genéricos.
+2. PENDÊNCIAS — O que ficou aberto e por que importa na próxima semana.
+3. PADRÕES — Uma observação cirúrgica sobre tendências (ritmo, procrastinação, temas recorrentes).
+4. PRÓXIMA SEMANA — 3 prioridades concretas para segunda-feira, baseadas nos dados.
+
+REGRAS:
+- Máximo 500 palavras. Prosa corrida, bullets em listas de 3+ itens.
+- Tom analítico e honesto — nem punitivo nem motivacional.
+- Baseie toda análise nos dados fornecidos. Não invente.
+- Zumbis: mencione com tom de decisão ("precisa de uma decisão"), não cobrança.
+- Termine com o que vai determinar se a próxima semana foi boa ou não.
+{_REGRAS_TOM}
+
+CONTEXTO:
+{contexto}
+
+Gere o relatório começando com:
+{cabecalho}"""
+
+    elif dia_num == 5:
         # Sábado: retrospectiva
         user_prompt = f"""INSTRUÇÃO: É sábado. Gere um relatório semanal honesto.
 Estrutura:
@@ -463,6 +555,7 @@ async def run_async(
     llm: LLMProvider,
     force: bool = False,
     dry_run: bool = False,
+    weekly: bool = False,
 ) -> str | None:
     """Pipeline completo do briefing (async)."""
     tz = ZoneInfo(config.timezone)
@@ -470,10 +563,14 @@ async def run_async(
     hoje = agora.strftime("%Y-%m-%d")
     dia_num = agora.weekday()
 
-    cabecalho = f"VERA — {_DIAS_SEMANA[dia_num]}, {agora.day}/{_MESES[agora.month]}"
+    if weekly:
+        cabecalho = f"VERA — Relatório Semanal, {agora.day}/{_MESES[agora.month]}"
+    else:
+        cabecalho = f"VERA — {_DIAS_SEMANA[dia_num]}, {agora.day}/{_MESES[agora.month]}"
 
+    mode_label = "Weekly Review" if weekly else "Briefing"
     print("=" * 60)
-    print("   VERA v0.2 — Briefing")
+    print(f"   VERA v0.2 — {mode_label}")
     print("=" * 60)
     print(f"   {agora.strftime('%d/%m/%Y %H:%M')} ({config.timezone})")
 
@@ -595,6 +692,18 @@ async def run_async(
     tarefas_rankeadas = filtrar_e_rankear(tarefas, state, delta)
     print(f"   {len(tarefas_rankeadas)} tarefas enviadas ao LLM")
 
+    # Weekly: coleta tarefas concluídas
+    completed_tasks: list[dict] = []
+    if weekly and "tasks" in domain_instances:
+        print("\n   Coletando tarefas concluídas...")
+        try:
+            all_done = await domain_instances["tasks"].collect_completed()
+            # Filtra: só as que estavam no mention_counts (foram briefadas recentemente)
+            completed_tasks = [t for t in all_done if t["id"] in mention_counts]
+            print(f"   [weekly] {len(completed_tasks)} concluídas recentemente (de {len(all_done)} done)")
+        except Exception as e:
+            print(f"   [weekly] Erro ao coletar concluídas: {e}")
+
     # Research Packs (RADAR section)
     research_ctx = ""
     if _research_habilitado(config):
@@ -613,8 +722,19 @@ async def run_async(
     if research_ctx:
         domain_contexts["_research"] = research_ctx
 
-    # Monta contexto por dia da semana
-    if dia_num == 5:
+    # Monta contexto por dia da semana (weekly override)
+    if weekly:
+        contexto = montar_contexto_weekly(
+            tarefas_rankeadas,
+            completed_tasks,
+            delta,
+            zombies,
+            domain_contexts,
+            mention_counts,
+            hoje,
+            state.get("briefing_count", 0),
+        )
+    elif dia_num == 5:
         contexto = montar_contexto_sabado(
             tarefas_rankeadas,
             delta,
@@ -654,6 +774,7 @@ async def run_async(
         dia_num,
         cabecalho,
         config,
+        weekly=weekly,
     )
 
     print("\n" + "=" * 60)
@@ -847,6 +968,9 @@ def run(
     llm: LLMProvider,
     force: bool = False,
     dry_run: bool = False,
+    weekly: bool = False,
 ) -> str | None:
     """Entrypoint sincrono."""
-    return asyncio.run(run_async(config, backend, llm, force=force, dry_run=dry_run))
+    return asyncio.run(
+        run_async(config, backend, llm, force=force, dry_run=dry_run, weekly=weekly)
+    )
