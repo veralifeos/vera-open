@@ -106,6 +106,17 @@ domains:
       type: "Tipo"
       last_interaction: "Última Interação"
 
+  check_semanal:
+    enabled: false
+    collection: ""             # Your Check Semanal database ID
+    fields:
+      semana: "Semana"         # Title field, ex: "S11 (10-16 mar)"
+      energia: "Energia"       # Number 0-10
+      vida_pratica: "Vida Pratica"  # Number 0-10
+      carreira: "Carreira"     # Number 0-10
+      sanidade: "Sanidade"     # Number 0-10
+      highlight: "Highlight"   # Rich text
+
   # Future domains (not yet implemented):
   # health:
   #   enabled: false

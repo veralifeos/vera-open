@@ -238,20 +238,28 @@ def montar_contexto_sabado(
     """Contexto específico para retrospectiva de sábado."""
     mc = mention_counts
 
+    # Numeros primeiro (sabado analitico)
+    total_abertas = len(tarefas_rankeadas)
+    zombies_fmt = f"{len(zombies)} tarefas zumbi" if zombies else "sem zumbis"
+    novas = len(delta.get("novas", []))
+
+    ctx = (
+        f"DATA: {today} (Sábado — retrospectiva analítica)\n\n"
+        f"=== NÚMEROS DA SEMANA ===\n"
+        f"- Abertas: {total_abertas}\n"
+        f"- Novas: {novas}\n"
+        f"- Zumbis: {zombies_fmt}\n"
+    )
+
     top_abertas = []
     for t in tarefas_rankeadas[:5]:
         count = mc.get(t["id"], {}).get("count", 0)
         mc_str = f" ({count}x)" if count >= 2 else ""
         top_abertas.append(f"{t['titulo']}{mc_str}")
 
-    zombies_fmt = f"{len(zombies)} tarefas zumbi" if zombies else "sem zumbis"
-
-    ctx = (
-        f"DATA: {today} (Sábado — retrospectiva semanal)\n\n"
-        f"ABERTAS PRIORITÁRIAS ({len(tarefas_rankeadas)}):\n"
-        + ("\n".join(f"- {t}" for t in top_abertas) if top_abertas else "- Nenhuma")
-        + f"\n\nZUMBIS: {zombies_fmt}"
-    )
+    if top_abertas:
+        ctx += f"\nABERTAS PRIORITÁRIAS:\n"
+        ctx += "\n".join(f"- {t}" for t in top_abertas)
 
     # Domínios
     for domain_name, domain_ctx in domain_contexts.items():
@@ -277,6 +285,16 @@ def montar_contexto_domingo(
     hoje_date = datetime.strptime(today, "%Y-%m-%d").date()
     proxima_semana = hoje_date + timedelta(days=7)
 
+    # Detecta carga reduzida do Check Semanal
+    carga_reduzida = False
+    for domain_ctx in domain_contexts.values():
+        if "CARGA REDUZIDA" in domain_ctx:
+            carga_reduzida = True
+            break
+
+    max_prioridades = 2 if carga_reduzida else 3
+    max_lista = 5
+
     urgentes_semana = []
     deadlines_count = 0
     for t in tarefas_rankeadas:
@@ -299,14 +317,25 @@ def montar_contexto_domingo(
             except (ValueError, TypeError):
                 pass
         urgentes_semana.append(f"{t['titulo']}{mc_str}{dl_str}")
-        if len(urgentes_semana) >= 5:
+        if len(urgentes_semana) >= max_lista:
             break
+
+    prioridades_label = f"{max_prioridades} PRIORIDADES" if carga_reduzida else "TOP 5 PRIORIDADES"
 
     ctx = (
         f"DATA: {today} (Domingo — planejamento estratégico)\n\n"
         f"SEMANA QUE VEM: {deadlines_count} deadlines | "
         f"{len(tarefas_rankeadas)} tarefas abertas | {len(zombies)} zumbis\n\n"
-        f"TOP 5 PRIORIDADES:\n"
+    )
+
+    if carga_reduzida:
+        ctx += (
+            f"ALERTA: Check Semanal com media < 5. "
+            f"Reduzir carga: {max_prioridades} prioridades em vez de 3. Sugerir descanso.\n\n"
+        )
+
+    ctx += (
+        f"{prioridades_label}:\n"
         + ("\n".join(f"- {t}" for t in urgentes_semana) if urgentes_semana else "- Nenhuma urgente")
     )
 
@@ -470,15 +499,21 @@ Gere o relatório começando com:
 
     elif dia_num == 5:
         # Sábado: retrospectiva
-        user_prompt = f"""INSTRUÇÃO: É sábado. Gere um relatório semanal honesto.
+        user_prompt = f"""INSTRUÇÃO: É sábado. Gere uma retrospectiva analítica.
 Estrutura:
-1. O que ficou aberto e por que importa na semana que vem
-2. Uma observação cirúrgica sobre o padrão da semana
-3. Encerramento que prepare o domingo
+1. Números primeiro: abertas vs fechadas, funil de vagas, Check Semanal com interpretação
+2. Se há Check Semanal no contexto, interprete as dimensões:
+   - 0-3: vermelho, precisa de atenção
+   - 4-6: amarelo, funcional mas não ideal
+   - 7-10: verde, semana boa nessa dimensão
+   - Compare com semana anterior se disponível (tendência subindo/descendo)
+   - Cruze dimensões quando relevante (ex: energia baixa + carreira alta = forçando)
+3. Uma observação cirúrgica sobre o padrão da semana
+4. Encerramento que prepare o domingo
 
 REGRAS:
 - Máximo 400 palavras. Prosa corrida.
-- Tom analítico com pitada de ironia — não punitivo
+- Tom analítico, dados primeiro, análise de tendência, não cobrança
 - Sem despedidas genéricas
 {_REGRAS_TOM}
 
@@ -493,12 +528,14 @@ Gere o relatório começando com:
         user_prompt = f"""INSTRUÇÃO: É domingo. Dia de planejamento estratégico, não de cobrança.
 Estrutura obrigatória:
 1. Panorama da semana: quantos deadlines, follow-ups pendentes
-2. Sugira 3 prioridades concretas pra segunda-feira (baseadas nos dados)
-3. Encerra com o que vai determinar se a semana foi boa ou não
+2. Se o contexto indica CARGA REDUZIDA (Check Semanal média < 5): sugira apenas 2 prioridades e sugira descanso
+3. Caso contrário: sugira 3 prioridades concretas pra segunda-feira (baseadas nos dados)
+4. Encerra com o que vai determinar se a semana foi boa ou não
 
 REGRAS:
 - Máximo 350 palavras. Tom estratégico, não motivacional.
 - Sem "você consegue!" ou elogios genéricos.
+- Se Check Semanal está baixo, não ignore: reduza carga explicitamente.
 {_REGRAS_TOM}
 
 CONTEXTO:

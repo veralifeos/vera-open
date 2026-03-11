@@ -227,11 +227,14 @@ def test_montar_contexto_domain_contexts():
 
 
 def test_montar_contexto_sabado():
-    """Contexto de sábado tem formato específico."""
+    """Contexto de sábado tem formato analítico."""
     tarefas = [_tarefa("t1", "Tarefa 1")]
-    ctx = montar_contexto_sabado(tarefas, {"novas": []}, [], {}, {}, "2026-03-07")
+    ctx = montar_contexto_sabado(tarefas, {"novas": ["Nova"]}, [], {}, {}, "2026-03-07")
     assert "Sábado" in ctx
-    assert "retrospectiva" in ctx.lower()
+    assert "analítica" in ctx.lower()
+    assert "NÚMEROS DA SEMANA" in ctx
+    assert "Abertas: 1" in ctx
+    assert "Novas: 1" in ctx
 
 
 def test_montar_contexto_domingo():
@@ -240,6 +243,26 @@ def test_montar_contexto_domingo():
     ctx = montar_contexto_domingo(tarefas, [], {}, {}, "2026-03-08")
     assert "Domingo" in ctx
     assert "planejamento" in ctx.lower()
+    assert "TOP 5 PRIORIDADES" in ctx
+
+
+def test_montar_contexto_domingo_carga_reduzida():
+    """Domingo com Check Semanal baixo reduz prioridades."""
+    tarefas = [_tarefa("t1", "Tarefa 1", deadline="2026-03-10")]
+    domain_contexts = {"check_semanal": "=== CHECK SEMANAL ===\n- CARGA REDUZIDA: media < 5"}
+    ctx = montar_contexto_domingo(tarefas, [], domain_contexts, {}, "2026-03-08")
+    assert "2 PRIORIDADES" in ctx
+    assert "ALERTA" in ctx
+    assert "descanso" in ctx.lower()
+
+
+def test_montar_contexto_domingo_sem_carga_reduzida():
+    """Domingo sem Check baixo mantém 3 prioridades."""
+    tarefas = [_tarefa("t1", "Tarefa 1", deadline="2026-03-10")]
+    domain_contexts = {"check_semanal": "=== CHECK SEMANAL ===\n- Media: 7.0/10"}
+    ctx = montar_contexto_domingo(tarefas, [], domain_contexts, {}, "2026-03-08")
+    assert "TOP 5 PRIORIDADES" in ctx
+    assert "CARGA REDUZIDA" not in ctx
 
 
 # ─── Persona / system prompt ────────────────────────────────────────────────
