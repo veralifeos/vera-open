@@ -92,6 +92,7 @@ Vera works with any Notion setup as long as you have a Tasks database. If you're
 | **Tasks** | To-do list with status, priority, deadline | Yes |
 | **Pipeline** | Opportunities, applications, deals | No |
 | **Contacts** | People and relationship tracking | No |
+| **Check Semanal** | Weekly self-assessment (0-10 scores) | No |
 | **Health** | Exercise, sleep, mood logs | No |
 | **Finances** | Income and expenses | No |
 | **Learning** | Courses, books, articles | No |
@@ -155,7 +156,7 @@ vera-open/
 ├── vera/                    # Core package
 │   ├── backends/            # StorageBackend ABC + NotionBackend
 │   ├── llm/                 # LLMProvider ABC + Claude + Ollama
-│   ├── domains/             # Domain ABC + Tasks, Pipeline, Contacts
+│   ├── domains/             # Domain ABC + Tasks, Pipeline, Contacts, CheckSemanal
 │   ├── modes/               # Briefing pipeline (collect → analyze → generate)
 │   ├── integrations/        # Telegram, Google Calendar
 │   ├── config.py            # Pydantic models + YAML loader
@@ -169,7 +170,7 @@ vera-open/
 │       ├── base.py          # ResearchPack ABC, ResearchItem, ResearchResult
 │       ├── sources/         # Source ABC + RSSSource + APISource
 │       ├── scoring.py       # Keywords + embeddings + LLM scoring
-│       ├── dedup.py         # TTL-based deduplication
+│       ├── dedup.py         # TTL-based deduplication (30-day TTL)
 │       ├── synthesis.py     # LLM summarization by topic
 │       ├── registry.py      # Pack auto-discovery
 │       └── packs/           # news/, jobs/, financial/
@@ -179,7 +180,7 @@ vera-open/
 ├── config/
 │   └── config.example.yaml  # Full configuration reference
 ├── state/                   # Persisted state (gitignored in production)
-├── tests/                   # 334 tests, zero external calls
+├── tests/                   # 359 tests, zero external calls
 └── docs/
     ├── SETUP.md             # Step-by-step setup guide
     └── NOTION_TEMPLATE.md   # Database schemas
@@ -217,6 +218,7 @@ vera-open/
 | `vera briefing --weekly` | Weekly review with retrospective and completion stats |
 | `vera status` | System health: last run, tasks, zombies, source alerts |
 | `vera bot` | Start Telegram bot (responds to /status, /next, /help) |
+| `vera feedback` | Analyze briefing accuracy (`--save` to persist results) |
 | `vera research <pack>` | Run a research pack (news, jobs, financial) |
 | `vera research --all` | Run all packs in parallel |
 | `vera research --list` | List available research packs |
@@ -245,8 +247,12 @@ vera-open/
 - [x] `vera briefing --weekly` — real weekly review with completed tasks and metrics
 - [x] `vera status` — system health dashboard
 - [x] `vera bot` — Telegram bot with /status, /next, /help
+- [x] `vera feedback` — briefing accuracy analysis with --save
+- [x] Check Semanal domain (numbers 0-10, trend analysis, load reduction)
+- [x] Saturday analytic retrospective with Check Semanal interpretation
+- [x] Sunday strategic planning with load reduction when Check < 5
 - [x] Consolidated retry module for research HTTP calls
-- [x] 334 tests
+- [x] 359 tests
 
 **v0.2.1**
 - [x] Full smoke test: every pipeline bug fixed

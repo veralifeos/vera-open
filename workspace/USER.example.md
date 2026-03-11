@@ -11,9 +11,9 @@ Delete estes comentarios quando terminar.
 [Ex: "Em recolocacao desde janeiro. Trabalhando em freelas enquanto busco posicao fixa em produto."]
 
 ## Prioridades do mes
-1. [Ex: "Fechar 3 entrevistas finais"]
-2. [Ex: "Lancar MVP do produto digital"]
-3. [Ex: "Manter rotina de exercicios 4x/semana"]
+1. [Ex: "Pipeline de vagas ativo (busca CLT R$12-18k, PMM/CRO/Growth, remoto)"]
+2. [Ex: "Freelas ativos: cliente A (site WordPress), proposta SEO cliente B"]
+3. [Ex: "Vera v3.1 operacional (briefing + research + feedback loop)"]
 
 ## Contexto relevante
 - Horario: [Ex: "Acordo as 9h, pico de energia a noite"]
