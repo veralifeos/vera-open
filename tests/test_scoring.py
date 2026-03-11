@@ -20,6 +20,12 @@ def _make_item(title="Test", content="Test content", **kwargs):
     )
 
 
+def _engine_with_embedder():
+    mock = MagicMock()
+    mock.encode.return_value = [[1, 0], [1, 0]]
+    return ScoringEngine(embedder=mock)
+
+
 class TestScoreKeywords:
     def test_exact_match(self):
         engine = ScoringEngine()
@@ -60,10 +66,10 @@ class TestScoreKeywords:
 
 class TestScoreEmbedding:
     def test_without_embedder(self):
-        """Sem embedder retorna 0.5 (neutro)."""
+        """Sem embedder retorna 0.0 (ignorado no composite)."""
         engine = ScoringEngine(embedder=None)
         item = _make_item()
-        assert engine.score_embedding(item, "reference text") == 0.5
+        assert engine.score_embedding(item, "reference text") == 0.0
 
     def test_with_mock_embedder(self):
         mock_embedder = MagicMock()
@@ -79,14 +85,23 @@ class TestScoreEmbedding:
 
 
 class TestScoreComposite:
-    def test_default_weights(self):
+    def test_without_embedder_uses_keyword_only(self):
+        """Sem embedder, score composto = keyword score direto."""
         engine = ScoringEngine()
+        assert not engine.has_embedder
+        assert engine.score_composite(0.8, 0.0) == 0.8
+        assert engine.score_composite(0.3, 0.0) == 0.3
+
+    def test_with_embedder_uses_weights(self):
+        """Com embedder, aplica pesos normalmente."""
+        engine = _engine_with_embedder()
+        assert engine.has_embedder
         score = engine.score_composite(0.8, 0.6)
         expected = 0.4 * 0.8 + 0.6 * 0.6
         assert abs(score - expected) < 0.001
 
-    def test_custom_weights(self):
-        engine = ScoringEngine()
+    def test_with_embedder_custom_weights(self):
+        engine = _engine_with_embedder()
         score = engine.score_composite(0.8, 0.6, weights=(0.7, 0.3))
         expected = 0.7 * 0.8 + 0.3 * 0.6
         assert abs(score - expected) < 0.001

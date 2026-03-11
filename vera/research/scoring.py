@@ -8,6 +8,8 @@ from vera.research.base import ResearchItem
 
 logger = logging.getLogger(__name__)
 
+_EMBEDDER_WARNING_LOGGED = False
+
 
 class ScoringEngine:
     """Motor de scoring multi-camada para Research Packs."""
@@ -18,8 +20,20 @@ class ScoringEngine:
             embedder: Instancia de sentence-transformers SentenceTransformer ou
                       light-embed TextEmbedding. Se None, scoring so usa keywords.
         """
+        global _EMBEDDER_WARNING_LOGGED
         self._embedder = embedder
         self._encode_fn = _resolve_encode_fn(embedder)
+        if self._encode_fn is None and not _EMBEDDER_WARNING_LOGGED:
+            logger.warning(
+                "Embedder não disponível, usando keyword-only scoring. "
+                "Instale sentence-transformers para scoring semântico."
+            )
+            _EMBEDDER_WARNING_LOGGED = True
+
+    @property
+    def has_embedder(self) -> bool:
+        """True se embedder está disponível."""
+        return self._encode_fn is not None
 
     def score_keywords(
         self,
@@ -27,8 +41,10 @@ class ScoringEngine:
         keywords: list[str],
         weights: dict | None = None,
     ) -> float:
-        """Camada 1: keyword matching. TF-IDF simples no titulo + content.
+        """Camada 1: keyword matching com proporção de cobertura.
 
+        Score = cobertura (fração de keywords matchados) × intensidade média.
+        1 de 3 keywords match = ~0.33, 3 de 3 = ~1.0.
         Retorna 0.0-1.0.
         """
         if not keywords:
@@ -38,32 +54,43 @@ class ScoringEngine:
         weights = weights or {}
         total_weight = 0.0
         matched_weight = 0.0
+        matched_count = 0
 
         for kw in keywords:
             kw_lower = kw.lower()
             w = weights.get(kw, 1.0)
             total_weight += w
 
-            # Conta ocorrencias (case-insensitive, word boundary)
+            # Conta ocorrencias (case-insensitive)
             pattern = re.escape(kw_lower)
             matches = len(re.findall(pattern, text))
             if matches > 0:
                 # TF simples: log(1 + count) normalizado
                 tf = math.log1p(matches) / math.log1p(10)  # cap em ~10 matches
                 matched_weight += w * min(tf, 1.0)
+                matched_count += 1
 
-        if total_weight == 0:
+        if total_weight == 0 or matched_count == 0:
             return 0.0
 
-        return min(matched_weight / total_weight, 1.0)
+        # Cobertura: fração de keywords presentes
+        coverage = matched_count / len(keywords)
+        # Intensidade: TF média dos que matcharam
+        matched_kw_weight = sum(
+            weights.get(kw, 1.0) for kw in keywords
+            if len(re.findall(re.escape(kw.lower()), text)) > 0
+        )
+        intensity = matched_weight / matched_kw_weight if matched_kw_weight else 0.0
+        # Score: sqrt(coverage) evita penalizar listas grandes de keywords
+        return min(math.sqrt(coverage) * (0.6 + 0.4 * intensity), 1.0)
 
     def score_embedding(self, item: ResearchItem, reference_text: str) -> float:
         """Camada 2: similaridade semantica via embeddings.
 
-        Retorna 0.0-1.0. Se embedder nao disponivel, retorna 0.5 (neutro).
+        Retorna 0.0-1.0. Se embedder nao disponivel, retorna 0.0 (ignorado).
         """
         if self._encode_fn is None:
-            return 0.5  # Neutro — graceful degradation
+            return 0.0
 
         try:
             item_text = f"{item.title}. {item.content[:500]}"
@@ -75,7 +102,7 @@ class ScoringEngine:
             return max(0.0, min(1.0, (sim + 1.0) / 2.0))
         except Exception as e:
             logger.warning("Erro no embedding scoring: %s", e)
-            return 0.5
+            return 0.0
 
     def score_composite(
         self,
@@ -83,7 +110,9 @@ class ScoringEngine:
         embedding_score: float,
         weights: tuple[float, float] = (0.4, 0.6),
     ) -> float:
-        """Score composto. Pesos configuraveis por pack."""
+        """Score composto. Sem embedder, rebalanceia para keyword-only."""
+        if not self.has_embedder:
+            return keyword_score
         w_kw, w_emb = weights
         return w_kw * keyword_score + w_emb * embedding_score
 
@@ -165,5 +194,4 @@ def create_embedder():
     except ImportError:
         pass
 
-    logger.info("Nenhum embedder disponivel. Scoring usara apenas keywords.")
     return None

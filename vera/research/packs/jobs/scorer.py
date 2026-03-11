@@ -99,14 +99,22 @@ class JobScorer:
         llm_score: float | None = None,
         weights: tuple[float, float, float] = (0.40, 0.35, 0.25),
     ) -> float:
-        """Score composto. Se LLM nao rodou, redistribui peso."""
+        """Score composto. Redistribui pesos de camadas ausentes."""
         w_rule, w_embed, w_llm = weights
-        if llm_score is None:
-            # Redistribui peso do LLM
-            total = w_rule + w_embed
-            if total > 0:
-                w_rule = w_rule / total
-                w_embed = w_embed / total
-            return w_rule * rule_score + w_embed * embed_score
 
-        return w_rule * rule_score + w_embed * embed_score + w_llm * llm_score
+        # Sem embedder: redistribui peso do embedding para rules
+        if not self._engine.has_embedder:
+            w_embed = 0.0
+
+        if llm_score is None:
+            w_llm = 0.0
+
+        total = w_rule + w_embed + w_llm
+        if total == 0:
+            return rule_score
+        # Normaliza pesos para somar 1.0
+        w_rule /= total
+        w_embed /= total
+        w_llm /= total
+
+        return w_rule * rule_score + w_embed * embed_score + w_llm * (llm_score or 0.0)

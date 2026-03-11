@@ -51,7 +51,9 @@ categories:
 
 scoring:
   weights: { keyword: 0.5, embedding: 0.5 }
-  relevance_threshold: 0.4
+  # Threshold 0.25 works well with keyword-only (no embedder).
+  # Raise to 0.4+ after installing sentence-transformers.
+  relevance_threshold: 0.25
 
 dedup:
   ttl_days: 3

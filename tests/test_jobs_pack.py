@@ -1,7 +1,7 @@
 """Testes para JobSearchPack — fontes, scorer, pack."""
 
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -192,15 +192,25 @@ class TestJobScorer:
         # With empty criteria, only remote dimension fires (item has "remote")
         assert 0.0 <= score <= 1.0
 
-    def test_composite_without_llm(self):
+    def test_composite_without_llm_no_embedder(self):
+        """Sem embedder + sem LLM: score = rule_score direto."""
         scorer = JobScorer(ScoringEngine())
+        score = scorer.composite(0.8, 0.0, llm_score=None)
+        assert abs(score - 0.8) < 0.01
+
+    def test_composite_without_llm_with_embedder(self):
+        """Com embedder + sem LLM: redistribui peso do LLM."""
+        mock = MagicMock()
+        mock.encode.return_value = [[1, 0], [1, 0]]
+        scorer = JobScorer(ScoringEngine(embedder=mock))
         score = scorer.composite(0.8, 0.6, llm_score=None)
-        # Should redistribute weights: 0.40/(0.40+0.35)=0.533, 0.35/(0.40+0.35)=0.467
         expected = (0.40 / 0.75) * 0.8 + (0.35 / 0.75) * 0.6
         assert abs(score - expected) < 0.01
 
     def test_composite_with_llm(self):
-        scorer = JobScorer(ScoringEngine())
+        mock = MagicMock()
+        mock.encode.return_value = [[1, 0], [1, 0]]
+        scorer = JobScorer(ScoringEngine(embedder=mock))
         score = scorer.composite(0.8, 0.6, 0.9)
         expected = 0.40 * 0.8 + 0.35 * 0.6 + 0.25 * 0.9
         assert abs(score - expected) < 0.01

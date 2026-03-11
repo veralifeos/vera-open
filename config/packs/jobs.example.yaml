@@ -8,12 +8,12 @@ pack:
   version: "0.1.0"
 
 criteria:
-  keywords: ["CRO", "growth marketing", "product marketing", "RevOps"]
+  keywords: ["product manager", "growth", "marketing", "data analyst", "remote"]
   location: "remote"
   seniority: ["senior", "lead", "manager"]
   salary_min: 12000
   salary_currency: "BRL"
-  stack: ["GA4", "HubSpot", "Figma", "Notion"]
+  stack: ["Python", "SQL", "Notion", "Figma"]
   exclude_keywords: ["intern", "junior"]
 
 sources:
