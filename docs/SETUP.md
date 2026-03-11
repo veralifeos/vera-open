@@ -13,8 +13,8 @@ Step-by-step guide to get Vera running. From zero to your first briefing in ~20 
 ```bash
 git clone https://github.com/veralifeos/vera-open.git
 cd vera-open
-pip install -e .
-# or: uv pip install -e .
+uv sync
+# or: pip install -e .
 ```
 
 ## 3. Create Notion integration
@@ -100,10 +100,9 @@ TELEGRAM_CHAT_ID=your_chat_id
 
 ## 9. First run
 
-```bash
-# Load env vars (if using .env manually)
-export $(cat .env | xargs)
+Vera auto-loads `.env` from the project root and `config/.env` — no manual `export` needed.
 
+```bash
 # Validate everything is connected
 python -m vera validate
 
@@ -114,47 +113,37 @@ python -m vera briefing --dry-run --force
 python -m vera briefing --force
 ```
 
+> **Windows users:** If your `.env` was created with Notepad, it may have a UTF-8 BOM that corrupts the first variable. Vera handles this automatically, but if you see issues, re-save as "UTF-8 without BOM".
+
 ## 10. Deploy to GitHub Actions
 
+The repo includes pre-built workflows in `.github/workflows/`:
+- **`daily.yml`** — runs research packs + briefing every day at 09:00 BRT
+- **`weekly.yml`** — runs weekly review on Saturdays at 10:00 BRT
+
+Both use `config/config.ci.yaml` (tracked in the repo) and pull secrets from GitHub Actions.
+
+### Setup
+
 1. Fork the repository (or push your configured copy)
-2. Go to **Settings** -> **Secrets and variables** -> **Actions**
-3. Add these repository secrets:
+2. Edit `config/config.ci.yaml` with your Notion database IDs
+3. Go to **Settings** -> **Secrets and variables** -> **Actions**
+4. Add these repository secrets:
 
-| Secret | Value |
-|---|---|
-| `NOTION_TOKEN` | Your Notion integration token |
-| `ANTHROPIC_API_KEY` | Your Anthropic API key |
-| `TELEGRAM_BOT_TOKEN` | Your Telegram bot token |
-| `TELEGRAM_CHAT_ID` | Your Telegram chat ID |
+| Secret | Required | Value |
+|---|---|---|
+| `NOTION_TOKEN` | Yes | Your Notion integration token |
+| `ANTHROPIC_API_KEY` | Yes | Your Anthropic API key |
+| `TELEGRAM_BOT_TOKEN` | Yes | Your Telegram bot token |
+| `TELEGRAM_CHAT_ID` | Yes | Your Telegram chat ID |
+| `JOOBLE_API_KEY` | No | For Jooble job search |
+| `RAPIDAPI_KEY` | No | For JSearch job search |
+| `FINNHUB_API_KEY` | No | For Finnhub financial data |
+| `COINGECKO_API_KEY` | No | For CoinGecko crypto data |
 
-4. Create `.github/workflows/daily.yml`:
+5. To test: go to **Actions** -> **Daily Briefing** -> **Run workflow**
 
-```yaml
-name: Vera Daily Briefing
-on:
-  schedule:
-    - cron: '0 12 * * *'  # 09:00 BRT (UTC-3)
-  workflow_dispatch:
-
-jobs:
-  briefing:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - run: pip install -e .
-      - run: python -m vera briefing
-        env:
-          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          FORCE_RUN: "true"
-```
-
-5. To test: go to **Actions** -> **Vera Daily Briefing** -> **Run workflow**
+The daily workflow commits state files (`state/`) back to the repo so deduplication persists across runs.
 
 ## 11. Customize persona
 

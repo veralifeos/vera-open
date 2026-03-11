@@ -40,13 +40,14 @@ The state engine tracks every task across runs: what's new, what worsened, what'
 git clone https://github.com/veralifeos/vera-open.git
 cd vera-open
 
-# 2. Install
-pip install -e .
-# or: uv pip install -e .
+# 2. Install (uv recommended)
+uv sync
+# or: pip install -e .
 
 # 3. Run the setup wizard
 python -m vera setup
 # Creates config.yaml and .env with your Notion token, API keys, etc.
+# .env is auto-loaded — no need to `export` manually.
 
 # 4. Validate everything works
 python -m vera validate
@@ -178,7 +179,7 @@ vera-open/
 ├── config/
 │   └── config.example.yaml  # Full configuration reference
 ├── state/                   # Persisted state (gitignored in production)
-├── tests/                   # 300+ tests, zero external calls
+├── tests/                   # 309 tests, zero external calls
 └── docs/
     ├── SETUP.md             # Step-by-step setup guide
     └── NOTION_TEMPLATE.md   # Database schemas
@@ -225,11 +226,25 @@ vera-open/
 
 **No Telegram message** -- Run `vera validate` to check bot token and chat ID. Check that `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are set.
 
+**SSL error on Telegram** -- If you're behind an intercepting proxy or antivirus, set `VERA_SSL_VERIFY=0` in your `.env`.
+
+**Notion 400 on status filter** -- If your Notion Status field uses the built-in Status type (not a Select), add `status_filter_type: "status"` under `domains.tasks.fields` in your config.
+
+**Research returns 0 results** -- Without `sentence-transformers`, scoring is keyword-only. Check that your pack config keywords match actual content. Lower `relevance_threshold` if needed.
+
 **Notion connection fails** -- Ensure the integration has access to each database (Share -> Add connection).
 
 ## Roadmap
 
-**v0.2.0** (current)
+**v0.2.1** (current)
+- [x] Full smoke test: every pipeline bug fixed
+- [x] Keyword-only scoring when embedder unavailable
+- [x] GitHub Actions CI fully green
+- [x] `.env` auto-loading with BOM handling
+- [x] SSL bypass for local dev (`VERA_SSL_VERIFY=0`)
+- [x] 309 tests
+
+**v0.2.0**
 - [x] Research Pack framework (modular, extensible)
 - [x] News/Topic Monitoring Pack (RSS feeds, keyword + embedding scoring)
 - [x] Job Search Pack (9 sources, hybrid 3-layer scoring, Notion auto-save)
