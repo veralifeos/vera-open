@@ -76,13 +76,16 @@ domains:
     enabled: true
     collection: ""             # Required. Your Tasks database ID
     fields:
-      title: "Name"
+      title: "Nome"            # Title property name in your Notion DB
       status: "Status"
       priority: "Prioridade"
       deadline: "Deadline"
       category: "Tipo"
-      status_active: ["To Do", "Doing", "Em andamento"]
-      status_done: ["Done", "Concluído"]
+      # status_filter_type: Notion property type for status filter.
+      # Use "select" (default) for standard select fields,
+      # or "status" if your DB uses Notion's built-in Status type.
+      status_active: ["A Fazer", "Fazendo", "Aguardando"]
+      status_done: ["Concluído", "Arquivado"]
 
   pipeline:
     enabled: false
