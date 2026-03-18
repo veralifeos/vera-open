@@ -12,6 +12,10 @@ on:
     - cron: "0 13 * * 6"
   workflow_dispatch:
 
+concurrency:
+  group: vera-weekly
+  cancel-in-progress: false
+
 env:
   VERA_CONFIG: config/config.ci.yaml
   NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}

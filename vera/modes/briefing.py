@@ -111,26 +111,37 @@ def filtrar_e_rankear(tarefas: list[dict], state: dict, delta: dict) -> list[dic
 def carregar_workspace_files(config: VeraConfig) -> dict:
     """Carrega AGENT.md e USER.md do workspace/.
 
-    Fallback: se arquivo nao existe, tenta .example.
+    AGENT.md: fallback para .example se ausente (persona generica e OK).
+    USER.md: SEM fallback — exemplo contem placeholders que poluem o briefing.
     Custom persona file sobrescreve AGENT.md.
     """
     workspace_path = Path("workspace")
     arquivos = {}
 
-    for nome in ["USER.md", "AGENT.md"]:
-        caminho = workspace_path / nome
-        if caminho.exists():
-            conteudo = caminho.read_text(encoding="utf-8").strip()
+    # AGENT.md: fallback para example e aceitavel (persona generica)
+    agent_path = workspace_path / "AGENT.md"
+    if agent_path.exists():
+        conteudo = agent_path.read_text(encoding="utf-8").strip()
+        if conteudo:
+            arquivos["AGENT.md"] = conteudo[:1500]
+    else:
+        example_path = workspace_path / "AGENT.example.md"
+        if example_path.exists():
+            conteudo = example_path.read_text(encoding="utf-8").strip()
             if conteudo:
-                arquivos[nome] = conteudo[:1500]
-        else:
-            # Tenta .example como fallback
-            example_name = nome.replace(".md", ".example.md")
-            example_path = workspace_path / example_name
-            if example_path.exists():
-                conteudo = example_path.read_text(encoding="utf-8").strip()
-                if conteudo:
-                    arquivos[nome] = conteudo[:1500]
+                arquivos["AGENT.md"] = conteudo[:1500]
+
+    # USER.md: NAO faz fallback para example (placeholders geram contexto falso)
+    user_path = workspace_path / "USER.md"
+    if user_path.exists():
+        conteudo = user_path.read_text(encoding="utf-8").strip()
+        if conteudo:
+            arquivos["USER.md"] = conteudo[:1500]
+    else:
+        print(
+            "   [workspace] USER.md nao encontrado. "
+            "Briefing sem contexto pessoal. Copie USER.example.md para USER.md."
+        )
 
     # Custom persona file sobrescreve AGENT.md
     if config.persona.custom_prompt_file:

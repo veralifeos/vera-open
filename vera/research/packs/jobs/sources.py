@@ -1,9 +1,11 @@
-"""Job board sources — 9 fontes de vagas."""
+"""Job board sources — 10 fontes de vagas + fallback Jobicy."""
 
 import hashlib
+import json
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
+from pathlib import Path
 
 import httpx
 from tenacity import retry
@@ -17,6 +19,43 @@ logger = logging.getLogger(__name__)
 _RETRY_KWARGS = RETRY_KWARGS
 
 _UA = "Vera/0.2 (+https://github.com/veralifeos/vera-open)"
+
+_CACHE_DIR = Path("state/cache")
+
+# Fontes com fallback para Jobicy quando falham ou retornam vazio
+FALLBACK_SOURCES: dict[str, str] = {
+    "jsearch": "jobicy",
+    "remotive": "jobicy",
+    "himalayas": "jobicy",
+}
+
+
+def _load_cache(source: str, ttl_hours: int = 48) -> list[dict] | None:
+    """Carrega cache de uma fonte se ainda valido (TTL em horas)."""
+    cache_file = _CACHE_DIR / f"{source}.json"
+    if not cache_file.exists():
+        return None
+    try:
+        data = json.loads(cache_file.read_text(encoding="utf-8"))
+        cached_at = datetime.fromisoformat(data["cached_at"])
+        age_hours = (datetime.now(timezone.utc) - cached_at).total_seconds() / 3600
+        if age_hours < ttl_hours:
+            logger.info("%s: usando cache (%.1fh de idade)", source, age_hours)
+            return data["items"]
+    except (json.JSONDecodeError, KeyError, ValueError, OSError) as e:
+        logger.debug("%s: cache invalido: %s", source, e)
+    return None
+
+
+def _save_cache(source: str, items: list[dict]) -> None:
+    """Salva resultado no cache."""
+    _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cache_file = _CACHE_DIR / f"{source}.json"
+    data = {"cached_at": datetime.now(timezone.utc).isoformat(), "items": items}
+    try:
+        cache_file.write_text(json.dumps(data, default=str), encoding="utf-8")
+    except OSError as e:
+        logger.debug("%s: erro ao salvar cache: %s", source, e)
 
 
 def _job_id(title: str, company: str, source: str) -> str:
@@ -44,6 +83,51 @@ def _parse_date(date_str: str | int | None) -> datetime | None:
         return datetime.fromisoformat(date_str.replace("Z", "+00:00"))
     except (ValueError, TypeError):
         return None
+
+
+class JobicySource(Source):
+    """Jobicy — API gratuita, sem auth, JSON limpo."""
+
+    name = "jobicy"
+
+    @retry(**_RETRY_KWARGS)
+    async def fetch(self, config: dict) -> list[dict]:
+        url = "https://jobicy.com/api/v2/remote-jobs"
+        params: dict[str, str] = {"count": "20"}
+
+        # Filtro por keyword se disponivel
+        keywords = config.get("criteria", {}).get("keywords", [])
+        if keywords:
+            params["tag"] = keywords[0].lower()
+
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                url, params=params, headers={"User-Agent": _UA}, timeout=30,
+            )
+            resp.raise_for_status()
+            return resp.json().get("jobs", [])
+
+    def parse(self, raw: dict) -> ResearchItem | None:
+        title = raw.get("jobTitle", "").strip()
+        company = raw.get("companyName", "")
+        if not title:
+            return None
+        return ResearchItem(
+            id=_job_id(title, company, "jobicy"),
+            title=f"{company} — {title}" if company else title,
+            url=raw.get("url", ""),
+            source_name="Jobicy",
+            published=_parse_date(raw.get("pubDate")),
+            content=raw.get("jobDescription", "")[:2000],
+            metadata={
+                "company": company,
+                "location": raw.get("jobGeo", ""),
+                "salary_min": raw.get("salaryMin"),
+                "salary_max": raw.get("salaryMax"),
+                "salary_currency": raw.get("salaryCurrency", ""),
+                "level": raw.get("jobLevel", ""),
+            },
+        )
 
 
 class HimalayasSource(Source):
@@ -231,7 +315,7 @@ class JoobleSource(Source):
 
 
 class JSearchSource(Source):
-    """JSearch (RapidAPI) — LinkedIn/Indeed indireto."""
+    """JSearch (RapidAPI) — LinkedIn/Indeed indireto. Cache 48h + query consolidada."""
 
     name = "jsearch"
 
@@ -244,8 +328,14 @@ class JSearchSource(Source):
             logger.info("JSearch: key nao encontrada (%s), desabilitando.", key_env)
             return []
 
+        # Cache 48h: evita queimar quota em runs repetidos
+        cached = _load_cache("jsearch", ttl_hours=48)
+        if cached is not None:
+            return cached
+
+        # Query consolidada: 1 unica chamada por run
         keywords = config.get("criteria", {}).get("keywords", [])
-        query = " ".join(keywords[:3]) if keywords else "remote"
+        query = " ".join(keywords[:5]) if keywords else "remote"
         url = "https://jsearch.p.rapidapi.com/search"
 
         async with httpx.AsyncClient() as client:
@@ -258,8 +348,14 @@ class JSearchSource(Source):
                 },
                 timeout=30,
             )
+            if resp.status_code == 429:
+                logger.warning("JSearch: quota esgotada (429). Fallback ativado.")
+                return []
             resp.raise_for_status()
-            return resp.json().get("data", [])
+            items = resp.json().get("data", [])
+            if items:
+                _save_cache("jsearch", items)
+            return items
 
     def parse(self, raw: dict) -> ResearchItem | None:
         title = raw.get("job_title", "").strip()
@@ -418,6 +514,7 @@ ALL_SOURCES: dict[str, type[Source]] = {
     "arbeitnow": ArbeitnowSource,
     "jooble": JoobleSource,
     "jsearch": JSearchSource,
+    "jobicy": JobicySource,
     "greenhouse": GreenhouseSource,
     "lever": LeverSource,
     "ashby": AshbySource,

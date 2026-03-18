@@ -4,7 +4,7 @@ import logging
 
 from vera.research.base import ResearchItem, ResearchPack, ResearchResult
 from vera.research.packs.jobs.scorer import JobScorer
-from vera.research.packs.jobs.sources import ALL_SOURCES
+from vera.research.packs.jobs.sources import ALL_SOURCES, FALLBACK_SOURCES
 from vera.research.scoring import ScoringEngine, create_embedder
 
 logger = logging.getLogger(__name__)
@@ -26,10 +26,19 @@ class JobSearchPack(ResearchPack):
             self._embedder_initialized = True
         return JobScorer(ScoringEngine(embedder=self._embedder))
 
+    def _fallback_enabled(self, source_name: str, sources_cfg: dict) -> bool:
+        """Checa se uma fonte fallback esta habilitada."""
+        fallback_name = FALLBACK_SOURCES.get(source_name)
+        if not fallback_name:
+            return False
+        fb_cfg = sources_cfg.get(fallback_name, {})
+        return fb_cfg.get("enabled", True)
+
     async def collect(self, config: dict) -> list[ResearchItem]:
-        """Busca vagas de todas as fontes habilitadas."""
+        """Busca vagas de todas as fontes habilitadas, com fallback Jobicy."""
         sources_cfg = config.get("sources", {})
         all_items: list[ResearchItem] = []
+        used_fallback: set[str] = set()
 
         for source_name, source_cls in ALL_SOURCES.items():
             src_cfg = sources_cfg.get(source_name, {})
@@ -38,9 +47,27 @@ class JobSearchPack(ResearchPack):
             if not src_cfg.get("enabled", True):
                 continue
 
+            # Skip se ja serviu como fallback neste ciclo
+            if source_name in used_fallback:
+                continue
+
             try:
                 source = source_cls()
                 raw_items = await source.fetch(config)
+
+                if not raw_items and source_name in FALLBACK_SOURCES:
+                    fallback_name = FALLBACK_SOURCES[source_name]
+                    if fallback_name not in used_fallback and self._fallback_enabled(source_name, sources_cfg):
+                        logger.info(
+                            "Jobs pack: '%s' retornou vazio, tentando fallback '%s'",
+                            source_name, fallback_name,
+                        )
+                        fallback_cls = ALL_SOURCES.get(fallback_name)
+                        if fallback_cls:
+                            fallback_src = fallback_cls()
+                            raw_items = await fallback_src.fetch(config)
+                            source = fallback_src
+                            used_fallback.add(fallback_name)
 
                 for raw in raw_items:
                     item = source.parse(raw)
@@ -49,6 +76,26 @@ class JobSearchPack(ResearchPack):
 
             except Exception as e:
                 logger.warning("Jobs pack: fonte '%s' falhou: %s", source_name, e)
+
+                # Tenta fallback em caso de erro tambem
+                fallback_name = FALLBACK_SOURCES.get(source_name)
+                if fallback_name and fallback_name not in used_fallback and self._fallback_enabled(source_name, sources_cfg):
+                    logger.info(
+                        "Jobs pack: tentando fallback '%s' apos erro em '%s'",
+                        fallback_name, source_name,
+                    )
+                    try:
+                        fallback_cls = ALL_SOURCES.get(fallback_name)
+                        if fallback_cls:
+                            fallback_src = fallback_cls()
+                            raw_items = await fallback_src.fetch(config)
+                            used_fallback.add(fallback_name)
+                            for raw in raw_items:
+                                item = fallback_src.parse(raw)
+                                if item:
+                                    all_items.append(item)
+                    except Exception as fb_err:
+                        logger.warning("Jobs pack: fallback '%s' tambem falhou: %s", fallback_name, fb_err)
 
         return all_items
 

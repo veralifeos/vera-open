@@ -10,9 +10,11 @@ from vera.research.packs.jobs.pack import JobSearchPack
 from vera.research.packs.jobs.scorer import JobScorer
 from vera.research.packs.jobs.sources import (
     ALL_SOURCES,
+    FALLBACK_SOURCES,
     ArbeitnowSource,
     GreenhouseSource,
     HimalayasSource,
+    JobicySource,
     LeverSource,
     RemoteOKSource,
     RemotiveSource,
@@ -62,7 +64,7 @@ _SAMPLE_CONFIG = {
 
 class TestSources:
     def test_all_sources_registered(self):
-        assert len(ALL_SOURCES) == 9
+        assert len(ALL_SOURCES) == 10
         expected = {
             "himalayas",
             "remotive",
@@ -70,6 +72,7 @@ class TestSources:
             "arbeitnow",
             "jooble",
             "jsearch",
+            "jobicy",
             "greenhouse",
             "lever",
             "ashby",
@@ -260,6 +263,7 @@ class TestJobSearchPack:
                 "arbeitnow": {"enabled": False},
                 "jooble": {"enabled": False},
                 "jsearch": {"enabled": False},
+                "jobicy": {"enabled": False},
                 "greenhouse": {"enabled": False},
                 "lever": {"enabled": False},
                 "ashby": {"enabled": False},
@@ -367,3 +371,187 @@ class TestJobPackSaveToBackend:
         items = [_make_item("Job A"), _make_item("Job B")]
         saved = await pack.save_to_backend(items, mock_backend)
         assert saved == 0  # Both failed but no crash
+
+
+# ─── Jobicy source tests ──────────────────────────────────────────────────
+
+
+class TestJobicySource:
+    def test_parse_valid(self):
+        source = JobicySource()
+        item = source.parse(
+            {
+                "jobTitle": "Backend Engineer",
+                "companyName": "Acme Corp",
+                "url": "https://jobicy.com/jobs/123",
+                "pubDate": "2026-03-18",
+                "jobDescription": "Looking for a backend engineer",
+                "jobGeo": "Remote",
+                "salaryMin": "60000",
+                "salaryMax": "80000",
+                "salaryCurrency": "GBP",
+                "jobLevel": "Senior",
+            }
+        )
+        assert item is not None
+        assert "Acme Corp" in item.title
+        assert "Backend Engineer" in item.title
+        assert item.metadata["salary_min"] == "60000"
+
+    def test_parse_empty_title(self):
+        source = JobicySource()
+        item = source.parse({"jobTitle": "", "companyName": "Acme"})
+        assert item is None
+
+    def test_fallback_mapping(self):
+        assert FALLBACK_SOURCES["jsearch"] == "jobicy"
+        assert FALLBACK_SOURCES["remotive"] == "jobicy"
+        assert FALLBACK_SOURCES["himalayas"] == "jobicy"
+
+
+# ─── Fallback tests ──────────────────────────────────────────────────────
+
+
+class TestFallbackLogic:
+    @pytest.mark.asyncio
+    async def test_fallback_on_empty_result(self):
+        """Quando fonte retorna vazio e fallback habilitado, usa Jobicy."""
+        pack = JobSearchPack()
+        config = {
+            "sources": {
+                "himalayas": {"enabled": True},
+                "remotive": {"enabled": False},
+                "remoteok": {"enabled": False},
+                "arbeitnow": {"enabled": False},
+                "jooble": {"enabled": False},
+                "jsearch": {"enabled": False},
+                "jobicy": {"enabled": True},
+                "greenhouse": {"enabled": False},
+                "lever": {"enabled": False},
+                "ashby": {"enabled": False},
+            },
+            "criteria": {"keywords": ["python"]},
+        }
+
+        with patch(
+            "vera.research.packs.jobs.sources.HimalayasSource.fetch",
+            new_callable=AsyncMock,
+            return_value=[],
+        ):
+            with patch(
+                "vera.research.packs.jobs.sources.JobicySource.fetch",
+                new_callable=AsyncMock,
+                return_value=[
+                    {"jobTitle": "Python Dev", "companyName": "FallbackCo", "url": "https://x.com"}
+                ],
+            ):
+                items = await pack.collect(config)
+        assert len(items) == 1
+        assert "FallbackCo" in items[0].title
+
+    @pytest.mark.asyncio
+    async def test_fallback_on_error(self):
+        """Quando fonte da erro e fallback habilitado, usa Jobicy."""
+        pack = JobSearchPack()
+        config = {
+            "sources": {
+                "himalayas": {"enabled": False},
+                "remotive": {"enabled": True},
+                "remoteok": {"enabled": False},
+                "arbeitnow": {"enabled": False},
+                "jooble": {"enabled": False},
+                "jsearch": {"enabled": False},
+                "jobicy": {"enabled": True},
+                "greenhouse": {"enabled": False},
+                "lever": {"enabled": False},
+                "ashby": {"enabled": False},
+            },
+            "criteria": {},
+        }
+
+        with patch(
+            "vera.research.packs.jobs.sources.RemotiveSource.fetch",
+            side_effect=ConnectionError("timeout"),
+        ):
+            with patch(
+                "vera.research.packs.jobs.sources.JobicySource.fetch",
+                new_callable=AsyncMock,
+                return_value=[
+                    {"jobTitle": "Remote Job", "companyName": "FBCo", "url": "https://x.com"}
+                ],
+            ):
+                items = await pack.collect(config)
+        assert len(items) == 1
+
+    @pytest.mark.asyncio
+    async def test_no_fallback_when_disabled(self):
+        """Quando fallback desabilitado, nao tenta Jobicy."""
+        pack = JobSearchPack()
+        config = {
+            "sources": {
+                "himalayas": {"enabled": True},
+                "remotive": {"enabled": False},
+                "remoteok": {"enabled": False},
+                "arbeitnow": {"enabled": False},
+                "jooble": {"enabled": False},
+                "jsearch": {"enabled": False},
+                "jobicy": {"enabled": False},
+                "greenhouse": {"enabled": False},
+                "lever": {"enabled": False},
+                "ashby": {"enabled": False},
+            },
+            "criteria": {},
+        }
+
+        with patch(
+            "vera.research.packs.jobs.sources.HimalayasSource.fetch",
+            new_callable=AsyncMock,
+            return_value=[],
+        ):
+            items = await pack.collect(config)
+        assert items == []
+
+    @pytest.mark.asyncio
+    async def test_fallback_used_only_once(self):
+        """Jobicy usado como fallback so uma vez mesmo com multiplas fontes falhando."""
+        pack = JobSearchPack()
+        config = {
+            "sources": {
+                "himalayas": {"enabled": True},
+                "remotive": {"enabled": True},
+                "remoteok": {"enabled": False},
+                "arbeitnow": {"enabled": False},
+                "jooble": {"enabled": False},
+                "jsearch": {"enabled": False},
+                "jobicy": {"enabled": True},
+                "greenhouse": {"enabled": False},
+                "lever": {"enabled": False},
+                "ashby": {"enabled": False},
+            },
+            "criteria": {},
+        }
+
+        jobicy_fetch = AsyncMock(
+            return_value=[
+                {"jobTitle": "Job 1", "companyName": "Co1", "url": "https://x.com"}
+            ]
+        )
+
+        with patch(
+            "vera.research.packs.jobs.sources.HimalayasSource.fetch",
+            new_callable=AsyncMock,
+            return_value=[],
+        ):
+            with patch(
+                "vera.research.packs.jobs.sources.RemotiveSource.fetch",
+                new_callable=AsyncMock,
+                return_value=[],
+            ):
+                with patch(
+                    "vera.research.packs.jobs.sources.JobicySource.fetch",
+                    jobicy_fetch,
+                ):
+                    items = await pack.collect(config)
+
+        # Jobicy chamado 1x (fallback do himalayas), nao 2x
+        assert jobicy_fetch.call_count == 1

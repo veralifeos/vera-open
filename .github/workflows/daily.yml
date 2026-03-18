@@ -18,6 +18,10 @@ on:
         required: false
         default: "false"
 
+concurrency:
+  group: vera-daily
+  cancel-in-progress: false
+
 env:
   VERA_CONFIG: config/config.ci.yaml
   NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
