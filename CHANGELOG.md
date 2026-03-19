@@ -2,6 +2,33 @@
 
 All notable changes to Vera Open.
 
+## [0.4.0] — 2026-03-18
+
+### Added
+
+- **`vera setup` overhaul** — interactive wizard with inline validation at every step:
+  - InquirerPy-powered prompts with typer.prompt fallback
+  - Inline validation for Notion token, Telegram bot, Claude API key, Ollama connection
+  - Config presets: "Recolocação profissional" / "Briefing pessoal" / "Teste rápido"
+  - **Notion DB creation** — auto-provisions databases + sample records + "Comece Aqui" welcome page
+  - Auto-detects timezone via `tzlocal`
+  - Auto-detects Telegram chat_id via `getUpdates`
+  - Auto-runs `vera doctor` at the end
+- **`vera doctor`** — diagnostic command with 10 health checks:
+  - Python version, .env, config.yaml, Notion token, database access, Telegram bot/chat_id, LLM, state/ writable, USER.md
+  - Formatted table output with fix hints
+  - Exit code 0 (all OK) or 1 (failures)
+- **`vera/setup/` package** — 5 modules: wizard, validators, notion_setup, config_writer, schemas
+- **Config presets** — `config/presets/config.{jobs,briefing,minimal}.yaml`
+- `InquirerPy` and `tzlocal` as optional `[setup]` dependencies
+- 55+ new tests for setup wizard, validators, Notion creation, and doctor
+
+### Changed
+
+- Setup wizard moved from monolithic `cli.py` (260 lines) to `vera/setup/` package
+- `pyproject.toml` version synced (was 0.2.0, now 0.4.0)
+- Test count: 359 → 410+
+
 ## [0.3.0] — 2026-03-11
 
 ### Added
@@ -19,7 +46,7 @@ All notable changes to Vera Open.
   - `/help` — list available commands
 - `TasksDomain.collect_completed()` method for querying done tasks
 - `vera/research/retry.py` — shared retry configuration for all research HTTP calls
-- 16 new tests (334 total)
+- 16 new tests (359 total)
 
 ### Changed
 

@@ -1,0 +1,91 @@
+# Vera Preset: Recolocação Profissional
+# All 4 domains + Jobs pack + daily & weekly briefings.
+
+name: "Vera"
+language: "pt-BR"
+timezone: "America/Sao_Paulo"
+
+backend:
+  type: "notion"
+  notion:
+    token_env: "NOTION_TOKEN"
+
+llm:
+  default: "claude"
+  advanced: "claude"
+  providers:
+    claude:
+      model: "claude-sonnet-4-5-20250929"
+      api_key_env: "ANTHROPIC_API_KEY"
+
+delivery:
+  telegram:
+    bot_token_env: "TELEGRAM_BOT_TOKEN"
+    chat_id_env: "TELEGRAM_CHAT_ID"
+
+persona:
+  preset: "executive"
+
+domains:
+  tasks:
+    enabled: true
+    collection: ""
+    fields:
+      title: "Name"
+      status: "Status"
+      priority: "Prioridade"
+      deadline: "Deadline"
+      category: "Tipo"
+      status_active: ["To Do", "Doing"]
+      status_done: ["Done"]
+
+  pipeline:
+    enabled: true
+    collection: ""
+    fields:
+      title: "Empresa"
+      stage: "Estágio"
+      priority: "Prioridade"
+      next_action: "Próximo Passo"
+      last_contact: "Data Último Contato"
+
+  contacts:
+    enabled: true
+    collection: ""
+    fields:
+      name: "Nome"
+      status: "Status"
+      type: "Tipo"
+      last_interaction: "Último Contato"
+
+  check_semanal:
+    enabled: true
+    collection: ""
+    fields:
+      semana: "Semana"
+      energia: "Energia"
+      vida_pratica: "Vida Prática"
+      carreira: "Carreira"
+      sanidade: "Sanidade"
+      highlight: "Highlight"
+
+schedule:
+  briefing: "09:00"
+  urgency_update: "08:00"
+  weekly_review:
+    day: "saturday"
+    time: "10:00"
+  week_setup:
+    day: "sunday"
+    time: "18:00"
+
+research:
+  enabled: true
+  packs:
+    jobs:
+      enabled: true
+      config_path: "config/packs/jobs.yaml"
+
+debug:
+  dry_run: false
+  verbose: false

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vera-open"
-version = "0.2.0"
+version = "0.4.0"
 description = "AI-native Life Operating System — daily briefings, task management, and life domains"
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -41,7 +41,11 @@ calendar = [
 embeddings = ["sentence-transformers>=2.0"]
 embeddings-light = ["light-embed>=1.0"]
 financial = ["edgartools>=5.0"]
-all = ["vera-open[embeddings,financial,calendar]"]
+setup = [
+    "InquirerPy>=0.3.4",
+    "tzlocal>=5.0",
+]
+all = ["vera-open[embeddings,financial,calendar,setup]"]
 dev = [
     "pytest>=7.0",
     "pytest-asyncio>=0.21",

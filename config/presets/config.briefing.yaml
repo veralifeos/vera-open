@@ -1,0 +1,72 @@
+# Vera Preset: Briefing Pessoal
+# Tasks + Check Semanal + News pack + daily briefings.
+
+name: "Vera"
+language: "pt-BR"
+timezone: "America/Sao_Paulo"
+
+backend:
+  type: "notion"
+  notion:
+    token_env: "NOTION_TOKEN"
+
+llm:
+  default: "claude"
+  advanced: "claude"
+  providers:
+    claude:
+      model: "claude-sonnet-4-5-20250929"
+      api_key_env: "ANTHROPIC_API_KEY"
+
+delivery:
+  telegram:
+    bot_token_env: "TELEGRAM_BOT_TOKEN"
+    chat_id_env: "TELEGRAM_CHAT_ID"
+
+persona:
+  preset: "coach"
+
+domains:
+  tasks:
+    enabled: true
+    collection: ""
+    fields:
+      title: "Name"
+      status: "Status"
+      priority: "Prioridade"
+      deadline: "Deadline"
+      category: "Tipo"
+      status_active: ["To Do", "Doing"]
+      status_done: ["Done"]
+
+  check_semanal:
+    enabled: true
+    collection: ""
+    fields:
+      semana: "Semana"
+      energia: "Energia"
+      vida_pratica: "Vida Prática"
+      carreira: "Carreira"
+      sanidade: "Sanidade"
+      highlight: "Highlight"
+
+schedule:
+  briefing: "09:00"
+  urgency_update: "08:00"
+  weekly_review:
+    day: "saturday"
+    time: "10:00"
+  week_setup:
+    day: "sunday"
+    time: "18:00"
+
+research:
+  enabled: true
+  packs:
+    news:
+      enabled: true
+      config_path: "config/packs/news.yaml"
+
+debug:
+  dry_run: false
+  verbose: false

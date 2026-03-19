@@ -1,11 +1,12 @@
-"""Testes do setup wizard."""
+"""Testes do setup wizard (legado) — refatorado para novos module paths."""
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import yaml
 from typer.testing import CliRunner
 
-from vera.cli import _detect_timezone, _try_notion_discovery, app
+from vera.cli import app
+from vera.setup.wizard import _detect_timezone
 
 runner = CliRunner()
 
@@ -17,66 +18,53 @@ def test_detect_timezone():
     assert "/" in tz  # formato IANA
 
 
-def test_notion_discovery_sem_token(monkeypatch):
-    """Auto-discovery retorna lista vazia sem token válido."""
-    monkeypatch.delenv("NOTION_TOKEN", raising=False)
-    result = _try_notion_discovery("")
-    assert result == []
+def _mock_httpx_client(post_response=None, get_response=None):
+    """Helper to mock httpx.AsyncClient for validators."""
+    mock_client = AsyncMock()
 
+    if post_response:
+        mock_client.post.return_value = post_response
+    if get_response:
+        mock_client.get.return_value = get_response
 
-def test_notion_discovery_com_erro():
-    """Auto-discovery retorna lista vazia em caso de erro."""
-    with patch("vera.backends.notion.NotionBackend") as MockBackend:
-        MockBackend.side_effect = Exception("Falha")
-        result = _try_notion_discovery("ntnl_fake")
-        assert result == []
-
-
-def test_notion_discovery_com_resultados():
-    """Auto-discovery retorna databases encontrados."""
-    mock_backend = AsyncMock()
-    mock_backend.search_databases = AsyncMock(
-        return_value=[
-            {"id": "db1", "title": "Vera — Tasks"},
-            {"id": "db2", "title": "Vera — Pipeline"},
-        ]
-    )
-
-    with patch("vera.backends.notion.NotionBackend", return_value=mock_backend):
-        result = _try_notion_discovery("ntnl_fake")
-        assert len(result) == 2
-        assert result[0]["title"] == "Vera — Tasks"
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=False)
+    return mock_client
 
 
 def test_setup_wizard_gera_config(tmp_path, monkeypatch):
     """Setup gera config.yaml válido com inputs simulados."""
     monkeypatch.chdir(tmp_path)
 
-    # Simula inputs do usuário
-    inputs = "\n".join(
-        [
-            "Vera",  # nome
-            "pt-BR",  # idioma
-            "America/Sao_Paulo",  # timezone
-            "2",  # backend: Outro
-            "1",  # LLM: Claude
-            "sk-ant-test",  # API key
-            "n",  # Telegram: não
-            "1",  # Persona: executiva
-            "",  # Tasks collection ID
-            "n",  # Pipeline: não
-            "n",  # Contacts: não
-            "n",  # Health: não
-            "n",  # Finances: não
-            "n",  # Learning: não
-        ]
-    )
+    with patch("vera.setup.wizard.HAS_INQUIRER", False):
+        inputs = "\n".join(
+            [
+                "Vera",                     # nome
+                "y",                        # timezone confirm
+                "3",                        # objetivo: teste rápido
+                "",                         # notion token (skip)
+                "n",                        # Telegram: não
+                "1",                        # LLM: Claude
+                "sk-ant-test",              # API key
+                "1",                        # Persona: executiva
+            ]
+        )
 
-    result = runner.invoke(app, ["setup"], input=inputs)
-    assert result.exit_code == 0
+        # Mock httpx for Claude validation (returns 200 = valid)
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.raise_for_status = MagicMock()
+        mock_client = _mock_httpx_client(post_response=mock_resp)
+
+        with patch("vera.setup.validators.httpx.AsyncClient", return_value=mock_client), \
+             patch("vera.doctor.run_all_checks", new_callable=AsyncMock) as mc, \
+             patch("vera.doctor.print_results", return_value=0):
+            mc.return_value = []
+            result = runner.invoke(app, ["setup"], input=inputs)
+
+    assert result.exit_code == 0, result.output
     assert "Setup completo" in result.output
 
-    # Verifica config.yaml gerado
     config_path = tmp_path / "config.yaml"
     assert config_path.exists()
 
@@ -84,87 +72,47 @@ def test_setup_wizard_gera_config(tmp_path, monkeypatch):
         config = yaml.safe_load(f)
 
     assert config["name"] == "Vera"
-    assert config["timezone"] == "America/Sao_Paulo"
     assert config["llm"]["default"] == "claude"
     assert "tasks" in config["domains"]
 
-    # Verifica .env gerado
     env_path = tmp_path / ".env"
     assert env_path.exists()
     env_content = env_path.read_text()
     assert "ANTHROPIC_API_KEY=sk-ant-test" in env_content
 
 
-def test_setup_wizard_notion_auto_discovery(tmp_path, monkeypatch):
-    """Setup com Notion faz auto-discovery."""
-    monkeypatch.chdir(tmp_path)
-
-    mock_backend = AsyncMock()
-    mock_backend.search_databases = AsyncMock(
-        return_value=[
-            {"id": "task_db_id", "title": "Vera — Tasks"},
-        ]
-    )
-
-    with patch("vera.backends.notion.NotionBackend", return_value=mock_backend):
-        inputs = "\n".join(
-            [
-                "Vera",  # nome
-                "pt-BR",  # idioma
-                "America/Sao_Paulo",  # timezone
-                "1",  # backend: Notion
-                "ntnl_test",  # token
-                "2",  # LLM: Ollama
-                "llama3.2:3b",  # model
-                "http://localhost:11434",  # url
-                "n",  # Telegram
-                "1",  # Persona
-                # tasks collection auto-detectado, não pede
-                "n",  # Pipeline
-                "n",  # Contacts
-                "n",  # Health
-                "n",  # Finances
-                "n",  # Learning
-            ]
-        )
-
-        result = runner.invoke(app, ["setup"], input=inputs)
-        assert result.exit_code == 0
-
-        config_path = tmp_path / "config.yaml"
-        with open(config_path) as f:
-            config = yaml.safe_load(f)
-
-        assert config["backend"]["type"] == "notion"
-        assert config["domains"]["tasks"]["collection"] == "task_db_id"
-
-
 def test_setup_wizard_ollama(tmp_path, monkeypatch):
     """Setup com Ollama não gera .env com API key."""
     monkeypatch.chdir(tmp_path)
 
-    inputs = "\n".join(
-        [
-            "Vera",
-            "pt-BR",
-            "America/Sao_Paulo",
-            "2",  # backend: Outro
-            "2",  # LLM: Ollama
-            "llama3.2:3b",
-            "http://localhost:11434",
-            "n",  # Telegram
-            "1",  # Persona
-            "",  # Tasks collection
-            "n",
-            "n",
-            "n",
-            "n",
-            "n",  # Domínios opcionais
-        ]
-    )
+    with patch("vera.setup.wizard.HAS_INQUIRER", False):
+        inputs = "\n".join(
+            [
+                "Vera",
+                "y",                        # timezone confirm
+                "3",                        # minimal
+                "",                         # no notion token
+                "n",                        # no telegram
+                "2",                        # LLM: Ollama
+                "http://localhost:11434",
+                "llama3.2:3b",
+                "1",                        # persona
+            ]
+        )
 
-    result = runner.invoke(app, ["setup"], input=inputs)
-    assert result.exit_code == 0
+        # Mock httpx for Ollama validation
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {"models": []}
+        mock_client = _mock_httpx_client(get_response=mock_resp)
+
+        with patch("vera.setup.validators.httpx.AsyncClient", return_value=mock_client), \
+             patch("vera.doctor.run_all_checks", new_callable=AsyncMock) as mc, \
+             patch("vera.doctor.print_results", return_value=0):
+            mc.return_value = []
+            result = runner.invoke(app, ["setup"], input=inputs)
+
+    assert result.exit_code == 0, result.output
 
     config_path = tmp_path / "config.yaml"
     with open(config_path) as f:
@@ -172,7 +120,6 @@ def test_setup_wizard_ollama(tmp_path, monkeypatch):
 
     assert config["llm"]["default"] == "ollama"
 
-    # Sem API key, .env não deveria ter ANTHROPIC_API_KEY
     env_path = tmp_path / ".env"
     if env_path.exists():
         assert "ANTHROPIC_API_KEY" not in env_path.read_text()

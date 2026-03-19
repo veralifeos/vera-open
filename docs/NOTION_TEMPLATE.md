@@ -2,10 +2,11 @@
 
 ## Template público
 
-<!-- TODO: Criar template no Notion e adicionar link aqui -->
-**Link do template:** (em breve)
+**Link do template:** [Vera Life OS — Notion Template](https://veralifeos.notion.site/Vera-Life-OS-Template)
 
-Para usar a Vera com Notion, duplique o template acima para seu workspace.
+Para usar a Vera com Notion, você tem duas opções:
+1. **Automático** — rode `python -m vera setup` e escolha "Criar databases automaticamente"
+2. **Manual** — duplique o template acima para seu workspace e conecte a integração
 
 ## Como conectar
 

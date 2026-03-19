@@ -22,7 +22,7 @@ def test_cli_version():
     """--version mostra versão."""
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert "0.3.0" in result.output
+    assert "0.4.0" in result.output
 
 
 def test_cli_briefing_help():
@@ -75,6 +75,12 @@ def test_cli_status_help():
 def test_cli_bot_help():
     """bot --help funciona."""
     result = runner.invoke(app, ["bot", "--help"])
+    assert result.exit_code == 0
+
+
+def test_cli_doctor_help():
+    """doctor --help funciona."""
+    result = runner.invoke(app, ["doctor", "--help"])
     assert result.exit_code == 0
 
 

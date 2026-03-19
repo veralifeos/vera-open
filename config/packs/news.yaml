@@ -1,0 +1,64 @@
+# News/Topic Monitoring Pack — config de exemplo
+# Copie para config/packs/news.yaml e customize
+
+pack:
+  name: "news"
+  display_name: "My Radar"
+  description: "Monitor news and topics from RSS feeds"
+  version: "0.1.0"
+
+schedule:
+  frequency: "4x/day"
+  briefing_section: "RADAR"
+
+topics:
+  - name: "AI & Tech"
+    keywords: ["AI", "artificial intelligence", "LLM", "GPT", "machine learning", "startup"]
+    sources:
+      - type: rss
+        url: "https://feeds.arstechnica.com/arstechnica/technology-lab"
+        name: "Ars Technica"
+      - type: rss
+        url: "https://techcrunch.com/feed/"
+        name: "TechCrunch"
+    relevance_threshold: 0.6
+    max_items: 5
+
+  - name: "Open Source"
+    keywords: ["open source", "GitHub", "self-hosted", "Linux", "Docker", "Kubernetes"]
+    sources:
+      - type: rss
+        url: "https://news.ycombinator.com/rss"
+        name: "Hacker News"
+      - type: rss
+        url: "https://www.reddit.com/r/selfhosted/.rss"
+        name: "r/selfhosted"
+    relevance_threshold: 0.5
+    max_items: 3
+
+  - name: "World"
+    keywords: ["economy", "trade", "oil", "sanctions", "conflict", "election"]
+    sources:
+      - type: rss
+        url: "https://feeds.bbci.co.uk/news/world/rss.xml"
+        name: "BBC World"
+      - type: rss
+        url: "https://www.aljazeera.com/xml/rss/all.xml"
+        name: "Al Jazeera"
+    relevance_threshold: 0.5
+
+scoring:
+  weights:
+    keyword: 0.4
+    embedding: 0.6
+  # Threshold 0.3 works well with keyword-only (no embedder).
+  # Raise to 0.5+ after installing sentence-transformers.
+  relevance_threshold: 0.3
+  use_llm_scoring: false
+
+dedup:
+  ttl_days: 7
+
+synthesis:
+  max_words_per_topic: 80
+  max_items_per_topic: 5
