@@ -186,6 +186,67 @@ section { position: relative; z-index: 1; }
 }
 .nav-sections a:hover { color: var(--text); background: var(--bg2); }
 @media (max-width: 640px) { .nav-sections { display: none; } }
+
+/* ─── LEAD FORM ─── */
+.lead-form-wrap {
+  margin-top: 40px;
+  padding-top: 40px;
+  border-top: 1px solid var(--border);
+}
+.lead-form-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 14px;
+}
+.lead-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  max-width: 520px;
+}
+.lead-input {
+  flex: 1;
+  min-width: 200px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s;
+}
+.lead-input::placeholder { color: var(--dim); }
+.lead-input:focus { border-color: var(--accent); }
+.lead-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .06em;
+  cursor: pointer;
+  transition: opacity .2s;
+  white-space: nowrap;
+}
+.lead-btn:hover { opacity: .85; }
+.lead-btn:disabled { opacity: .5; cursor: default; }
+.lead-msg {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  display: none;
+}
+.lead-msg.ok { color: var(--green); }
+.lead-msg.err { color: var(--accent); }
+
 /* CROSSING */
 #crossing { padding: 100px 0; background: var(--bg-strip); border-top: 1px solid var(--border2); border-bottom: 1px solid var(--border2); }
 .crossing-inner { display: grid; grid-template-columns: 1fr 180px 1fr; gap: 40px; align-items: center; }
@@ -1105,6 +1166,29 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
           <span class="t-en">Notion template</span><span class="t-pt">Template Notion</span>
         </a>
       </div>
+
+      <!-- Lead capture form -->
+      <div class="lead-form-wrap anim anim-delay-4">
+        <div class="lead-form-label">
+          <span class="t-en">Get notified when v1.0 drops</span>
+          <span class="t-pt">Avisado quando a v1.0 sair</span>
+        </div>
+        <div class="lead-form" id="lead-form">
+          <input
+            type="email"
+            class="lead-input"
+            id="lead-email"
+            placeholder="seu@email.com"
+            autocomplete="email"
+          >
+          <button class="lead-btn t-en" id="lead-btn-en" onclick="submitLead(event)">Notify me →</button>
+          <button class="lead-btn t-pt" id="lead-btn-pt" onclick="submitLead(event)">Me avise →</button>
+        </div>
+        <div class="lead-msg ok t-en" id="lead-ok-en">You're in. We'll reach out when v1.0 is ready.</div>
+        <div class="lead-msg ok t-pt" id="lead-ok-pt">Anotado. Você será avisado quando a v1.0 sair.</div>
+        <div class="lead-msg err t-en" id="lead-err-en">Something went wrong. Try again or email vera.os.app@gmail.com</div>
+        <div class="lead-msg err t-pt" id="lead-err-pt">Algo deu errado. Tente novamente ou mande email para vera.os.app@gmail.com</div>
+      </div>
     </div>
   </div>
 </section>
@@ -1222,6 +1306,46 @@ function toggleStep(header) {
   document.querySelectorAll('.step.open').forEach(s => s.classList.remove('open'));
   if (!isOpen) step.classList.add('open');
 }
+
+// ─── LEAD FORM ────────────────────────────────────────────────────────────
+async function submitLead(e) {
+  e.preventDefault();
+  const email = document.getElementById('lead-email').value.trim();
+  if (!email || !email.includes('@')) return;
+
+  const btnEn = document.getElementById('lead-btn-en');
+  const btnPt = document.getElementById('lead-btn-pt');
+  btnEn.disabled = true; btnPt.disabled = true;
+  btnEn.textContent = '...'; btnPt.textContent = '...';
+
+  try {
+    const resp = await fetch('https://vera-leads.vera-os-app.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        fonte: 'LP getvera.dev',
+        lang: document.documentElement.lang || 'pt-BR',
+        referrer: document.referrer || '',
+        page: window.location.href,
+      })
+    });
+
+    if (resp.ok) {
+      document.getElementById('lead-form').style.display = 'none';
+      document.getElementById('lead-ok-en').style.display = 'block';
+      document.getElementById('lead-ok-pt').style.display = 'block';
+    } else {
+      throw new Error('non-ok');
+    }
+  } catch(err) {
+    btnEn.disabled = false; btnPt.disabled = false;
+    btnEn.textContent = 'Notify me →'; btnPt.textContent = 'Me avise →';
+    document.getElementById('lead-err-en').style.display = 'block';
+    document.getElementById('lead-err-pt').style.display = 'block';
+  }
+}
+
 </script>
 </body>
 </html>
