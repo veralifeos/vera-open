@@ -294,6 +294,74 @@ def test_writer_does_not_modify_other_sections(tmp_path):
         w.INFERENCES_STATE_PATH = original_inf
 
 
+def test_writer_preserves_manual_content(tmp_path):
+    """Writer preserva linhas manuais (que não começam com '- [inferido')."""
+    user_md = tmp_path / "USER.md"
+    user_md.write_text(
+        "# Perfil\n\n## Feedback loop\n"
+        "### Calibrações ativas\n"
+        "- Ignorar projeto X até dia 30\n"
+        "- [inferido 2026-03-10] Inferência antiga que será substituída\n",
+        encoding="utf-8",
+    )
+
+    writer = UserProfileWriter()
+
+    import vera.feedback.writer as w
+    original_path = w.USER_MD_PATH
+    original_inf = w.INFERENCES_STATE_PATH
+    w.USER_MD_PATH = user_md
+    w.INFERENCES_STATE_PATH = tmp_path / "inferences.json"
+
+    try:
+        from vera.feedback.patterns import Inference
+        inf = Inference("new1", "carga", "Nova inferência", "2026-03-20", "2026-04-20", 5)
+        writer.update([inf])
+
+        content = user_md.read_text(encoding="utf-8")
+        # Manual content preserved
+        assert "### Calibrações ativas" in content
+        assert "Ignorar projeto X até dia 30" in content
+        # Old inference replaced by new one
+        assert "Inferência antiga que será substituída" not in content
+        assert "[inferido 2026-03-20] Nova inferência" in content
+    finally:
+        w.USER_MD_PATH = original_path
+        w.INFERENCES_STATE_PATH = original_inf
+
+
+def test_pattern_dedup_same_task_different_weeks():
+    """Mesma task gerando zona_morta em semanas diferentes usa mesmo ID."""
+    engine = PatternEngine()
+    s1 = Signal("zona_morta", {"task_id": "t1", "title": "Task 1", "mention_count": 8}, 8, 0.8)
+    s2 = Signal("zona_morta", {"task_id": "t1", "title": "Task 1", "mention_count": 10}, 10, 0.9)
+
+    inf1 = engine.generate_inferences([s1])
+    inf2 = engine.generate_inferences([s2])
+
+    assert inf1[0].id == inf2[0].id  # same dedup ID
+
+
+def test_tracker_resolves_titles():
+    """Tracker inclui título no value do sinal em vez de só o ID."""
+    tracker = BehaviorTracker()
+    obs = [
+        _make_observation(
+            days_ago=i,
+            mc_snapshot={"abc123": 9},
+            completed=[],
+        )
+        for i in range(6)
+    ]
+    # Add title mapping to one observation
+    obs[0]["task_titles"] = {"abc123": "Enviar proposta SEO"}
+
+    signals = tracker.detect_signals(obs)
+    zona = [s for s in signals if s.type == "zona_morta"]
+    assert len(zona) >= 1
+    assert zona[0].value["title"] == "Enviar proposta SEO"
+
+
 def test_writer_respects_max_15(tmp_path):
     """Writer respeita limite de 15 inferências ativas."""
     user_md = tmp_path / "USER.md"

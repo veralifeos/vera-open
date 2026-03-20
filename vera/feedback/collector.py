@@ -38,6 +38,7 @@ class ObservationCollector:
             "dia_num": data.get("dia_num", 0),
             "pack_results": data.get("pack_results", {}),
             "mention_counts_snapshot": data.get("mention_counts_snapshot", {}),
+            "task_titles": data.get("task_titles", {}),  # {task_id: "título"}
         }
 
         state["observations"].append(observation)

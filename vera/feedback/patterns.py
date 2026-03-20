@@ -48,28 +48,35 @@ class PatternEngine:
                 f"{days} semanas. Vera vai sugerir no máximo 2 prioridades "
                 f"até normalizar."
             )
-            return self._make_inference("carga", text, today, expires, signal.evidence_count)
+            return self._make_inference(
+                "carga", text, today, expires, signal.evidence_count,
+                dedup_key="carga|active",
+            )
 
         if signal.type == "prioridade_real":
             tid = signal.value.get("task_id", "?")
+            title = signal.value.get("title", tid)
             count = signal.value.get("mention_count", 0)
             text = (
-                f"Prioridade real detectada: '{tid}' foi concluída após "
+                f"Prioridade real detectada: '{title}' foi concluída após "
                 f"{count} menções. Adicionado ao scoring."
             )
             return self._make_inference(
-                "prioridade_real", text, today, expires, signal.evidence_count
+                "prioridade_real", text, today, expires, signal.evidence_count,
+                dedup_key=f"prioridade_real|{tid}",
             )
 
         if signal.type == "zona_morta":
             tid = signal.value.get("task_id", "?")
+            title = signal.value.get("title", tid)
             count = signal.value.get("mention_count", 0)
             text = (
-                f"Parar de mencionar: '{tid}' apareceu {count}x sem ação. "
+                f"Parar de mencionar: '{title}' apareceu {count}x sem ação. "
                 f"— remova esta linha se discordar"
             )
             return self._make_inference(
-                "zona_morta", text, today, expires, signal.evidence_count
+                "zona_morta", text, today, expires, signal.evidence_count,
+                dedup_key=f"zona_morta|{tid}",
             )
 
         # v1: skip ritmo and pack_irrelevante
@@ -77,9 +84,11 @@ class PatternEngine:
 
     @staticmethod
     def _make_inference(
-        inf_type: str, text: str, created_at: str, expires_at: str, evidence_count: int
+        inf_type: str, text: str, created_at: str, expires_at: str, evidence_count: int,
+        dedup_key: str | None = None,
     ) -> Inference:
-        key = f"{inf_type}|{text}|{created_at}"
+        # Dedup by type+target (stable across runs), not by date
+        key = dedup_key or f"{inf_type}|{text}"
         inf_id = hashlib.md5(key.encode()).hexdigest()[:12]
         return Inference(
             id=inf_id,

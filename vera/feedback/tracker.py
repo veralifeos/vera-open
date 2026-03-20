@@ -66,6 +66,7 @@ class BehaviorTracker:
         """task_id in completed AND mention_count >= 4 in snapshot."""
         signals = []
         seen_tasks: set[str] = set()
+        titles = self._build_title_map(observations)
 
         for obs in observations:
             completed = set(obs.get("tasks_completed", []))
@@ -79,7 +80,8 @@ class BehaviorTracker:
                     seen_tasks.add(tid)
                     signals.append(Signal(
                         type="prioridade_real",
-                        value={"task_id": tid, "mention_count": count},
+                        value={"task_id": tid, "title": titles.get(tid, tid),
+                               "mention_count": count},
                         evidence_count=count,
                         confidence=min(0.95, 0.7 + count * 0.03),
                     ))
@@ -90,6 +92,7 @@ class BehaviorTracker:
         """task_id with mention_count >= 7 across observations, never in completed."""
         all_completed: set[str] = set()
         task_max_mc: dict[str, int] = {}
+        titles = self._build_title_map(observations)
 
         for obs in observations:
             all_completed.update(obs.get("tasks_completed", []))
@@ -102,7 +105,8 @@ class BehaviorTracker:
             if count >= 7 and tid not in all_completed:
                 signals.append(Signal(
                     type="zona_morta",
-                    value={"task_id": tid, "mention_count": count},
+                    value={"task_id": tid, "title": titles.get(tid, tid),
+                           "mention_count": count},
                     evidence_count=count,
                     confidence=min(0.9, 0.5 + count * 0.05),
                 ))
@@ -110,6 +114,15 @@ class BehaviorTracker:
                 break
 
         return signals
+
+    @staticmethod
+    def _build_title_map(observations: list[dict]) -> dict[str, str]:
+        """Constrói mapa task_id → título a partir das observações (mais recente vence)."""
+        titles: dict[str, str] = {}
+        for obs in observations:
+            for tid, title in obs.get("task_titles", {}).items():
+                titles[tid] = title
+        return titles
 
     def _check_pack_irrelevante(self, observations: list[dict]) -> list[Signal]:
         """Pack with 0 results in 5+ consecutive observations."""

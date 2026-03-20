@@ -984,6 +984,10 @@ async def run_async(
                     tid: mc.get("count", 0)
                     for tid, mc in mention_counts.items()
                 },
+                "task_titles": {
+                    t["id"]: t.get("titulo", t["id"])
+                    for t in tarefas_rankeadas
+                },
             })
         except Exception as e:
             print(f"   [feedback] Erro ao registrar observação: {e}")

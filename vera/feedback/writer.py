@@ -77,16 +77,36 @@ class UserProfileWriter:
                 section_end = i
                 break
 
-        new_section = self._format_inferences(active_inferences)
+        new_inference_lines = self._format_inferences(active_inferences)
 
         if section_start is not None:
-            # Replace existing section
             if section_end is None:
                 section_end = len(lines)
-            new_lines = lines[:section_start] + [f"{SECTION_HEADER}", new_section] + lines[section_end:]
+
+            # Preserve manual content (lines that don't start with "- [inferido")
+            manual_lines = []
+            for line in lines[section_start + 1:section_end]:
+                stripped = line.strip()
+                if stripped.startswith("- [inferido"):
+                    continue  # replaced by new inferences
+                if stripped == "Nenhuma inferência ativa.":
+                    continue
+                manual_lines.append(line)
+
+            # Remove trailing blank lines from manual content
+            while manual_lines and not manual_lines[-1].strip():
+                manual_lines.pop()
+
+            section_parts = [SECTION_HEADER]
+            if manual_lines:
+                section_parts.extend(manual_lines)
+                section_parts.append("")  # blank line before inferences
+            section_parts.append(new_inference_lines)
+
+            new_lines = lines[:section_start] + section_parts + lines[section_end:]
         else:
             # Append section at end
-            new_lines = lines + ["", f"{SECTION_HEADER}", new_section]
+            new_lines = lines + ["", SECTION_HEADER, new_inference_lines]
 
         new_text = "\n".join(new_lines)
 
