@@ -13,6 +13,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from vera.backends.base import StorageBackend
+from vera.event_engine import EventEngine, build_event_context
 from vera.briefing_history import format_for_prompt as history_prompt
 from vera.briefing_history import save_history
 from vera.config import VeraConfig
@@ -25,6 +26,60 @@ from vera.state import StateManager
 
 # Máximo de tarefas enviadas ao LLM
 MAX_TAREFAS_PROMPT = 20
+
+
+def parse_user_priorities(user_md: str) -> list[str]:
+    """Extrai keywords da seção '## Prioridades do mês' do USER.md.
+
+    Retorna lista de termos lowercase para matching contra títulos de tarefas.
+    Ex: ["pipeline", "vera", "seo", "caju", "boticário"]
+    """
+    if not user_md:
+        return []
+
+    keywords = []
+    in_section = False
+
+    for line in user_md.splitlines():
+        stripped = line.strip()
+
+        # Detecta entrada na seção
+        if stripped.lower().startswith("## prioridades"):
+            in_section = True
+            continue
+
+        # Sai da seção ao encontrar próximo ##
+        if in_section and stripped.startswith("##"):
+            break
+
+        if not in_section:
+            continue
+
+        # Ignora comentários HTML e linhas vazias
+        if not stripped or stripped.startswith("<!--") or stripped.startswith("Ex:"):
+            continue
+
+        # Remove prefixo de lista ("1.", "2.", "-", "*")
+        text = stripped.lstrip("0123456789.-* ").strip()
+        if not text:
+            continue
+
+        # Extrai palavras com 4+ chars (ignora artigos/preposições)
+        words = [
+            w.lower().strip(".,;:()[]\"'")
+            for w in text.split()
+            if len(w) >= 4
+        ]
+        # Remove stopwords comuns
+        stopwords = {
+            "para", "desde", "entre", "sendo", "ainda", "mais", "pelo",
+            "pela", "com", "que", "uma", "este", "essa", "foco", "ativo",
+            "até", "dias", "mês", "semana", "feira", "busco", "busca",
+            "while", "desde", "working", "lista", "item", "meta",
+        }
+        keywords.extend(w for w in words if w not in stopwords)
+
+    return list(dict.fromkeys(keywords))  # dedup preservando ordem
 
 # Max palavras por tipo de dia (usado nos presets de persona)
 _MAX_WORDS_DIA = {0: 500, 5: 400, 6: 350}  # seg, sab, dom; default 350
@@ -62,8 +117,12 @@ def verificar_janela_horario(config: VeraConfig, force: bool = False) -> bool:
 # ─── Scoring e ranking ───────────────────────────────────────────────────────
 
 
-def score_tarefa(tarefa: dict, mention_counts: dict) -> float:
-    """Calcula score de prioridade para ranking."""
+def score_tarefa(tarefa: dict, mention_counts: dict, user_priorities: list[str] | None = None) -> float:
+    """Calcula score de prioridade para ranking.
+
+    Parâmetro user_priorities: keywords extraídas do USER.md.
+    Tarefas cujo título bate com prioridades do usuário recebem boost.
+    """
     score = 0.0
     tid = tarefa["id"]
 
@@ -83,6 +142,13 @@ def score_tarefa(tarefa: dict, mention_counts: dict) -> float:
     elif any(p in prio for p in ["média", "medium", "importante"]):
         score += 15
 
+    # Boost por prioridades do usuário (USER.md)
+    if user_priorities:
+        titulo_lower = (tarefa.get("titulo") or "").lower()
+        matches = sum(1 for kw in user_priorities if kw in titulo_lower)
+        if matches > 0:
+            score += min(matches * 20, 40)  # max +40 por prioridade de usuário
+
     # Mention count: reduz score para tarefas muito repetidas
     count = mention_counts.get(tid, {}).get("count", 0)
     score -= min(count * 3, 30)
@@ -90,16 +156,27 @@ def score_tarefa(tarefa: dict, mention_counts: dict) -> float:
     return score
 
 
-def filtrar_e_rankear(tarefas: list[dict], state: dict, delta: dict) -> list[dict]:
-    """Filtra zombies/cooldown e rankeia por score."""
+def filtrar_e_rankear(
+    tarefas: list[dict],
+    state: dict,
+    delta: dict,
+    user_priorities: list[str] | None = None,
+) -> list[dict]:
+    """Filtra zombies/cooldown e rankeia por score.
+
+    Passa user_priorities para score_tarefa().
+    """
     mention_counts = state.get("mention_counts", {})
     ids_cooldown = set(delta.get("em_cooldown", []))
     ids_zombies = {z["id"] for z in delta.get("zombies", [])}
 
-    ativas = [t for t in tarefas if t["id"] not in ids_cooldown and t["id"] not in ids_zombies]
+    ativas = [
+        t for t in tarefas
+        if t["id"] not in ids_cooldown and t["id"] not in ids_zombies
+    ]
 
     for t in ativas:
-        t["_score"] = score_tarefa(t, mention_counts)
+        t["_score"] = score_tarefa(t, mention_counts, user_priorities)
 
     ativas.sort(key=lambda x: x["_score"], reverse=True)
     return ativas[:MAX_TAREFAS_PROMPT]
@@ -245,17 +322,27 @@ def montar_contexto_sabado(
     domain_contexts: dict[str, str],
     mention_counts: dict,
     today: str,
+    workspace: dict | None = None,
 ) -> str:
-    """Contexto específico para retrospectiva de sábado."""
+    """Contexto específico para retrospectiva de sábado.
+
+    Recebe workspace para injetar USER.md no contexto do fim de semana.
+    """
     mc = mention_counts
 
-    # Numeros primeiro (sabado analitico)
     total_abertas = len(tarefas_rankeadas)
     zombies_fmt = f"{len(zombies)} tarefas zumbi" if zombies else "sem zumbis"
     novas = len(delta.get("novas", []))
 
     ctx = (
         f"DATA: {today} (Sábado — retrospectiva analítica)\n\n"
+    )
+
+    # Injeta perfil do usuário se disponível
+    if workspace and workspace.get("USER.md"):
+        ctx += f"=== PERFIL ===\n{workspace['USER.md']}\n\n"
+
+    ctx += (
         f"=== NÚMEROS DA SEMANA ===\n"
         f"- Abertas: {total_abertas}\n"
         f"- Novas: {novas}\n"
@@ -290,8 +377,12 @@ def montar_contexto_domingo(
     domain_contexts: dict[str, str],
     mention_counts: dict,
     today: str,
+    workspace: dict | None = None,
 ) -> str:
-    """Contexto específico para planejamento de domingo."""
+    """Contexto específico para planejamento de domingo.
+
+    Recebe workspace para injetar USER.md.
+    """
     mc = mention_counts
     hoje_date = datetime.strptime(today, "%Y-%m-%d").date()
     proxima_semana = hoje_date + timedelta(days=7)
@@ -335,13 +426,20 @@ def montar_contexto_domingo(
 
     ctx = (
         f"DATA: {today} (Domingo — planejamento estratégico)\n\n"
+    )
+
+    # Injeta perfil do usuário
+    if workspace and workspace.get("USER.md"):
+        ctx += f"=== PERFIL ===\n{workspace['USER.md']}\n\n"
+
+    ctx += (
         f"SEMANA QUE VEM: {deadlines_count} deadlines | "
         f"{len(tarefas_rankeadas)} tarefas abertas | {len(zombies)} zumbis\n\n"
     )
 
     if carga_reduzida:
         ctx += (
-            f"ALERTA: Check Semanal com media < 5. "
+            f"ALERTA: Check Semanal com média < 5. "
             f"Reduzir carga: {max_prioridades} prioridades em vez de 3. Sugerir descanso.\n\n"
         )
 
@@ -684,6 +782,11 @@ async def run_async(
     workspace = carregar_workspace_files(config)
     print(f"   Carregados: {list(workspace.keys())}")
 
+    # Extrai prioridades do usuário para scoring personalizado
+    user_priorities = parse_user_priorities(workspace.get("USER.md", ""))
+    if user_priorities:
+        print(f"   [user] Prioridades detectadas: {user_priorities[:5]}")
+
     # Calendar (opcional)
     calendar_events = []
     calendar_ctx = ""
@@ -737,20 +840,38 @@ async def run_async(
 
     # Filtra e rankeia
     print("\n   Filtrando e rankeando...")
-    tarefas_rankeadas = filtrar_e_rankear(tarefas, state, delta)
+    tarefas_rankeadas = filtrar_e_rankear(tarefas, state, delta, user_priorities)
     print(f"   {len(tarefas_rankeadas)} tarefas enviadas ao LLM")
 
-    # Weekly: coleta tarefas concluídas
+    # Coleta tarefas concluídas (para event engine + weekly review)
     completed_tasks: list[dict] = []
-    if weekly and "tasks" in domain_instances:
-        print("\n   Coletando tarefas concluídas...")
+    if "tasks" in domain_instances:
         try:
             all_done = await domain_instances["tasks"].collect_completed()
-            # Filtra: só as que estavam no mention_counts (foram briefadas recentemente)
             completed_tasks = [t for t in all_done if t["id"] in mention_counts]
-            print(f"   [weekly] {len(completed_tasks)} concluídas recentemente (de {len(all_done)} done)")
+            if weekly:
+                print(f"   [weekly] {len(completed_tasks)} concluídas recentemente")
         except Exception as e:
-            print(f"   [weekly] Erro ao coletar concluídas: {e}")
+            print(f"   [tasks] Erro ao coletar concluídas: {e}")
+
+    # Event engine — eventos especiais de personalidade
+    event_result = None
+    try:
+        event_ctx = build_event_context(
+            tarefas=tarefas_rankeadas,
+            completed_tasks=completed_tasks,
+            mention_counts=mention_counts,
+            state=state,
+            delta=delta,
+            domain_analyses=domain_analyses,
+            weekday_num=dia_num,
+        )
+        engine = EventEngine()
+        event_result = engine.evaluate(event_ctx)
+        if event_result:
+            print(f"   [event] {event_result.type.upper()}: {event_result.reason}")
+    except Exception as e:
+        print(f"   [event] Erro no event engine: {e}")
 
     # Research Packs (RADAR section)
     research_ctx = ""
@@ -790,6 +911,7 @@ async def run_async(
             domain_contexts,
             mention_counts,
             hoje,
+            workspace=workspace,
         )
     elif dia_num == 6:
         contexto = montar_contexto_domingo(
@@ -798,6 +920,7 @@ async def run_async(
             domain_contexts,
             mention_counts,
             hoje,
+            workspace=workspace,
         )
     else:
         contexto = montar_contexto(
@@ -810,6 +933,10 @@ async def run_async(
             hoje,
             dia_num,
         )
+
+    # Injeta evento especial no contexto
+    if event_result:
+        contexto += f"\n\n{event_result.signal}"
 
     # Gera briefing via LLM
     print("\n   Gerando briefing via LLM...")
@@ -840,6 +967,13 @@ async def run_async(
 
         # Salva histórico
         save_history(mensagem)
+
+        # Marca evento como usado
+        if event_result:
+            try:
+                EventEngine().mark_used(event_result)
+            except Exception as e:
+                print(f"   [event] Erro ao salvar evento: {e}")
 
         # Observabilidade
         mc = state.get("mention_counts", {})

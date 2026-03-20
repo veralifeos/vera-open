@@ -95,7 +95,7 @@ def test_preset_executive():
     prompt = get_persona_prompt("executive", "Vera", 400)
     assert "Vera" in prompt
     assert "400" in prompt
-    assert "secretaria executiva" in prompt.lower()
+    assert "operadora pessoal executiva" in prompt.lower()
 
 
 def test_preset_coach():
@@ -109,7 +109,7 @@ def test_preset_coach():
 def test_preset_desconhecido_usa_executive():
     """Preset desconhecido fallback para executive."""
     prompt = get_persona_prompt("unknown", "Bot", 300)
-    assert "secretaria executiva" in prompt.lower()
+    assert "operadora pessoal executiva" in prompt.lower()
 
 
 def test_custom_sobrescreve_preset():
