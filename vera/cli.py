@@ -21,6 +21,9 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 
+from vera.packs_cli import app as packs_app
+app.add_typer(packs_app, name="packs")
+
 
 def version_callback(value: bool) -> None:
     if value:
