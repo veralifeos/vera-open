@@ -968,6 +968,26 @@ async def run_async(
         # Salva histórico
         save_history(mensagem)
 
+        # Record observation for feedback loop
+        try:
+            from vera.feedback.collector import ObservationCollector
+            ObservationCollector().record({
+                "tasks_suggested": [t["id"] for t in tarefas_rankeadas],
+                "tasks_completed": [t["id"] for t in completed_tasks],
+                "energy_score": domain_analyses.get("check", {}).get("energia", 0),
+                "dia_num": dia_num,
+                "pack_results": {
+                    name: len([l for l in ctx.strip().split("\n") if l.strip()])
+                    for name, ctx in domain_contexts.items() if ctx.strip()
+                },
+                "mention_counts_snapshot": {
+                    tid: mc.get("count", 0)
+                    for tid, mc in mention_counts.items()
+                },
+            })
+        except Exception as e:
+            print(f"   [feedback] Erro ao registrar observação: {e}")
+
         # Marca evento como usado
         if event_result:
             try:

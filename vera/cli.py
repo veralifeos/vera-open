@@ -659,6 +659,59 @@ def setup() -> None:
     run_setup_wizard()
 
 
+# ─── Feedback ─────────────────────────────────────────────────────────────────
+
+feedback_app = typer.Typer(name="feedback", help="Feedback loop — analisa padrões e atualiza USER.md")
+app.add_typer(feedback_app, name="feedback")
+
+
+@feedback_app.command("analyze")
+def feedback_analyze() -> None:
+    """Roda análise de padrões e atualiza seção ## Feedback loop do USER.md."""
+    from vera.feedback.loop import run_feedback_loop
+
+    result = run_feedback_loop()
+    typer.echo(f"Sinais detectados: {result['signals_detected']}")
+    typer.echo(f"Inferências adicionadas: {result['inferences_added']}")
+    typer.echo(f"Inferências removidas: {result['inferences_removed']}")
+    typer.echo(f"Total ativas: {result['total_active']}")
+
+
+@feedback_app.command("status")
+def feedback_status() -> None:
+    """Mostra inferências ativas e total de observações."""
+    import json
+
+    obs_path = Path("state/observations.json")
+    inf_path = Path("state/inferences.json")
+
+    if obs_path.exists():
+        data = json.loads(obs_path.read_text(encoding="utf-8"))
+        typer.echo(f"Observações: {len(data.get('observations', []))}")
+    else:
+        typer.echo("Observações: 0 (nenhum briefing registrado ainda)")
+
+    if inf_path.exists():
+        data = json.loads(inf_path.read_text(encoding="utf-8"))
+        active = data.get("active", [])
+        typer.echo(f"Inferências ativas: {len(active)}")
+        for inf in active:
+            typer.echo(f"  - [{inf.get('type', '?')}] {inf.get('text', '')[:80]}")
+    else:
+        typer.echo("Inferências ativas: 0")
+
+
+@feedback_app.command("clear")
+def feedback_clear() -> None:
+    """Remove todas as inferências ativas."""
+    inf_path = Path("state/inferences.json")
+    if inf_path.exists():
+        inf_path.write_text('{"active": []}', encoding="utf-8")
+        typer.echo("Inferências limpas.")
+    else:
+        typer.echo("Nenhuma inferência para limpar.")
+
+
 # ─── Doctor ──────────────────────────────────────────────────────────────────
 
 

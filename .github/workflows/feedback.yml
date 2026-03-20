@@ -1,0 +1,44 @@
+name: Vera Feedback Loop
+
+on:
+  schedule:
+    - cron: "0 20 * * 0"  # Sunday 20:00 UTC = 17:00 BRT
+  workflow_dispatch:
+
+concurrency:
+  group: vera-feedback
+  cancel-in-progress: false
+
+env:
+  VERA_CONFIG: config/config.ci.yaml
+  NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+jobs:
+  feedback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run feedback analysis
+        run: uv run python -m vera feedback analyze
+
+      - name: Commit state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f state/ workspace/USER.md || true
+          git diff --cached --quiet || git commit -m "chore: update feedback state [skip ci]"
+          git push
