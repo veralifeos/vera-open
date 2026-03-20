@@ -413,6 +413,36 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
 .footer-links a:hover { color: var(--text); }
 .footer-copy { font-size: 12px; color: var(--dim); }
 
+/* GATE MODAL */
+#gate-overlay { display:none;position:fixed;inset:0;z-index:900;align-items:center;justify-content:center;background:rgba(8,14,22,.88);backdrop-filter:blur(10px);padding:24px; }
+#gate-overlay.open { display:flex; }
+#gate-box { background:var(--card);border:1px solid var(--border);border-radius:18px;padding:44px 48px;width:100%;max-width:440px;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.5);animation:gate-in .25s ease; }
+@keyframes gate-in { from{opacity:0;transform:translateY(16px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+#gate-close { position:absolute;top:16px;right:18px;background:none;border:none;cursor:pointer;color:var(--dim);font-size:20px;line-height:1;transition:color .15s; }
+#gate-close:hover { color:var(--text); }
+.gate-icon { width:48px;height:48px;margin-bottom:20px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(255,87,34,.4)); }
+.gate-h { font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:8px; }
+.gate-h em { font-style:italic;color:var(--accent); }
+.gate-sub { font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:28px; }
+.gate-field { margin-bottom:14px; }
+.gate-label { display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:6px; }
+.gate-input { width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;box-sizing:border-box; }
+.gate-input::placeholder { color:var(--dim); }
+.gate-input:focus { border-color:var(--accent); }
+.gate-submit { width:100%;margin-top:8px;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:13px;font-family:var(--font-mono);font-size:13px;font-weight:500;letter-spacing:.05em;cursor:pointer;transition:opacity .2s; }
+.gate-submit:hover { opacity:.88; }
+.gate-submit:disabled { opacity:.5;cursor:default; }
+.gate-note { text-align:center;font-family:var(--font-mono);font-size:10px;color:var(--dim);margin-top:14px;letter-spacing:.06em; }
+.gate-success { text-align:center;padding:16px 0; }
+.gate-success .check { font-size:36px;margin-bottom:14px; }
+.gate-success .msg { font-size:15px;color:var(--text);margin-bottom:8px; }
+.gate-success .links { display:flex;flex-direction:column;gap:10px;margin-top:24px; }
+.gate-success .links a { display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;text-decoration:none;font-size:14px;color:var(--text);transition:border-color .2s; }
+.gate-success .links a:hover { border-color:var(--accent); }
+.gate-success .links a span { font-family:var(--font-mono);font-size:10px;color:var(--muted);display:block;margin-top:2px; }
+.gate-success .links img { width:24px;height:24px;border-radius:6px;flex-shrink:0; }
+@media (max-width:480px) { #gate-box{padding:32px 24px;} }
+
 /* STICKY MOBILE CTA */
 .sticky-cta { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; padding: 12px 16px; background: rgba(15,26,40,.97); border-top: 1px solid var(--border); backdrop-filter: blur(12px); }
 .sticky-cta-inner { display: flex; gap: 10px; }
@@ -612,7 +642,7 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
           <span class="t-pt">Vera roda enquanto você dorme. Acorde sabendo o que importa: vagas, notícias, mercado, sua semana. Sintetizado por IA, entregue no Telegram.</span>
         </p>
         <div class="hero-ctas anim anim-delay-3">
-          <a href="https://github.com/veralifeos/vera-open" class="btn-primary" target="_blank">
+          <a href="#" class="btn-primary" onclick="openGate(event)">
             <span class="t-en">Get started free</span>
             <span class="t-pt">Começar grátis</span>
             →
@@ -1120,11 +1150,11 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
         <span class="t-pt">Vera é grátis, open-source e projetada para rodar por anos sem manutenção. Configure uma vez. Acorde melhor todo dia.</span>
       </p>
       <div class="cta-final-btns anim anim-delay-3">
-        <a href="https://github.com/veralifeos/vera-open" class="btn-primary" target="_blank">
-          <span class="t-en">View on GitHub</span><span class="t-pt">Ver no GitHub</span> →
+        <a href="#" class="btn-primary" onclick="openGate(event)">
+          <span class="t-en">Get started free</span><span class="t-pt">Começar grátis</span> →
         </a>
-        <a href="https://same-tiger-545.notion.site" class="btn-secondary" target="_blank">
-          <span class="t-en">Notion template</span><span class="t-pt">Template Notion</span>
+        <a href="https://github.com/veralifeos/vera-open" class="btn-secondary" target="_blank">
+          <span class="t-en">View on GitHub</span><span class="t-pt">Ver no GitHub</span>
         </a>
         <a href="/setup" class="btn-secondary" target="_blank">
           <span class="t-en">Setup Guide</span><span class="t-pt">Guia de Setup</span>
@@ -1213,7 +1243,7 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
 <!-- STICKY MOBILE CTA -->
 <div class="sticky-cta">
   <div class="sticky-cta-inner">
-    <a href="https://github.com/veralifeos/vera-open" class="btn-primary" target="_blank">
+    <a href="#" class="btn-primary" onclick="openGate(event)">
       <span class="t-en">Get started</span><span class="t-pt">Começar</span>
     </a>
     <a href="/setup" class="btn-secondary">
@@ -1221,6 +1251,82 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
     </a>
   </div>
 </div>
+
+<!-- GATE MODAL -->
+<div id="gate-overlay" onclick="closeGateOutside(event)" role="dialog" aria-modal="true">
+  <div id="gate-box">
+    <button id="gate-close" onclick="closeGate()" aria-label="Close">&times;</button>
+    <div id="gate-form-view">
+      <img src="assets/VeraIUcon-02.webp" class="gate-icon" alt="Vera">
+      <div class="gate-h t-en">One briefing.<br><em>Every morning.</em></div>
+      <div class="gate-h t-pt">Um briefing.<br><em>Toda manhã.</em></div>
+      <div class="gate-sub t-en">Leave your details to access the repo and Notion template.</div>
+      <div class="gate-sub t-pt">Deixe seus dados para acessar o repositório e o template Notion.</div>
+      <div class="gate-field">
+        <label class="gate-label t-en" for="g-name">Name</label>
+        <label class="gate-label t-pt" for="g-name">Nome</label>
+        <input class="gate-input" id="g-name" type="text" autocomplete="name" placeholder="Fernando Fidelis">
+      </div>
+      <div class="gate-field">
+        <label class="gate-label t-en" for="g-email">Email</label>
+        <label class="gate-label t-pt" for="g-email">Email</label>
+        <input class="gate-input" id="g-email" type="email" autocomplete="email" placeholder="fernando@email.com">
+      </div>
+      <div class="gate-field">
+        <label class="gate-label t-en" for="g-role">What do you do?</label>
+        <label class="gate-label t-pt" for="g-role">O que você faz?</label>
+        <input class="gate-input" id="g-role" type="text" placeholder="Ex: Product Designer, Dev, Ops...">
+      </div>
+      <button class="gate-submit" id="g-btn" onclick="submitGate()">
+        <span class="t-en">Access →</span><span class="t-pt">Acessar →</span>
+      </button>
+      <div class="gate-note t-en">Open source · No spam · Unsubscribe anytime</div>
+      <div class="gate-note t-pt">Open source · Sem spam · Cancele quando quiser</div>
+    </div>
+    <div id="gate-success-view" style="display:none">
+      <div class="gate-success">
+        <div class="check">✓</div>
+        <div class="msg t-en">You're in. Here's how to start:</div>
+        <div class="msg t-pt">Tudo certo. Veja como começar:</div>
+        <div class="links">
+          <a href="https://chatgpt.com/g/g-69bccc99698c8191b02717a0c7523395-vera-setup-assistant" target="_blank">
+            <img src="assets/VeraIUcon-02.webp" alt="">
+            <div>
+              <span class="t-en">Setup Assistant (GPT)</span><span class="t-pt">Assistente de Setup (GPT)</span>
+              <span class="t-en">Guided installation, step by step</span><span class="t-pt">Instalação guiada, passo a passo</span>
+            </div>
+          </a>
+          <a href="/setup">
+            <div>
+              <span class="t-en" style="color:var(--text)">Setup Guide</span><span class="t-pt" style="color:var(--text)">Guia de Setup</span>
+              <span>getvera.dev/setup</span>
+            </div>
+          </a>
+          <a href="https://github.com/veralifeos/vera-open" target="_blank">
+            <div>
+              <span class="t-en" style="color:var(--text)">GitHub — vera-open</span><span class="t-pt" style="color:var(--text)">GitHub — vera-open</span>
+              <span class="t-en">Repository · docs · source code</span><span class="t-pt">Repositório · docs · código fonte</span>
+            </div>
+          </a>
+          <a href="https://same-tiger-545.notion.site/Vera-Life-OS-31b487bf2603816aba1df400b86dbde3" target="_blank">
+            <div>
+              <span class="t-en" style="color:var(--text)">Notion Template</span><span class="t-pt" style="color:var(--text)">Template Notion</span>
+              <span class="t-en">Copy to your workspace · ready to use</span><span class="t-pt">Copie pro seu workspace · pronto pra usar</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function openGate(e){if(e)e.preventDefault();document.getElementById('gate-overlay').classList.add('open');setTimeout(function(){document.getElementById('g-name').focus()},50);document.body.style.overflow='hidden';}
+function closeGate(){document.getElementById('gate-overlay').classList.remove('open');document.body.style.overflow='';}
+function closeGateOutside(e){if(e.target===document.getElementById('gate-overlay'))closeGate();}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeGate();});
+async function submitGate(){var name=document.getElementById('g-name').value.trim();var email=document.getElementById('g-email').value.trim();var role=document.getElementById('g-role').value.trim();if(!email||email.indexOf('@')===-1){document.getElementById('g-email').focus();return;}var btn=document.getElementById('g-btn');btn.disabled=true;btn.innerHTML='<span>...</span>';try{await fetch('https://vera-leads.vera-os-app.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,email:email,role:role,fonte:'LP getvera.dev',lang:document.documentElement.lang||'pt-BR',referrer:document.referrer||'',page:window.location.href})})}catch(err){console.warn('Lead capture error:',err)}document.getElementById('gate-form-view').style.display='none';document.getElementById('gate-success-view').style.display='block';}
+</script>
 
 <script>
 function setLang(lang) {
