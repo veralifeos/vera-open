@@ -218,11 +218,18 @@ vera-open/
 | `vera briefing --weekly` | Weekly review with retrospective and completion stats |
 | `vera status` | System health: last run, tasks, zombies, source alerts |
 | `vera bot` | Start Telegram bot (responds to /status, /next, /help) |
-| `vera feedback` | Analyze briefing accuracy (`--save` to persist results) |
-| `vera research <pack>` | Run a research pack (news, jobs, financial) |
+| `vera feedback analyze` | Run behavioral analysis and update USER.md |
+| `vera feedback status` | Show active inferences and observation count |
+| `vera feedback clear` | Remove all active inferences |
+| `vera research <pack>` | Run a research pack (news, jobs, financial, custom) |
 | `vera research --all` | Run all packs in parallel |
 | `vera research --list` | List available research packs |
 | `vera research <pack> --dry-run` | Run without saving dedup state |
+| `vera packs list` | Table of all packs with install/enable status |
+| `vera packs install <name>` | Install pack (copy example YAML + enable) |
+| `vera packs enable/disable <name>` | Toggle pack without deleting config |
+| `vera packs info <name>` | Show pack description, status, and config |
+| `vera doctor` | System diagnostic with 10 health checks |
 
 ## Troubleshooting
 
@@ -242,54 +249,36 @@ vera-open/
 
 ## Roadmap
 
-**v0.3.0** (current)
-- [x] `vera research --all` — run all packs in parallel
-- [x] `vera briefing --weekly` — real weekly review with completed tasks and metrics
-- [x] `vera status` — system health dashboard
-- [x] `vera bot` — Telegram bot with /status, /next, /help
-- [x] `vera feedback` — briefing accuracy analysis with --save
-- [x] Check Semanal domain (numbers 0-10, trend analysis, load reduction)
-- [x] Saturday analytic retrospective with Check Semanal interpretation
-- [x] Sunday strategic planning with load reduction when Check < 5
-- [x] Consolidated retry module for research HTTP calls
-- [x] 359 tests
+**v0.5.0** (current)
+- [x] Event Engine — [PRAISE] and [IRONY] personality events in briefings
+- [x] Feedback Loop — automated behavioral analysis (5 signals, rule-based inferences)
+- [x] User Priority Scoring — USER.md priorities boost task ranking
+- [x] `vera packs` CLI — list, install, enable, disable, info
+- [x] Custom Research Pack — generic configurable YAML-based monitor
+- [x] Persona rewrite with event integration instructions
+- [x] Landing page at getvera.dev with lead capture
+- [x] 428 tests
 
-**v0.2.1**
-- [x] Full smoke test: every pipeline bug fixed
-- [x] Keyword-only scoring when embedder unavailable
-- [x] GitHub Actions CI fully green
-- [x] `.env` auto-loading with BOM handling
-- [x] SSL bypass for local dev (`VERA_SSL_VERIFY=0`)
+**v0.4.0**
+- [x] `vera setup` overhaul — InquirerPy wizard, Notion auto-provisioning
+- [x] `vera doctor` — 10 health checks with fix hints
+- [x] Config presets (recolocação, briefing pessoal, teste rápido)
 
-**v0.2.0**
-- [x] Research Pack framework (modular, extensible)
-- [x] News/Topic Monitoring Pack (RSS feeds, keyword + embedding scoring)
-- [x] Job Search Pack (9 sources, hybrid 3-layer scoring, Notion auto-save)
-- [x] Financial/Investment Pack (SEC EDGAR, Finnhub, CoinGecko, DeFiLlama)
-- [x] Daily briefing RADAR integration
-- [x] Pack creation guide for contributors
-- [x] 300+ tests
+**v0.3.0**
+- [x] `vera research --all`, `vera briefing --weekly`, `vera status`, `vera bot`
+- [x] Check Semanal domain, Saturday/Sunday specialized modes
+
+**v0.2.x**
+- [x] Research Pack framework (news, jobs, financial)
+- [x] Full smoke test fixes, CI green, keyword-only scoring fallback
 
 **v0.1.0**
-- [x] Daily briefing pipeline with state management
-- [x] Notion backend with auto-discovery
-- [x] Multi-LLM support (Claude + Ollama)
-- [x] Google Calendar integration (optional)
-- [x] Configurable personas (executive/coach/custom)
-- [x] Retry with exponential backoff on all integrations
-- [x] 3-level error alerting via Telegram
-- [x] 3 life domains: Tasks, Pipeline, Contacts
-- [x] Setup wizard + validation
+- [x] Daily briefing pipeline, Notion backend, Claude + Ollama, Telegram delivery
 
-**v0.3** (planned)
+**Next**
 - [ ] Health, Finances, Learning domains
 - [ ] Bidirectional Telegram (reply to mark done, reschedule)
-- [ ] Weekly scoring with trend analysis
-
-**v0.3** (future)
 - [ ] Multi-backend (Airtable, Supabase)
-- [ ] Custom scoring formulas
-- [ ] Dependency tracking between tasks
 - [ ] Web dashboard
 
 ## License

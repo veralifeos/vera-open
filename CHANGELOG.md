@@ -2,6 +2,43 @@
 
 All notable changes to Vera Open.
 
+## [0.5.0] — 2026-03-20
+
+### Added
+
+- **Event Engine** — personality events ([PRAISE] / [IRONY]) injected into briefings:
+  - Praise: zombie resolved, bulk completions, high-mention tasks done, pipeline advances
+  - Irony: chronic tasks, missed deadlines, stale follow-ups, zero-completion weeks
+  - Max 2 events/week, min 2 days between, state persistence in `state/events.json`
+  - Persona prompt updated with event integration instructions
+- **Feedback Loop Automático** — 4-layer behavioral analysis:
+  - `vera/feedback/collector.py` — saves one observation per briefing to `state/observations.json`
+  - `vera/feedback/tracker.py` — detects 5 behavioral signals (carga, prioridade_real, zona_morta, pack_irrelevante, ritmo)
+  - `vera/feedback/patterns.py` — converts signals to inferences (rule-based, no LLM)
+  - `vera/feedback/writer.py` — writes ONLY to `## Feedback loop` section of `workspace/USER.md`, preserves manual content
+  - Minimum 5 observations before any inference fires, max 15 active, 30-day expiry
+  - `vera feedback analyze` / `status` / `clear` CLI commands
+  - GitHub Actions workflow: Sunday 17:00 BRT
+- **User Priority Scoring** — `parse_user_priorities()` extracts keywords from USER.md `## Prioridades do mês`, boosts matching tasks +20 (max +40) in ranking
+- **`vera packs` CLI** — subcommand group for research pack management:
+  - `vera packs list` — table with install/enable status
+  - `vera packs install <name>` — copies example YAML + enables in config.yaml
+  - `vera packs enable/disable <name>` — toggles without deleting config
+  - `vera packs info <name>` — shows description, status, YAML content
+- **Custom Research Pack** — generic configurable monitor (`vera/research/packs/custom/`)
+- **Personas rewrite** — "secretária executiva" → "operadora pessoal executiva", added event instructions with tone examples
+- **Landing page** — getvera.dev on GitHub Pages with lead capture → Notion via Cloudflare Worker
+- **`workspace/USER.example.md`** expanded — feedback loop section, calibrações ativas, domínios ativos
+
+### Changed
+
+- Briefing pipeline injects USER.md profile into Saturday/Sunday contexts
+- `completed_tasks` collection moved outside `if weekly:` block (available for event engine)
+- Inference dedup by type+target (stable across weeks, no duplicates)
+- Task titles resolved in feedback signals (not raw IDs)
+- Test count: 410 → 428
+- Version bump: 0.4.0 → 0.5.0
+
 ## [0.4.0] — 2026-03-18
 
 ### Added

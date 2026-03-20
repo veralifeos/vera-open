@@ -196,16 +196,51 @@ Numbers first: open vs closed tasks, job funnel, Check Semanal interpretation (0
 - `vera/source_health.py` -- monitors sources with consecutive zeros
 - `vera/last_run.py` -- observability per execution
 
+## Event Engine
+
+`vera/event_engine.py` injects personality events into briefings:
+
+- **[PRAISE]** -- factual recognition of real progress (zombie resolved, bulk completions, pipeline advance)
+- **[IRONY]** -- dry irony about operational patterns (chronic tasks, missed deadlines, stale follow-ups)
+- Guards: max 2 events/week, min 2 days between, suppressed when energy < 4 or avg task score > 80
+- State: `state/events.json` tracks week counter, trigger IDs (dedup), last event date
+- Integration: `build_event_context()` constructs context dict, `EventEngine.evaluate()` returns `EventResult | None`, signal injected into briefing context before LLM generation
+
+## Feedback Loop
+
+`vera/feedback/` -- automated behavioral analysis (4 layers):
+
+1. **ObservationCollector** (`collector.py`) -- saves one observation per briefing to `state/observations.json`. Schema: tasks_suggested, tasks_completed, energy_score, dia_num, pack_results, mention_counts_snapshot, task_titles. Keeps last 90 days.
+
+2. **BehaviorTracker** (`tracker.py`) -- detects 5 behavioral signals (minimum 5 observations):
+   - `carga`: avg energy < 5 in last 7 days with 3+ briefings
+   - `prioridade_real`: task completed after 4+ mentions
+   - `zona_morta`: task with 7+ mentions, never completed
+   - `pack_irrelevante`: pack with 0 results in 5+ consecutive runs
+   - `ritmo`: 80%+ completions on same weekday across 14+ days
+
+3. **PatternEngine** (`patterns.py`) -- converts signals to inferences (rule-based, no LLM). v1 generates for carga, prioridade_real, zona_morta. Dedup by type+target (stable across weeks). Expiry: 30 days.
+
+4. **UserProfileWriter** (`writer.py`) -- writes ONLY to `## Feedback loop` section of `workspace/USER.md`. Preserves manual content (calibrations, notes). Max 15 active inferences. Each inference: `- [inferido YYYY-MM-DD] {text}` with "remova esta linha se discordar".
+
+## Packs CLI
+
+`vera/packs_cli.py` -- Typer sub-app for research pack management:
+- `vera packs list` -- table with pack name, config status, enabled status, description
+- `vera packs install <name>` -- copies example YAML to active config, enables in config.yaml
+- `vera packs enable/disable <name>` -- toggles without deleting config
+- `vera packs info <name>` -- shows description, status, and YAML content
+
 ## Testing strategy
 
-- **359 tests**, all in `tests/`
+- **428 tests**, all in `tests/`
 - **Zero external calls** -- everything mocked (AsyncMock, MagicMock, patch)
 - **Fixture patterns**: `_minimal_config()`, `MockBackend`, `MockLLM`, `tmp_path` for state files
-- **Coverage**: config, backends, LLM providers, domains (tasks, pipeline, contacts, check_semanal), state, briefing history, last_run, briefing pipeline, CLI, retry, Telegram, Calendar, workspace, source health, personas, feedback, end-to-end
+- **Coverage**: config, backends, LLM providers, domains (tasks, pipeline, contacts, check_semanal), state, briefing history, last_run, briefing pipeline, CLI, retry, Telegram, Calendar, workspace, source health, personas, event engine, feedback loop, end-to-end
 - Run with: `uv run pytest tests/`
 
 ## Workflows
 
-- `daily.yml` -- research --all + briefing (daily)
-- `weekly.yml` -- briefing --weekly (Saturday)
-- `feedback.yml` -- feedback loop (monthly)
+- `daily.yml` -- research --all + briefing (daily, 12:00 UTC)
+- `weekly.yml` -- briefing --weekly (Saturday, 13:00 UTC)
+- `feedback.yml` -- feedback loop analysis (Sunday, 20:00 UTC)

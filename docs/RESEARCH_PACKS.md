@@ -58,6 +58,33 @@ Features:
 - **Mandatory disclaimer** in every output
 - Dedup with 3-day TTL
 
+### Custom Pack (`custom`)
+
+A generic, fully configurable pack for monitoring any RSS feeds organized by topics. No code required — define topics, keywords, and sources entirely via YAML.
+
+**Config:** `config/packs/custom.yaml` (copy from `custom.example.yaml`)
+
+```bash
+vera packs install custom
+vera research custom --dry-run
+```
+
+Features:
+- Define unlimited topics with keywords and RSS sources
+- Keyword scoring (no embeddings needed)
+- Dedup with configurable TTL
+- Works out of the box with any RSS/Atom feed
+
+### Managing Packs via CLI
+
+```bash
+vera packs list                 # table with install/enable status
+vera packs install <name>       # copies example YAML + enables in config.yaml
+vera packs enable <name>        # enables without re-installing
+vera packs disable <name>       # disables without deleting config
+vera packs info <name>          # shows description, status, YAML content
+```
+
 ## How to Configure
 
 1. Copy the example config for the pack you want:

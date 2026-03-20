@@ -22,7 +22,7 @@ def test_cli_version():
     """--version mostra versão."""
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert "0.4.0" in result.output
+    assert "0.5.0" in result.output
 
 
 def test_cli_briefing_help():
