@@ -87,6 +87,12 @@ a{color:var(--orange);text-decoration:none}a:hover{text-decoration:underline}
 .footer{text-align:center;padding:40px 20px;border-top:1px solid rgba(255,255,255,.06);color:var(--slate-500);font-size:13px}.footer a{color:var(--slate-400)}
 .lang-toggle{position:fixed;top:8px;right:16px;z-index:101;display:flex;gap:2px;background:rgba(17,29,50,.8);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:2px;backdrop-filter:blur(8px);transition:top .3s}.lang-toggle.shifted{top:60px}
 .lang-btn{padding:4px 10px;border-radius:4px;font-size:12px;font-weight:600;color:var(--slate-400);cursor:pointer;border:none;background:transparent;font-family:var(--font-body);transition:all .2s}.lang-btn.active{background:var(--orange);color:#fff}
+.lang-pt{display:none}
+html[lang="pt-BR"] .lang-pt{display:block;display:inline}
+html[lang="pt-BR"] .lang-en{display:none}
+html[lang="pt-BR"] p.lang-pt,html[lang="pt-BR"] div.lang-pt,html[lang="pt-BR"] li.lang-pt,html[lang="pt-BR"] span.lang-pt{display:block}
+html[lang="pt-BR"] p.lang-en,html[lang="pt-BR"] div.lang-en,html[lang="pt-BR"] li.lang-en{display:none}
+html[lang="pt-BR"] span.lang-pt{display:inline}
 </style>
 </head>
 <body>
@@ -106,106 +112,191 @@ a{color:var(--orange);text-decoration:none}a:hover{text-decoration:underline}
 </section>
 
 <nav class="progress-bar" id="progressBar"><div class="progress-inner">
-<div class="progress-step active" data-step="1" onclick="scrollToStep(1)"><div class="progress-dot"><span class="nm">1</span><span class="ck">&#10003;</span></div><span class="progress-label">Install</span></div><div class="progress-line"></div>
-<div class="progress-step" data-step="2" onclick="scrollToStep(2)"><div class="progress-dot"><span class="nm">2</span><span class="ck">&#10003;</span></div><span class="progress-label">Clone</span></div><div class="progress-line"></div>
-<div class="progress-step" data-step="3" onclick="scrollToStep(3)"><div class="progress-dot"><span class="nm">3</span><span class="ck">&#10003;</span></div><span class="progress-label">Credentials</span></div><div class="progress-line"></div>
-<div class="progress-step" data-step="4" onclick="scrollToStep(4)"><div class="progress-dot"><span class="nm">4</span><span class="ck">&#10003;</span></div><span class="progress-label">Validate</span></div><div class="progress-line"></div>
+<div class="progress-step active" data-step="1" onclick="scrollToStep(1)"><div class="progress-dot"><span class="nm">1</span><span class="ck">&#10003;</span></div><span class="progress-label" data-en="Install" data-pt="Instalar">Install</span></div><div class="progress-line"></div>
+<div class="progress-step" data-step="2" onclick="scrollToStep(2)"><div class="progress-dot"><span class="nm">2</span><span class="ck">&#10003;</span></div><span class="progress-label" data-en="Clone" data-pt="Clonar">Clone</span></div><div class="progress-line"></div>
+<div class="progress-step" data-step="3" onclick="scrollToStep(3)"><div class="progress-dot"><span class="nm">3</span><span class="ck">&#10003;</span></div><span class="progress-label" data-en="Credentials" data-pt="Credenciais">Credentials</span></div><div class="progress-line"></div>
+<div class="progress-step" data-step="4" onclick="scrollToStep(4)"><div class="progress-dot"><span class="nm">4</span><span class="ck">&#10003;</span></div><span class="progress-label" data-en="Validate" data-pt="Validar">Validate</span></div><div class="progress-line"></div>
 <div class="progress-step" data-step="5" onclick="scrollToStep(5)"><div class="progress-dot"><span class="nm">5</span><span class="ck">&#10003;</span></div><span class="progress-label">Briefing</span></div>
 </div></nav>
 
 <div class="content-area">
 <div class="os-row"><div class="os-badge"><span data-en="Detected:" data-pt="Detectado:">Detected:</span> <strong id="detectedOS">--</strong></div></div>
-<div class="terminal-note"><div class="note-box"><strong data-en="New to this?" data-pt="Primeira vez?">New to this?</strong> <span data-en="This guide uses a terminal." data-pt="Este guia usa um terminal.">This guide uses a terminal -- a text window for commands.</span><br><strong>Windows:</strong> <code>Win+R</code> then <code>cmd</code>. <strong>macOS:</strong> <code>Cmd+Space</code> then <code>Terminal</code>. <strong>Linux:</strong> <code>Ctrl+Alt+T</code>.<br><span data-en="Every dark code block = copy and paste into that window." data-pt="Todo bloco escuro = copiar e colar nessa janela.">Every dark code block = copy and paste into that window.</span></div></div>
+<div class="terminal-note"><div class="note-box">
+<span class="lang-en"><strong>New to this?</strong> This guide uses a terminal — a text window for commands.<br><strong>Windows:</strong> <code>Win+R</code> then <code>cmd</code>. <strong>macOS:</strong> <code>Cmd+Space</code> then <code>Terminal</code>. <strong>Linux:</strong> <code>Ctrl+Alt+T</code>.<br>Every dark code block = copy and paste into that window.</span>
+<span class="lang-pt"><strong>Primeira vez?</strong> Este guia usa um terminal — uma janela de texto para comandos.<br><strong>Windows:</strong> <code>Win+R</code> e digite <code>cmd</code>. <strong>macOS:</strong> <code>Cmd+Space</code> e digite <code>Terminal</code>. <strong>Linux:</strong> <code>Ctrl+Alt+T</code>.<br>Todo bloco escuro = copiar e colar nessa janela.</span>
+</div></div>
 <main class="steps">
 
-<section class="step active-step" id="step1" data-step="1"><div class="geo-tri"><svg viewBox="0 0 32 32"><polygon points="16,2 30,30 2,30" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/></svg></div><div class="step-header"><div class="step-number">1</div><div><div class="step-title" data-en="Install prerequisites" data-pt="Instalar pre-requisitos">Install prerequisites</div><div class="step-time">~5 min</div></div></div><div class="step-body">
-<p data-en="Three tools: Python (Vera's language), Git (download code), uv (manage dependencies)." data-pt="Tres ferramentas: Python, Git e uv.">Three tools: Python (Vera's language), Git (download code), uv (manage dependencies).</p>
+<section class="step active-step" id="step1" data-step="1"><div class="geo-tri"><svg viewBox="0 0 32 32"><polygon points="16,2 30,30 2,30" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/></svg></div><div class="step-header"><div class="step-number">1</div><div><div class="step-title" data-en="Install prerequisites" data-pt="Instalar pré-requisitos">Install prerequisites</div><div class="step-time">~5 min</div></div></div><div class="step-body">
+<p class="lang-en">Three tools: Python (Vera's language), Git (download code), uv (manage dependencies).</p>
+<p class="lang-pt">Três ferramentas: Python (linguagem da Vera), Git (baixar código), uv (gerenciar dependências).</p>
 <h3>Python 3.11+</h3>
 <div class="os-tabs"><button class="os-tab" data-os="windows" onclick="setOS('windows')">Windows</button><button class="os-tab" data-os="macos" onclick="setOS('macos')">macOS</button><button class="os-tab" data-os="linux" onclick="setOS('linux')">Linux</button></div>
-<div class="os-content" data-os="windows"><p>Download from <a href="https://www.python.org/downloads/" target="_blank">python.org/downloads</a>. Check <strong>"Add Python to PATH"</strong>.</p></div>
-<div class="os-content" data-os="macos"><div class="code-block"><pre>brew install python</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div></div>
-<div class="os-content" data-os="linux"><div class="code-block"><pre>sudo apt install python3 python3-pip</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div></div>
+<div class="os-content" data-os="windows">
+<p class="lang-en">Download from <a href="https://www.python.org/downloads/" target="_blank">python.org/downloads</a>. Check <strong>"Add Python to PATH"</strong>.</p>
+<p class="lang-pt">Baixe em <a href="https://www.python.org/downloads/" target="_blank">python.org/downloads</a>. Marque <strong>"Add Python to PATH"</strong>.</p>
+</div>
+<div class="os-content" data-os="macos"><div class="code-block"><pre>brew install python</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" onclick="copyCode(this)">Copy</button></div></div>
+<div class="os-content" data-os="linux"><div class="code-block"><pre>sudo apt install python3 python3-pip</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" onclick="copyCode(this)">Copy</button></div></div>
 <h3>Git</h3>
-<div class="os-content" data-os="windows"><p>Download from <a href="https://git-scm.com/download/win" target="_blank">git-scm.com</a>, install with defaults.</p></div>
-<div class="os-content" data-os="macos"><div class="code-block"><pre>brew install git</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div></div>
-<div class="os-content" data-os="linux"><div class="code-block"><pre>sudo apt install git</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div></div>
+<div class="os-content" data-os="windows">
+<p class="lang-en">Download from <a href="https://git-scm.com/download/win" target="_blank">git-scm.com</a>, install with defaults.</p>
+<p class="lang-pt">Baixe em <a href="https://git-scm.com/download/win" target="_blank">git-scm.com</a>, instale com padrões.</p>
+</div>
+<div class="os-content" data-os="macos"><div class="code-block"><pre>brew install git</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" onclick="copyCode(this)">Copy</button></div></div>
+<div class="os-content" data-os="linux"><div class="code-block"><pre>sudo apt install git</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" onclick="copyCode(this)">Copy</button></div></div>
 <h3>uv</h3>
-<div class="os-content" data-os="windows"><p>Open <strong>PowerShell</strong> (not cmd):</p><div class="code-block"><pre>powershell -c "irm https://astral.sh/uv/install.ps1 | iex"</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div></div>
-<div class="os-content" data-os="macos"><div class="code-block"><pre>curl -LsSf https://astral.sh/uv | sh</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div></div>
-<div class="os-content" data-os="linux"><div class="code-block"><pre>curl -LsSf https://astral.sh/uv | sh</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div></div>
-<h3>Verify</h3>
-<p><strong>Close and reopen terminal</strong>, then:</p>
+<div class="os-content" data-os="windows">
+<p class="lang-en">Open <strong>PowerShell</strong> (not cmd):</p>
+<p class="lang-pt">Abra o <strong>PowerShell</strong> (não o cmd):</p>
+<div class="code-block"><pre>powershell -c "irm https://astral.sh/uv/install.ps1 | iex"</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" onclick="copyCode(this)">Copy</button></div></div>
+<div class="os-content" data-os="macos"><div class="code-block"><pre>curl -LsSf https://astral.sh/uv | sh</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" onclick="copyCode(this)">Copy</button></div></div>
+<div class="os-content" data-os="linux"><div class="code-block"><pre>curl -LsSf https://astral.sh/uv | sh</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" onclick="copyCode(this)">Copy</button></div></div>
+<h3 data-en="Verify" data-pt="Verificar">Verify</h3>
+<p class="lang-en"><strong>Close and reopen terminal</strong>, then:</p>
+<p class="lang-pt"><strong>Feche e reabra o terminal</strong>:</p>
 <div class="code-block"><pre>python --version
 git --version
-uv --version</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<div class="success-signal">Version numbers for all three. Python must be 3.11+.</div>
-<div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)">Stuck?</button><div class="accordion-content"><p>"python" not recognized (Windows): reopen terminal. If broken, reinstall with "Add to PATH".</p><p>No Homebrew (macOS): <a href="https://brew.sh" target="_blank">brew.sh</a> first.</p><p>Linux: try <code>python3 --version</code>.</p></div></div>
-<div class="done-check"><input type="checkbox" id="done1" onchange="markDone(1)"><label for="done1">All three installed</label></div>
+uv --version</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" onclick="copyCode(this)">Copy</button></div>
+<div class="success-signal">
+<span class="lang-en">Version numbers for all three. Python must be 3.11+.</span>
+<span class="lang-pt">Números de versão nos três. Python deve ser 3.11+.</span>
+</div>
+<div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><span data-en="Stuck?" data-pt="Travou?">Stuck?</span></button><div class="accordion-content">
+<p class="lang-en">"python" not recognized (Windows): reopen terminal. If broken, reinstall with "Add to PATH".</p>
+<p class="lang-pt">"python" não reconhecido (Windows): reabra o terminal. Se não funcionar, reinstale com "Add to PATH".</p>
+<p class="lang-en">No Homebrew (macOS): <a href="https://brew.sh" target="_blank">brew.sh</a> first.</p>
+<p class="lang-pt">Sem Homebrew (macOS): instale via <a href="https://brew.sh" target="_blank">brew.sh</a> primeiro.</p>
+<p class="lang-en">Linux: try <code>python3 --version</code>.</p>
+<p class="lang-pt">Linux: tente <code>python3 --version</code>.</p>
+</div></div>
+<div class="done-check"><input type="checkbox" id="done1" onchange="markDone(1)"><label for="done1" data-en="All three installed" data-pt="Todos instalados">All three installed</label></div>
 </div></section>
 
-<section class="step" id="step2" data-step="2"><div class="geo-tri"><svg viewBox="0 0 32 32"><polygon points="16,2 30,30 2,30" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/></svg></div><div class="step-header"><div class="step-number">2</div><div><div class="step-title" data-en="Get the code" data-pt="Baixar o codigo">Get the code</div><div class="step-time">~5 min</div></div></div><div class="step-body">
+<section class="step" id="step2" data-step="2"><div class="geo-tri"><svg viewBox="0 0 32 32"><polygon points="16,2 30,30 2,30" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/></svg></div><div class="step-header"><div class="step-number">2</div><div><div class="step-title" data-en="Get the code" data-pt="Baixar o código">Get the code</div><div class="step-time">~5 min</div></div></div><div class="step-body">
 <h3>1. Fork</h3>
-<p>Open <a href="https://github.com/veralifeos/vera-open" target="_blank">github.com/veralifeos/vera-open</a>, click <strong>Fork</strong>, then <strong>Create fork</strong>.</p>
-<div class="warn-signal">Need a free <a href="https://github.com" target="_blank" style="color:#fbbf24">GitHub account</a>.</div>
+<p class="lang-en">Open <a href="https://github.com/veralifeos/vera-open" target="_blank">github.com/veralifeos/vera-open</a>, click <strong>Fork</strong>, then <strong>Create fork</strong>.</p>
+<p class="lang-pt">Abra <a href="https://github.com/veralifeos/vera-open" target="_blank">github.com/veralifeos/vera-open</a>, clique em <strong>Fork</strong>, depois <strong>Create fork</strong>.</p>
+<div class="warn-signal">
+<span class="lang-en">Need a free <a href="https://github.com" target="_blank" style="color:#fbbf24">GitHub account</a>.</span>
+<span class="lang-pt">Precisa de uma conta gratuita no <a href="https://github.com" target="_blank" style="color:#fbbf24">GitHub</a>.</span>
+</div>
 <h3>2. Clone</h3>
-<p>Replace <code>YOUR_USERNAME</code>:</p>
+<p class="lang-en">Replace <code>YOUR_USERNAME</code>:</p>
+<p class="lang-pt">Substitua <code>YOUR_USERNAME</code>:</p>
 <div class="code-block"><pre>git clone https://github.com/YOUR_USERNAME/vera-open.git
 cd vera-open
-uv sync</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<div class="success-signal"><code>uv sync</code> finishes without errors = ready.</div>
-<div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)">Fork? Clone? uv sync?</button><div class="accordion-content"><p><strong>Fork</strong> = your copy on GitHub.<br><strong>Clone</strong> = download to your machine.<br><strong>uv sync</strong> = install project dependencies.</p></div></div>
-<div class="done-check"><input type="checkbox" id="done2" onchange="markDone(2)"><label for="done2">Cloned and synced</label></div>
+uv sync</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" onclick="copyCode(this)">Copy</button></div>
+<div class="success-signal">
+<span class="lang-en"><code>uv sync</code> finishes without errors = ready.</span>
+<span class="lang-pt"><code>uv sync</code> termina sem erros = pronto.</span>
+</div>
+<div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)">Fork? Clone? uv sync?</button><div class="accordion-content">
+<p class="lang-en"><strong>Fork</strong> = your copy on GitHub.<br><strong>Clone</strong> = download to your machine.<br><strong>uv sync</strong> = install project dependencies.</p>
+<p class="lang-pt"><strong>Fork</strong> = sua cópia no GitHub.<br><strong>Clone</strong> = baixar para sua máquina.<br><strong>uv sync</strong> = instalar dependências.</p>
+</div></div>
+<div class="done-check"><input type="checkbox" id="done2" onchange="markDone(2)"><label for="done2" data-en="Cloned and synced" data-pt="Clonado e sincronizado">Cloned and synced</label></div>
 </div></section>
 
 <section class="step" id="step3" data-step="3"><div class="geo-tri"><svg viewBox="0 0 32 32"><polygon points="16,2 30,30 2,30" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/></svg></div><div class="step-header"><div class="step-number">3</div><div><div class="step-title" data-en="Get your credentials" data-pt="Obter credenciais">Get your credentials</div><div class="step-time">~15 min</div></div></div><div class="step-body">
-<p>Tokens = passwords that let Vera access each service.</p>
+<p class="lang-en">Tokens = passwords that let Vera access each service.</p>
+<p class="lang-pt">Tokens = senhas que permitem a Vera acessar cada serviço.</p>
 <h3>A. Notion</h3>
-<ol><li><a href="https://www.notion.so" target="_blank">notion.so</a> &#8594; Settings &#8594; Connections &#8594; "Develop or manage integrations"</li><li>New integration &#8594; name "Vera" &#8594; Internal &#8594; Read + Insert + Update &#8594; Save</li><li>Copy token (<code>ntn_</code> or <code>secret_</code>)</li></ol>
-<p><strong>Duplicate template:</strong> <a href="https://same-tiger-545.notion.site/Vera-Life-OS-31b487bf2603816aba1df400b86dbde3" target="_blank">Vera template</a></p>
-<p>Connect integration to <strong>EACH database</strong>: open it &#8594; &#8226;&#8226;&#8226; &#8594; Connections &#8594; "Vera"</p>
-<div class="warn-signal">Connect on each database, not the parent page. #1 mistake.</div>
+<ol class="lang-en"><li><a href="https://www.notion.so" target="_blank">notion.so</a> &#8594; Settings &#8594; Connections &#8594; "Develop or manage integrations"</li><li>New integration &#8594; name "Vera" &#8594; Internal &#8594; Read + Insert + Update &#8594; Save</li><li>Copy token (<code>ntn_</code> or <code>secret_</code>)</li></ol>
+<ol class="lang-pt"><li><a href="https://www.notion.so" target="_blank">notion.so</a> &#8594; Settings &#8594; Connections &#8594; "Develop or manage integrations"</li><li>Nova integração &#8594; nome "Vera" &#8594; Internal &#8594; Read + Insert + Update &#8594; Save</li><li>Copie o token (<code>ntn_</code> ou <code>secret_</code>)</li></ol>
+<p class="lang-en"><strong>Duplicate template:</strong> <a href="https://same-tiger-545.notion.site/Vera-Life-OS-31b487bf2603816aba1df400b86dbde3" target="_blank">Vera template</a></p>
+<p class="lang-pt"><strong>Duplique o template:</strong> <a href="https://same-tiger-545.notion.site/Vera-Life-OS-31b487bf2603816aba1df400b86dbde3" target="_blank">Vera template</a></p>
+<p class="lang-en">Connect integration to <strong>EACH database</strong>: open it &#8594; &#8226;&#8226;&#8226; &#8594; Connections &#8594; "Vera"</p>
+<p class="lang-pt">Conecte a integração em <strong>CADA database</strong>: abra &#8594; &#8226;&#8226;&#8226; &#8594; Connections &#8594; "Vera"</p>
+<div class="warn-signal">
+<span class="lang-en">Connect on each database, not the parent page. #1 mistake.</span>
+<span class="lang-pt">Conecte em cada database, não na página pai. Erro nº 1.</span>
+</div>
 <h3>B. Telegram</h3>
-<ol><li><a href="https://t.me/BotFather" target="_blank">@BotFather</a> &#8594; <code>/newbot</code> &#8594; name + username &#8594; copy token</li><li>Send any message to your bot</li><li>Open in browser:</li></ol>
-<div class="code-block"><pre>https://api.telegram.org/botYOUR_TOKEN/getUpdates</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<p>Find <code>"chat":{"id": 123456789}</code> = your <strong>Chat ID</strong>.</p>
-<div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)">Empty result?</button><div class="accordion-content"><p>Send a message to the bot first, reload. Wait 10s if still empty.</p></div></div>
+<ol class="lang-en"><li><a href="https://t.me/BotFather" target="_blank">@BotFather</a> &#8594; <code>/newbot</code> &#8594; name + username &#8594; copy token</li><li>Send any message to your bot</li><li>Open in browser:</li></ol>
+<ol class="lang-pt"><li><a href="https://t.me/BotFather" target="_blank">@BotFather</a> &#8594; <code>/newbot</code> &#8594; nome + username &#8594; copie o token</li><li>Envie qualquer mensagem pro seu bot</li><li>Abra no navegador:</li></ol>
+<div class="code-block"><pre>https://api.telegram.org/botYOUR_TOKEN/getUpdates</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" onclick="copyCode(this)">Copy</button></div>
+<p class="lang-en">Find <code>"chat":{"id": 123456789}</code> = your <strong>Chat ID</strong>.</p>
+<p class="lang-pt">Procure <code>"chat":{"id": 123456789}</code> = seu <strong>Chat ID</strong>.</p>
+<div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><span data-en="Empty result?" data-pt="Resultado vazio?">Empty result?</span></button><div class="accordion-content">
+<p class="lang-en">Send a message to the bot first, reload. Wait 10s if still empty.</p>
+<p class="lang-pt">Envie uma mensagem pro bot primeiro, recarregue. Espere 10s se ainda vazio.</p>
+</div></div>
 <h3>C. Claude API</h3>
-<ol><li><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> &#8594; create account (free US$5)</li><li>API Keys &#8594; Create Key &#8594; copy (<code>sk-ant-api03-</code>)</li></ol>
-<div class="success-signal">US$5 lasts months (~$0.01-0.03/day).</div>
-<div class="done-check"><input type="checkbox" id="done3" onchange="markDone(3)"><label for="done3">All credentials ready</label></div>
+<ol class="lang-en"><li><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> &#8594; create account (free US$5)</li><li>API Keys &#8594; Create Key &#8594; copy (<code>sk-ant-api03-</code>)</li></ol>
+<ol class="lang-pt"><li><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> &#8594; crie uma conta (US$5 grátis)</li><li>API Keys &#8594; Create Key &#8594; copie (<code>sk-ant-api03-</code>)</li></ol>
+<div class="success-signal">
+<span class="lang-en">US$5 lasts months (~$0.01-0.03/day).</span>
+<span class="lang-pt">US$5 dura meses (~$0.01-0.03/dia).</span>
+</div>
+<div class="done-check"><input type="checkbox" id="done3" onchange="markDone(3)"><label for="done3" data-en="All credentials ready" data-pt="Credenciais prontas">All credentials ready</label></div>
 </div></section>
 
 <section class="step" id="step4" data-step="4"><div class="geo-tri"><svg viewBox="0 0 32 32"><polygon points="16,2 30,30 2,30" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/></svg></div><div class="step-header"><div class="step-number">4</div><div><div class="step-title" data-en="Configure and validate" data-pt="Configurar e validar">Configure and validate</div><div class="step-time">~5 min</div></div></div><div class="step-body">
-<div class="code-block"><pre>uv run vera setup</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<p>Paste each credential when prompted.</p>
-<h3>Test connections</h3>
-<div class="code-block"><pre>uv run vera validate</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<h3>If something fails</h3>
-<div class="code-block"><pre>uv run vera doctor</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<div class="success-signal">10 checks. All [OK] = ready. [FAIL] tells you what to fix.</div>
-<div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)">Common issues</button><div class="accordion-content"><p>"No module named vera" &#8594; <code>uv sync</code> first.</p><p>Notion not found &#8594; connect integration to each database (step 3A).</p><p>Telegram fails &#8594; CHAT_ID must be numeric, not username.</p></div></div>
-<div class="done-check"><input type="checkbox" id="done4" onchange="markDone(4)"><label for="done4">All [OK]</label></div>
+<div class="code-block"><pre>uv run vera setup</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" onclick="copyCode(this)">Copy</button></div>
+<p class="lang-en">Paste each credential when prompted.</p>
+<p class="lang-pt">Cole cada credencial quando solicitado.</p>
+<h3 data-en="Test connections" data-pt="Testar conexões">Test connections</h3>
+<div class="code-block"><pre>uv run vera validate</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" onclick="copyCode(this)">Copy</button></div>
+<h3 data-en="If something fails" data-pt="Se algo falhar">If something fails</h3>
+<div class="code-block"><pre>uv run vera doctor</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" onclick="copyCode(this)">Copy</button></div>
+<div class="success-signal">
+<span class="lang-en">10 checks. All [OK] = ready. [FAIL] tells you what to fix.</span>
+<span class="lang-pt">10 verificações. Tudo [OK] = pronto. [FAIL] diz o que corrigir.</span>
+</div>
+<div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><span data-en="Common issues" data-pt="Problemas comuns">Common issues</span></button><div class="accordion-content">
+<p class="lang-en">"No module named vera" &#8594; <code>uv sync</code> first.</p>
+<p class="lang-pt">"No module named vera" &#8594; rode <code>uv sync</code> primeiro.</p>
+<p class="lang-en">Notion not found &#8594; connect integration to each database (step 3A).</p>
+<p class="lang-pt">Notion não encontrado &#8594; conecte a integração em cada database (passo 3A).</p>
+<p class="lang-en">Telegram fails &#8594; CHAT_ID must be numeric, not username.</p>
+<p class="lang-pt">Telegram falha &#8594; CHAT_ID deve ser numérico, não username.</p>
+</div></div>
+<div class="done-check"><input type="checkbox" id="done4" onchange="markDone(4)"><label for="done4" data-en="All [OK]" data-pt="Tudo [OK]">All [OK]</label></div>
 </div></section>
 
 <section class="step" id="step5" data-step="5"><div class="geo-tri"><svg viewBox="0 0 32 32"><polygon points="16,2 30,30 2,30" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/></svg></div><div class="step-header"><div class="step-number">5</div><div><div class="step-title" data-en="Your first briefing" data-pt="Seu primeiro briefing">Your first briefing</div><div class="step-time">~2 min</div></div></div><div class="step-body">
-<h3>Test (nothing sent)</h3>
-<div class="code-block"><pre>uv run vera briefing --dry-run --force</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<div class="success-signal">Briefing text in terminal = working.</div>
-<h3>Send for real</h3>
-<div class="code-block"><pre>uv run vera briefing --force</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<p>Check Telegram. <strong>That's your first briefing.</strong></p>
-<h3>Next</h3>
-<ul><li><strong>Personalize:</strong> edit <code>workspace/USER.md</code></li><li><strong>Research:</strong> <code>uv run vera packs install jobs</code></li><li><strong>Automate:</strong> GitHub Actions (below)</li><li><strong>Explore:</strong> <code>uv run vera --help</code></li></ul>
-<div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)">GitHub Actions setup</button><div class="accordion-content"><p>Your fork &#8594; Settings &#8594; Secrets and variables &#8594; Actions. Add 4 secrets:</p><div class="code-block"><pre>NOTION_TOKEN
+<h3 data-en="Test (nothing sent)" data-pt="Teste (nada enviado)">Test (nothing sent)</h3>
+<div class="code-block"><pre>uv run vera briefing --dry-run --force</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" onclick="copyCode(this)">Copy</button></div>
+<div class="success-signal">
+<span class="lang-en">Briefing text in terminal = working.</span>
+<span class="lang-pt">Texto do briefing no terminal = funcionando.</span>
+</div>
+<h3 data-en="Send for real" data-pt="Enviar de verdade">Send for real</h3>
+<div class="code-block"><pre>uv run vera briefing --force</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" onclick="copyCode(this)">Copy</button></div>
+<p class="lang-en">Check Telegram. <strong>That's your first briefing.</strong></p>
+<p class="lang-pt">Confira no Telegram. <strong>Esse é seu primeiro briefing.</strong></p>
+<h3 data-en="Next" data-pt="Próximos passos">Next</h3>
+<ul>
+<li class="lang-en"><strong>Personalize:</strong> edit <code>workspace/USER.md</code></li>
+<li class="lang-pt"><strong>Personalize:</strong> edite <code>workspace/USER.md</code></li>
+<li class="lang-en"><strong>Research:</strong> <code>uv run vera packs install jobs</code></li>
+<li class="lang-pt"><strong>Research:</strong> <code>uv run vera packs install jobs</code></li>
+<li class="lang-en"><strong>Automate:</strong> GitHub Actions (below)</li>
+<li class="lang-pt"><strong>Automatize:</strong> GitHub Actions (abaixo)</li>
+<li class="lang-en"><strong>Explore:</strong> <code>uv run vera --help</code></li>
+<li class="lang-pt"><strong>Explore:</strong> <code>uv run vera --help</code></li>
+</ul>
+<div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)"><span data-en="GitHub Actions setup" data-pt="Configurar GitHub Actions">GitHub Actions setup</span></button><div class="accordion-content">
+<p class="lang-en">Your fork &#8594; Settings &#8594; Secrets and variables &#8594; Actions. Add 4 secrets:</p>
+<p class="lang-pt">Seu fork &#8594; Settings &#8594; Secrets and variables &#8594; Actions. Adicione 4 secrets:</p>
+<div class="code-block"><pre>NOTION_TOKEN
 ANTHROPIC_API_KEY
 TELEGRAM_BOT_TOKEN
-TELEGRAM_CHAT_ID</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><p>Actions tab &#8594; "Vera Briefing" &#8594; Enable workflow.</p><div class="success-signal">Vera runs every weekday. Sat = retrospective, Sun = planning.</div></div></div>
-<div class="done-check"><input type="checkbox" id="done5" onchange="markDone(5)"><label for="done5">Briefing received</label></div>
+TELEGRAM_CHAT_ID</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" onclick="copyCode(this)">Copy</button></div>
+<p class="lang-en">Actions tab &#8594; "Vera Briefing" &#8594; Enable workflow.</p>
+<p class="lang-pt">Aba Actions &#8594; "Vera Briefing" &#8594; Enable workflow.</p>
+<div class="success-signal">
+<span class="lang-en">Vera runs every weekday. Sat = retrospective, Sun = planning.</span>
+<span class="lang-pt">Vera roda todo dia útil. Sáb = retrospectiva, Dom = planejamento.</span>
+</div>
+</div></div>
+<div class="done-check"><input type="checkbox" id="done5" onchange="markDone(5)"><label for="done5" data-en="Briefing received" data-pt="Briefing recebido">Briefing received</label></div>
 </div></section>
 
 </main></div>
 
-<a href="https://chatgpt.com/g/g-69bccc99698c8191b02717a0c7523395-vera-setup-assistant" target="_blank" class="help-float">&#128172; Stuck? Ask the Assistant</a>
+<a href="https://chatgpt.com/g/g-69bccc99698c8191b02717a0c7523395-vera-setup-assistant" target="_blank" class="help-float"><span>&#128172;</span> <span data-en="Stuck? Ask the Assistant" data-pt="Travou? Pergunte ao Assistente">Stuck? Ask the Assistant</span></a>
 <footer class="footer"><a href="https://getvera.dev">getvera.dev</a> &#183; <a href="https://github.com/veralifeos/vera-open">GitHub</a> &#183; v0.5.0</footer>
 
 <script>
@@ -214,12 +305,12 @@ var currentOS=localStorage.getItem('vera-os')||detectOS(),currentLang=localStora
 function setOS(os){currentOS=os;localStorage.setItem('vera-os',os);updateOS()}
 function updateOS(){document.getElementById('detectedOS').textContent={windows:'Windows',macos:'macOS',linux:'Linux'}[currentOS]||currentOS;document.querySelectorAll('.os-tab').forEach(function(t){t.classList.toggle('active',t.dataset.os===currentOS)});document.querySelectorAll('.os-content').forEach(function(c){c.classList.toggle('active',c.dataset.os===currentOS)})}
 function setLang(l){currentLang=l;localStorage.setItem('vera-lang',l);updateLang()}
-function updateLang(){document.documentElement.lang=currentLang==='pt'?'pt-BR':'en';document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.textContent.trim().toLowerCase()===currentLang)});document.querySelectorAll('[data-'+currentLang+']').forEach(function(el){var t=el.getAttribute('data-'+currentLang);if(t&&el.children.length===0)el.textContent=t})}
+function updateLang(){document.documentElement.lang=currentLang==='pt'?'pt-BR':'en';document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.textContent.trim().toLowerCase()===currentLang)});document.querySelectorAll('[data-'+currentLang+']').forEach(function(el){var t=el.getAttribute('data-'+currentLang);if(t)el.textContent=t});document.querySelectorAll('.copy-btn').forEach(function(btn){if(!btn.classList.contains('copied')){btn.textContent=currentLang==='pt'?'Copiar':'Copy'}})}
 function markDone(s){var cb=document.getElementById('done'+s);if(cb.checked){if(completedSteps.indexOf(s)<0)completedSteps.push(s)}else{completedSteps=completedSteps.filter(function(x){return x!==s})}localStorage.setItem('vera-steps',JSON.stringify(completedSteps));updateProgress()}
 function updateProgress(){var lines=document.querySelectorAll('.progress-line');for(var i=1;i<=5;i++){var pb=document.querySelector('.progress-step[data-step="'+i+'"]'),sec=document.getElementById('step'+i),cb=document.getElementById('done'+i),done=completedSteps.indexOf(i)>=0;pb.classList.toggle('done',done);sec.classList.toggle('completed',done);if(cb)cb.checked=done;if(i<5)lines[i-1].classList.toggle('done',done)}updateActiveStep()}
 function updateActiveStep(){document.querySelectorAll('.progress-step').forEach(function(p){var s=parseInt(p.dataset.step),d=completedSteps.indexOf(s)>=0;p.classList.toggle('active',s===currentVisibleStep&&!d);p.classList.toggle('visited',s<currentVisibleStep&&!d)});document.querySelectorAll('.step').forEach(function(s){var n=parseInt(s.dataset.step);s.classList.toggle('active-step',n===currentVisibleStep&&completedSteps.indexOf(n)<0)})}
 function scrollToStep(n){var el=document.getElementById('step'+n);if(el)el.scrollIntoView({behavior:'smooth'})}
-function copyCode(btn){navigator.clipboard.writeText(btn.previousElementSibling.textContent).then(function(){btn.textContent='\u2713 Copied!';btn.classList.add('copied');setTimeout(function(){btn.textContent='Copy';btn.classList.remove('copied')},1500)})}
+function copyCode(btn){var copiedEn='\u2713 Copied!',copiedPt='\u2713 Copiado!';navigator.clipboard.writeText(btn.previousElementSibling.textContent).then(function(){btn.textContent=currentLang==='pt'?copiedPt:copiedEn;btn.classList.add('copied');setTimeout(function(){btn.textContent=currentLang==='pt'?'Copiar':'Copy';btn.classList.remove('copied')},1500)})}
 function toggleAccordion(t){t.classList.toggle('open');t.nextElementSibling.classList.toggle('open')}
 var hero=document.getElementById('heroVideo'),bar=document.getElementById('progressBar'),langT=document.getElementById('langToggle');
 window.addEventListener('scroll',function(){var y=window.scrollY,h=hero.offsetHeight,r=Math.min(y/h,1);hero.style.opacity=1-r;hero.style.pointerEvents=r>0.8?'none':'auto';var show=y>h*0.7;bar.classList.toggle('visible',show);langT.classList.toggle('shifted',show)},{passive:true});
