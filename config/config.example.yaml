@@ -24,7 +24,7 @@ llm:
   advanced: "claude"           # For complex analysis (future)
   providers:
     claude:
-      model: "claude-sonnet-4-5-20250929"
+      model: "claude-sonnet-4-6"
       api_key_env: "ANTHROPIC_API_KEY"
     ollama:
       model: "llama3.2:3b"
