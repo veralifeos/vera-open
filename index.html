@@ -300,7 +300,8 @@ section { position: relative; z-index: 1; }
 .packs-header { text-align: center; margin-bottom: 56px; }
 .packs-header .section-p { margin: 0 auto; }
 .packs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
-.pack-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: border-color .25s; }
+.pack-card { background: #1a2d45; border: 1px solid rgba(255,255,255,.1); border-radius: 16px; overflow: hidden; transition: border-color .25s, box-shadow .25s; }
+.pack-card:hover { border-color: rgba(255,255,255,.18); box-shadow: 0 4px 24px rgba(0,0,0,.35); }
 .pack-bar { height: 4px; }
 .pack-bar.jobs { background: var(--green); }
 .pack-bar.news { background: var(--teal); }
@@ -310,9 +311,9 @@ section { position: relative; z-index: 1; }
 .pack-name.jobs { color: var(--green); }
 .pack-name.news { color: var(--teal); }
 .pack-name.finance { color: var(--indigo); }
-.pack-h { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+.pack-h { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: #f1f5f9; margin-bottom: 12px; }
 .pack-vera-quote { font-family: var(--font-display); font-style: italic; font-size: 13px; color: var(--accent); line-height: 1.6; margin-bottom: 16px; padding-left: 12px; border-left: 2px solid var(--accent); }
-.pack-sources { font-family: var(--font-mono); font-size: 10px; color: var(--dim); line-height: 1.8; }
+.pack-sources { font-family: var(--font-mono); font-size: 11px; color: #94a3b8; line-height: 1.8; }
 
 /* PERSONA — with portrait photo */
 #persona { padding: 100px 0; }
@@ -620,10 +621,6 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
             <span class="t-en">How it works</span>
             <span class="t-pt">Como funciona</span>
           </a>
-          <a href="/setup" class="btn-secondary" style="opacity:.8">
-            <span class="t-en">Setup Guide</span>
-            <span class="t-pt">Guia de Setup</span>
-          </a>
         </div>
       </div>
 
@@ -683,7 +680,7 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
 <div class="gpt-banner anim">
   <div class="container">
     <a href="https://chatgpt.com/g/g-684e8e4a0d4c8191b1fe0c7af3fa9ebb-vera-open-setup-assistant" class="gpt-banner-inner" target="_blank">
-      <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAoACgDASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAABgAHBQT/xAAuEAABAwMCBAUDBQAAAAAAAAABAgMEBREhABIGMUFRBxMiYXEUMoEjQlKRof/EABgBAQADAQAAAAAAAAAAAAAAAAQCAwUA/8QAIBEAAgMAAgIDAQAAAAAAAAAAAQIAAxEEIRIxQVFhE//aAAwDAQACEQMRAD8Ax0NJJyLa7Dv21IjZKUkX7arp6NGxAUpIHubagr2hNT6dKlrcVHiMOOr6oabJUfnA09GjqkKrMqTBkSYxhFAdYd2urfs4g2CknGFe/fp8qXJBHe8t4+PXcR5KzpVl82B5QvlwrECVIddaWqU9gqPpwk2ukWt7jH9aMpcfxBq8MK8N+HZ7EM+bUQJr7KQp90XwhAJOEpub25m3bmLjA5G9MpjfkVVDyBiOpKAPwdb8eLqGqdG4Zp4S3VqzGLMxJ9RYj9xjsc7sHuBi/e8G3HGOz0u/Hgkjf3E3hxwPNr1TiQGi0kuNl+Y+42FiOyklIUQOZUsgfHfSWqeGEqLAkR0VmIiS3ey6Y7bZUptPQXN8+1+d/fR7hnjCnIZj8Qz5MaBVWVlqazFILjACrqKBbNiLe/y3AvEGvP1WupqMaP9KYMgJiR3Sk+Wkg2IOOYte/Y6ys/MH0BMz6TxjG0f4INQHJ0f6xr7QH7bDBz+bfnWXeFsXdXS0nkVtE8+w3HIGj7nEUhNV2yHb7UhLd+gufWB72V/mi3h8wprjcSKgJT5Z3L9gBlWl8OhE6YPkS+7mTkH4lrmh4Yj5kDMKlLJYDhbdWkWK8AkAf0Da/bTCkeHkNYLkWqFhCSdqHo6UkHtcKPtpNAnoXSolQUlTbrBcU2tJBTdJuAQedja+umpMqZGlI3tvhSyTjacf7oa7cWliZBzLLOQ+cAj8JmpqoklKa2HUKCSApkJBHfIdJt850i8NeFpEJ5FZrpjOVJtIeZjtKSr6cLGCcYUq1uQsMZOMVzqvxFkZsSiG+J3JyDZ1s/k//Z" alt="Vera" class="gpt-banner-icon">
+      <img src="assets/VeraIUcon-02.webp" alt="Vera" class="gpt-banner-icon">
       <span class="gpt-banner-text">
         <span class="t-en">🤖 <strong>Setup assistant available via GPT</strong> — get guided through installation step by step</span>
         <span class="t-pt">🤖 <strong>Assistente de instalação disponível via GPT</strong> — instalação guiada passo a passo</span>
@@ -886,6 +883,11 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
         <div class="feat-desc t-en">One command validates your entire setup: API keys, Notion access, Telegram bot, LLM connection. 10 checks, fix hints included.</div>
         <div class="feat-desc t-pt">Um comando valida todo seu setup: API keys, acesso Notion, bot Telegram, conexão LLM. 10 verificações, com dicas de correção.</div>
       </div>
+      <div class="feat-card anim anim-delay-3"><div class="feat-icon">🔄</div>
+        <div class="feat-title t-en">Feedback Loop</div><div class="feat-title t-pt">Feedback Loop</div>
+        <div class="feat-desc t-en">Vera learns your behavior: detects overload, recognizes real priorities, flags dead tasks. Automatic inferences update your USER.md every week.</div>
+        <div class="feat-desc t-pt">Vera aprende seu comportamento: detecta sobrecarga, reconhece prioridades reais, sinaliza tarefas mortas. Inferências automáticas atualizam seu USER.md toda semana.</div>
+      </div>
     </div>
   </div>
 </section>
@@ -1080,8 +1082,8 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
       <div class="under-item anim anim-delay-1"><div class="under-num">428</div>
         <div class="under-label"><strong class="t-en">automated tests</strong><strong class="t-pt">testes automatizados</strong><span class="t-en">all passing in v0.5.0</span><span class="t-pt">todos passando na v0.5.0</span></div>
       </div>
-      <div class="under-item anim anim-delay-2"><div class="under-num">3+</div>
-        <div class="under-label"><strong class="t-en">research packs</strong><strong class="t-pt">research packs</strong><span class="t-en">jobs, news, financial + custom</span><span class="t-pt">vagas, notícias, financeiro + custom</span></div>
+      <div class="under-item anim anim-delay-2"><div class="under-num">4</div>
+        <div class="under-label"><strong class="t-en">research packs</strong><strong class="t-pt">research packs</strong><span class="t-en">jobs · news · financial · custom</span><span class="t-pt">vagas · notícias · financeiro · custom</span></div>
       </div>
       <div class="under-item anim anim-delay-3"><div class="under-num">$0</div>
         <div class="under-label"><strong class="t-en">infrastructure cost</strong><strong class="t-pt">custo de infraestrutura</strong><span class="t-en">GitHub Actions free tier</span><span class="t-pt">GitHub Actions free tier</span></div>
