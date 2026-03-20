@@ -437,10 +437,8 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
 .gate-success .check { font-size:36px;margin-bottom:14px; }
 .gate-success .msg { font-size:15px;color:var(--text);margin-bottom:8px; }
 .gate-success .links { display:flex;flex-direction:column;gap:10px;margin-top:24px; }
-.gate-success .links a { display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;text-decoration:none;font-size:14px;color:var(--text);transition:border-color .2s; }
-.gate-success .links a:hover { border-color:var(--accent); }
-.gate-success .links a span { font-family:var(--font-mono);font-size:10px;color:var(--muted);display:block;margin-top:2px; }
-.gate-success .links img { width:24px;height:24px;border-radius:6px;flex-shrink:0; }
+.gate-success .links a { display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;text-decoration:none;font-size:14px;font-weight:500;color:var(--text);transition:border-color .2s; }
+.gate-success .links a:hover { border-color:var(--accent);color:var(--accent); }
 @media (max-width:480px) { #gate-box{padding:32px 24px;} }
 
 /* STICKY MOBILE CTA */
@@ -1286,33 +1284,20 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
     <div id="gate-success-view" style="display:none">
       <div class="gate-success">
         <div class="check">✓</div>
-        <div class="msg t-en">You're in. Here's how to start:</div>
-        <div class="msg t-pt">Tudo certo. Veja como começar:</div>
+        <div class="msg t-en">You're in.</div>
+        <div class="msg t-pt">Tudo certo.</div>
         <div class="links">
           <a href="https://chatgpt.com/g/g-69bccc99698c8191b02717a0c7523395-vera-setup-assistant" target="_blank">
-            <img src="assets/VeraIUcon-02.webp" alt="">
-            <div>
-              <span class="t-en">Setup Assistant (GPT)</span><span class="t-pt">Assistente de Setup (GPT)</span>
-              <span class="t-en">Guided installation, step by step</span><span class="t-pt">Instalação guiada, passo a passo</span>
-            </div>
+            🤖 <span class="t-en">Setup Assistant (GPT)</span><span class="t-pt">Assistente de Setup (GPT)</span>
           </a>
           <a href="/setup">
-            <div>
-              <span class="t-en" style="color:var(--text)">Setup Guide</span><span class="t-pt" style="color:var(--text)">Guia de Setup</span>
-              <span>getvera.dev/setup</span>
-            </div>
+            📋 <span class="t-en">Setup Guide</span><span class="t-pt">Guia de Setup</span>
           </a>
           <a href="https://github.com/veralifeos/vera-open" target="_blank">
-            <div>
-              <span class="t-en" style="color:var(--text)">GitHub — vera-open</span><span class="t-pt" style="color:var(--text)">GitHub — vera-open</span>
-              <span class="t-en">Repository · docs · source code</span><span class="t-pt">Repositório · docs · código fonte</span>
-            </div>
+            📦 GitHub
           </a>
           <a href="https://same-tiger-545.notion.site/Vera-Life-OS-31b487bf2603816aba1df400b86dbde3" target="_blank">
-            <div>
-              <span class="t-en" style="color:var(--text)">Notion Template</span><span class="t-pt" style="color:var(--text)">Template Notion</span>
-              <span class="t-en">Copy to your workspace · ready to use</span><span class="t-pt">Copie pro seu workspace · pronto pra usar</span>
-            </div>
+            📄 Notion Template
           </a>
         </div>
       </div>
