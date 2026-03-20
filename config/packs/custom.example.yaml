@@ -1,0 +1,108 @@
+# config/packs/custom.example.yaml
+#
+# Pack genérico — configure para monitorar qualquer coisa.
+# Copie para custom.yaml e edite conforme seu caso de uso.
+#
+# Exemplos de uso:
+#   - Editais de cultura em BH e MG
+#   - Monitorar lançamentos de concorrentes
+#   - Oportunidades de freela em design/marketing
+#   - Novidades de produto ou tecnologia
+#   - Qualquer coisa com RSS ou busca web
+#
+# Para criar múltiplos monitores, crie arquivos separados:
+#   config/packs/custom-editais.yaml
+#   config/packs/custom-freelas.yaml
+# E registre cada um como um pack separado no config.yaml.
+
+# ─── Identidade ──────────────────────────────────────────────────────────────
+
+pack_label: "Editais de Cultura"   # Nome que aparece no briefing
+description: "Monitoramento de editais culturais em BH, MG e nacionais"
+
+# ─── Keywords ────────────────────────────────────────────────────────────────
+
+# Palavras obrigatórias para relevância (OR — basta uma aparecer)
+keywords:
+  - edital
+  - inscrições abertas
+  - chamamento público
+  - fomento
+
+# Keywords que aumentam o score (bônus, não obrigatórias)
+keywords_boost:
+  - cultura
+  - audiovisual
+  - música
+  - artes visuais
+  - Belo Horizonte
+  - Minas Gerais
+
+# Itens contendo essas palavras são descartados
+exclude_keywords:
+  - encerrado
+  - resultado final
+  - homologação
+
+# ─── Fontes ──────────────────────────────────────────────────────────────────
+
+sources:
+
+  # RSS feeds — formato mais confiável
+  - type: rss
+    name: FUNARTE
+    url: https://www.funarte.gov.br/feed/
+    enabled: true
+
+  - type: rss
+    name: SECULT-MG
+    url: https://www.cultura.mg.gov.br/feed
+    enabled: true
+
+  - type: rss
+    name: Cultura RS (exemplo)
+    url: https://cultura.rs.gov.br/feed
+    enabled: false   # desabilite fontes que não usa
+
+  # Busca web — DuckDuckGo (gratuito, sem chave de API)
+  - type: web_search
+    name: Busca Editais BH
+    engine: duckduckgo
+    query: "edital cultura Belo Horizonte 2026 inscrições abertas"
+    enabled: true
+
+  - type: web_search
+    name: Busca ProAC SP
+    engine: duckduckgo
+    query: "ProAC edital 2026 inscrições"
+    enabled: false
+
+  # Busca web com SerpAPI (mais robusto, requer chave gratuita em serpapi.com)
+  # - type: web_search
+  #   name: Google Editais
+  #   engine: serpapi
+  #   api_key_env: SERPAPI_KEY   # variável de ambiente com a chave
+  #   query: "edital fomento cultura {keywords} 2026"
+  #   enabled: false
+
+# ─── Scoring ─────────────────────────────────────────────────────────────────
+
+scoring:
+  relevance_threshold: 0.35   # 0.0-1.0. Mais baixo = mais resultados
+  weights:
+    keyword: 0.6              # peso das keywords na nota final
+    embedding: 0.4            # peso da similaridade semântica
+
+# ─── Dedup ───────────────────────────────────────────────────────────────────
+
+dedup:
+  ttl_days: 14   # não reaparece no briefing por 14 dias
+
+# ─── Síntese ─────────────────────────────────────────────────────────────────
+
+synthesis:
+  enabled: true
+  max_words: 120
+  prompt_extra: >
+    Foque em destacar editais com prazo próximo ou de alto valor.
+    Mencione categoria, prazo e valor quando disponível no texto.
