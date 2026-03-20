@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setup Guide — Vera Open</title>
+<meta name="description" content="Install Vera Open in 5 steps. From zero to your first AI-powered daily briefing.">
+<meta property="og:title" content="Vera Open — Setup Guide">
+<meta property="og:description" content="Install Vera Open in 5 steps. Zero to first briefing in 30 minutes.">
+<meta property="og:url" content="https://getvera.dev/setup">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolygon points='16,4 28,28 4,28' fill='%23e8734a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0a1628;--navy-light:#111d32;--navy-mid:#162340;--orange:#e8734a;--orange-hover:#d4623b;--green:#4ade80;--green-dim:#22c55e;--slate-300:#cbd5e1;--slate-400:#94a3b8;--slate-500:#64748b;--slate-600:#475569;--text:#e2e8f0;--text-dim:#94a3b8;--text-bright:#f8fafc;--font-display:'Playfair Display',Georgia,serif;--font-body:'DM Sans','Segoe UI',sans-serif;--font-mono:'JetBrains Mono',Consolas,monospace;--max-w:720px;--radius:8px}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{font-family:var(--font-body);color:var(--text);background:var(--navy);line-height:1.7;font-size:16px;-webkit-font-smoothing:antialiased}
+a{color:var(--orange);text-decoration:none}a:hover{text-decoration:underline}
+.hero-video-wrap{position:relative;width:100%;height:100vh;overflow:hidden}
+.hero-video-wrap video{position:absolute;top:50%;left:50%;min-width:100%;min-height:100%;transform:translate(-50%,-50%);object-fit:cover}
+.hero-video-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,22,40,.3) 0%,rgba(10,22,40,.55) 60%,rgba(10,22,40,1) 100%);z-index:1}
+.hero-content{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 20px}
+.hero-logo{width:200px;margin-bottom:24px;opacity:.85}
+.hero-content h1{font-family:var(--font-display);font-size:clamp(28px,5vw,44px);font-weight:700;color:var(--text-bright);line-height:1.2;margin-bottom:12px}
+.hero-content h1 em{color:var(--orange);font-style:italic}
+.hero-content .subtitle{color:var(--slate-300);font-size:17px;max-width:480px;margin:0 auto}
+.hero-scroll-hint{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);z-index:2;color:var(--slate-500);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:6px;animation:bobDown 2s ease-in-out infinite}
+.hero-scroll-hint svg{width:20px;height:20px;stroke:var(--slate-500);fill:none;stroke-width:2}
+@keyframes bobDown{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
+.geo-deco{position:fixed;pointer-events:none;z-index:0;opacity:.03}
+.geo-deco-left{left:-40px;top:30%;width:200px;height:400px;border-right:2px solid var(--orange);border-top:2px solid var(--orange);transform:skewY(-8deg)}
+.geo-deco-right{right:-20px;top:55%;width:120px;height:300px}
+.geo-deco-right::before,.geo-deco-right::after{content:'';position:absolute;background:var(--orange)}
+.geo-deco-right::before{width:100%;height:2px;top:0}
+.geo-deco-right::after{width:2px;height:100%;right:0}
+.geo-tri{position:absolute;top:12px;right:12px;width:28px;height:28px;opacity:.06}
+.progress-bar{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,22,40,.92);border-bottom:1px solid rgba(255,255,255,.06);padding:0 20px;height:56px;display:flex;align-items:center;backdrop-filter:blur(12px);transform:translateY(-100%);transition:transform .3s}
+.progress-bar.visible{transform:translateY(0)}
+.progress-inner{max-width:var(--max-w);margin:0 auto;width:100%;display:flex;align-items:center;gap:4px}
+.progress-step{flex:1;display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 4px;border-radius:6px;transition:background .2s}
+.progress-step:hover{background:rgba(255,255,255,.04)}
+.progress-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--slate-600);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--slate-500);transition:all .3s;flex-shrink:0}
+.progress-dot .ck{display:none}.progress-dot .nm{display:inline}
+.progress-step.active .progress-dot{border-color:var(--orange);color:var(--orange);box-shadow:0 0 0 3px rgba(232,115,74,.15)}
+.progress-step.done .progress-dot{border-color:var(--green);background:var(--green);color:var(--navy)}
+.progress-step.done .progress-dot .nm{display:none}.progress-step.done .progress-dot .ck{display:inline}
+.progress-step.visited .progress-dot{border-color:var(--slate-400);color:var(--slate-400)}
+.progress-label{font-size:11px;color:var(--slate-500);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.progress-step.active .progress-label{color:var(--orange)}
+.progress-step.done .progress-label{color:var(--green-dim)}
+.progress-step.visited .progress-label{color:var(--slate-400)}
+.progress-line{width:16px;height:2px;background:var(--slate-600);flex-shrink:0;transition:background .3s}
+.progress-line.done{background:var(--green-dim)}
+@media(max-width:600px){.progress-label{display:none}.progress-line{width:8px}}
+.content-area{position:relative;z-index:1}
+.os-row{display:flex;align-items:center;justify-content:center;gap:16px;padding:24px 20px 8px;max-width:var(--max-w);margin:0 auto}
+.os-badge{display:inline-flex;align-items:center;gap:6px;background:var(--navy-mid);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:6px 14px;font-size:13px;color:var(--slate-300)}
+.os-badge strong{color:var(--text-bright)}
+.terminal-note{max-width:var(--max-w);margin:0 auto 32px;padding:0 20px}
+.note-box{background:rgba(232,115,74,.06);border:1px solid rgba(232,115,74,.15);border-radius:var(--radius);padding:16px 20px;font-size:14px;color:var(--slate-300);line-height:1.7}
+.note-box strong{color:var(--orange)}
+.note-box code{background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;font-family:var(--font-mono);font-size:12px}
+.steps{max-width:var(--max-w);margin:0 auto;padding:0 20px 120px}
+.step{margin-bottom:48px;padding:32px;background:var(--navy-light);border:1px solid rgba(255,255,255,.06);border-radius:12px;transition:border-color .3s;position:relative;overflow:hidden}
+.step.active-step{border-color:rgba(232,115,74,.25)}
+.step.completed{border-color:rgba(74,222,128,.15)}
+.step-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px}
+.step-number{width:36px;height:36px;border-radius:50%;background:var(--navy-mid);border:2px solid var(--slate-600);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--slate-400);flex-shrink:0;transition:all .3s}
+.step.active-step .step-number{border-color:var(--orange);color:var(--orange)}
+.step.completed .step-number{border-color:var(--green);background:var(--green);color:var(--navy)}
+.step-title{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text-bright);line-height:1.3}
+.step-time{font-size:12px;color:var(--slate-500);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.step-body{color:var(--text);font-size:15px}.step-body p{margin-bottom:14px}.step-body h3{font-size:16px;font-weight:600;color:var(--text-bright);margin:24px 0 8px}.step-body ol,.step-body ul{margin:8px 0 14px 20px}.step-body li{margin-bottom:6px}.step-body li::marker{color:var(--slate-500)}
+.success-signal{background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.15);border-radius:var(--radius);padding:10px 14px;margin:12px 0;font-size:13px;color:var(--green);display:flex;align-items:flex-start;gap:8px}.success-signal::before{content:'\2713';font-weight:700;flex-shrink:0}
+.warn-signal{background:rgba(250,204,21,.06);border:1px solid rgba(250,204,21,.15);border-radius:var(--radius);padding:10px 14px;margin:12px 0;font-size:13px;color:#fbbf24;display:flex;align-items:flex-start;gap:8px}.warn-signal::before{content:'\26A0';flex-shrink:0}.warn-signal a{color:#fbbf24}
+.os-tabs{display:flex;gap:4px;margin:12px 0}
+.os-tab{padding:6px 14px;border-radius:6px;font-size:13px;font-weight:500;background:var(--navy-mid);color:var(--slate-400);border:1px solid transparent;cursor:pointer;transition:all .2s}.os-tab:hover{color:var(--text)}.os-tab.active{border-color:var(--orange);color:var(--orange);background:rgba(232,115,74,.08)}
+.os-content{display:none}.os-content.active{display:block}
+.code-block{position:relative;background:#0d1117;border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);margin:12px 0 16px;overflow:hidden}
+.code-block pre{padding:16px 56px 16px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.6;color:#c9d1d9;margin:0;white-space:pre-wrap;word-break:break-all}
+.copy-btn{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--slate-400);padding:4px 10px;border-radius:5px;font-size:12px;cursor:pointer;font-family:var(--font-body);transition:all .2s}.copy-btn:hover{background:rgba(255,255,255,.12);color:var(--text)}.copy-btn.copied{background:rgba(74,222,128,.15);color:var(--green);border-color:var(--green)}
+.accordion{margin:16px 0}.accordion-trigger{width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:12px 16px;color:var(--slate-300);font-size:14px;font-family:var(--font-body);cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;transition:all .2s}.accordion-trigger:hover{background:rgba(255,255,255,.05);color:var(--text)}.accordion-trigger::after{content:'\25B8';transition:transform .2s}.accordion-trigger.open::after{transform:rotate(90deg)}.accordion-content{display:none;padding:14px 16px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-top:0;border-radius:0 0 var(--radius) var(--radius);font-size:14px;color:var(--text-dim);line-height:1.7}.accordion-content.open{display:block}.accordion-content p{margin-bottom:10px}.accordion-content p:last-child{margin-bottom:0}
+.done-check{display:flex;align-items:center;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.06)}.done-check input[type="checkbox"]{width:18px;height:18px;accent-color:var(--green);cursor:pointer}.done-check label{font-size:14px;color:var(--slate-400);cursor:pointer;font-weight:500}.done-check input:checked+label{color:var(--green)}
+.help-float{position:fixed;bottom:24px;right:24px;z-index:99;display:flex;align-items:center;gap:8px;background:var(--orange);color:#fff;padding:12px 20px;border-radius:28px;font-size:14px;font-weight:600;box-shadow:0 4px 20px rgba(232,115,74,.35);transition:all .2s;text-decoration:none;font-family:var(--font-body);border:none}.help-float:hover{background:var(--orange-hover);transform:translateY(-2px);box-shadow:0 6px 28px rgba(232,115,74,.45);text-decoration:none;color:#fff}
+.footer{text-align:center;padding:40px 20px;border-top:1px solid rgba(255,255,255,.06);color:var(--slate-500);font-size:13px}.footer a{color:var(--slate-400)}
+.lang-toggle{position:fixed;top:8px;right:16px;z-index:101;display:flex;gap:2px;background:rgba(17,29,50,.8);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:2px;backdrop-filter:blur(8px);transition:top .3s}.lang-toggle.shifted{top:60px}
+.lang-btn{padding:4px 10px;border-radius:4px;font-size:12px;font-weight:600;color:var(--slate-400);cursor:pointer;border:none;background:transparent;font-family:var(--font-body);transition:all .2s}.lang-btn.active{background:var(--orange);color:#fff}
+</style>
+</head>
+<body>
+<div class="geo-deco geo-deco-left"></div>
+<div class="geo-deco geo-deco-right"></div>
+<div class="lang-toggle" id="langToggle"><button class="lang-btn active" onclick="setLang('en')">EN</button><button class="lang-btn" onclick="setLang('pt')">PT</button></div>
+
+<section class="hero-video-wrap" id="heroVideo">
+<video autoplay muted playsinline poster="./assets/VeraIUcon-02.webp"><source src="./assets/vera-setup-video.mp4" type="video/mp4"></video>
+<div class="hero-video-overlay"></div>
+<div class="hero-content">
+<svg class="hero-logo" viewBox="170 380 1600 320" xmlns="http://www.w3.org/2000/svg"><path fill="rgba(255,255,255,.85)" d="M421.7,389.67h131.93l-.43,1.29c-53.97,0-76.67,62.54-82.67,79.67l-62.96,174.76c4.28,10.71,25.7,43.26,59.97,43.26l.43.86-184.19-.43-.43-.86c38.98,0,31.27-36.41,27.84-45.41l-76.25-208.6c-5.57-15.42-18.85-43.69-60.39-43.69v-1.29l184.19.43.43,1.29c-38.98,0-35.55,24.42-26.99,47.55l73.67,201.75.43.86,60.83-170.48c10.28-29.13,18.85-79.67-46.26-79.67l.86-1.29Z"/><path fill="rgba(255,255,255,.85)" d="M473.7,590.44c0-64.31,44.16-114.04,106.32-114.04,52.3,0,87.46,28.72,88.31,77.6h-132.04c1.29,58.73,33.44,95.6,74.6,95.6,23.15,0,45.44-10.29,64.31-35.15l3.43,2.14c-20.58,47.16-63.45,74.17-103.75,74.17-54.87,0-101.17-37.73-101.17-100.32ZM584.74,547.14c15.43,0,17.58-3.86,17.58-17.58,0-24.87-7.72-45.44-27.44-45.44-15,0-37.3,15.86-38.58,63.02h48.44Z"/><path fill="rgba(255,255,255,.85)" d="M712.06,657.32v-92.6c0-25.72-7.72-42.87-22.29-49.73v-2.57c24.01-6,57.45-21.44,83.17-36.01h3.43l-3.43,52.73c5.14-8.57,9-15,14.58-22.72,16.29-22.72,30.44-30.01,45.87-30.01,19.72,0,33.44,12.86,33.44,32.58s-14.58,32.58-32.58,32.58-27.87-19.72-39.87-19.72c-6.43,0-13.29,3.86-20.58,14.58v120.9c0,19.72,7.29,23.15,34.3,24.87v4.29h-121.75v-4.29c19.72-1.71,25.72-5.14,25.72-24.87Z"/><path fill="rgba(255,255,255,.85)" d="M976.58,653.89c-22.29,24.01-42.44,36.01-64.31,36.01-25.72,0-44.16-17.15-44.16-42.01,0-19.72,11.15-33.87,57.45-47.59l50.59-15.01v-33.44c0-12-3.86-37.73-32.15-37.73-9.86,0-35.58,3.86-35.58,13.29,0,6.86,11.58,19.72,11.58,33.44,0,12.86-10.29,19.72-22.72,19.72-10.72,0-21.44-5.57-21.44-19.29,0-15.43,13.29-32.15,32.15-48.87,27.44-24.44,50.59-34.3,72.88-34.3,32.15,0,57.02,21.01,57.02,56.59v110.61c0,10.29,5.14,16.72,13.72,16.72,9,0,15.86-6.43,19.29-10.72l3.86,2.57c-9,14.58-27.01,36.01-60.45,36.01-30.87,0-36.87-19.72-37.73-36.01ZM954.71,655.6c8.15,0,14.58-4.29,21.44-9.86v-53.59l-26.15,9.43c-11.15,4.29-20.58,11.57-20.58,27.44,0,17.15,10.29,26.58,25.29,26.58Z"/><path fill="rgba(255,255,255,.85)" d="M1097.79,663.42c0-14.45,11.68-26.13,26.13-26.13s26.13,11.68,26.13,26.13-11.68,26.13-26.13,26.13-26.13-11.68-26.13-26.13Z"/><path fill="rgba(255,255,255,.85)" d="M1370.26,395.84c81.22,0,126.01,66.02,100.39,147.23-25.62,81.22-111.81,146.44-193.03,146.44-81.22,0-126.26-65.22-100.64-146.44,25.62-81.22,112.06-147.23,193.28-147.23ZM1459.61,470.26c6.56-20.8-1.91-39.61-26.71-39.61-69.22,0-223.42,117.23-244.63,184.44-6.56,20.8,1.91,39.61,26.72,39.61,69.21,0,223.42-117.23,244.62-184.44Z"/><path fill="rgba(255,255,255,.85)" d="M1744.26,397.45h1.2s-8.3,50.41-40.31,50.41c-39.21,0-34.34-48.41-72.75-48.41-12.4,0-33.6,7.6-43.7,39.61-7.45,23.6,4.45,32.81,29.94,48.41l37.62,22.81c33.57,20.4,57.08,37.21,44.46,77.21-25.24,80.02-112.2,102.03-157.81,102.03s-104.19-9.6-104.19-9.6l33.93-101.22h1.2c-23.48,74.42,19.81,108.42,65.42,108.42,32.8,0,66.89-18,77.49-51.61,8.46-26.8-3.36-38.81-22.51-50.41l-37.34-22.41c-31.95-19.2-62.85-39.21-49.47-81.62,8.96-28.41,42.89-85.22,143.71-85.22,38.41,0,84.49,18.8,93.12,1.6Z"/></svg>
+<h1><span data-en="From zero to your first" data-pt="Do zero ao seu primeiro">From zero to your first</span> <em>briefing</em></h1>
+<p class="subtitle" data-en="5 steps. About 30 minutes. No programming required." data-pt="5 etapas. ~30 minutos. Sem programar.">5 steps. About 30 minutes. No programming required.</p>
+</div>
+<div class="hero-scroll-hint"><span data-en="scroll" data-pt="role">scroll</span><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+</section>
+
+<nav class="progress-bar" id="progressBar"><div class="progress-inner">
+<div class="progress-step active" data-step="1" onclick="scrollToStep(1)"><div class="progress-dot"><span class="nm">1</span><span class="ck">&#10003;</span></div><span class="progress-label">Install</span></div><div class="progress-line"></div>
+<div class="progress-step" data-step="2" onclick="scrollToStep(2)"><div class="progress-dot"><span class="nm">2</span><span class="ck">&#10003;</span></div><span class="progress-label">Clone</span></div><div class="progress-line"></div>
+<div class="progress-step" data-step="3" onclick="scrollToStep(3)"><div class="progress-dot"><span class="nm">3</span><span class="ck">&#10003;</span></div><span class="progress-label">Credentials</span></div><div class="progress-line"></div>
+<div class="progress-step" data-step="4" onclick="scrollToStep(4)"><div class="progress-dot"><span class="nm">4</span><span class="ck">&#10003;</span></div><span class="progress-label">Validate</span></div><div class="progress-line"></div>
+<div class="progress-step" data-step="5" onclick="scrollToStep(5)"><div class="progress-dot"><span class="nm">5</span><span class="ck">&#10003;</span></div><span class="progress-label">Briefing</span></div>
+</div></nav>
+
+<div class="content-area">
+<div class="os-row"><div class="os-badge"><span data-en="Detected:" data-pt="Detectado:">Detected:</span> <strong id="detectedOS">--</strong></div></div>
+<div class="terminal-note"><div class="note-box"><strong data-en="New to this?" data-pt="Primeira vez?">New to this?</strong> <span data-en="This guide uses a terminal." data-pt="Este guia usa um terminal.">This guide uses a terminal -- a text window for commands.</span><br><strong>Windows:</strong> <code>Win+R</code> then <code>cmd</code>. <strong>macOS:</strong> <code>Cmd+Space</code> then <code>Terminal</code>. <strong>Linux:</strong> <code>Ctrl+Alt+T</code>.<br><span data-en="Every dark code block = copy and paste into that window." data-pt="Todo bloco escuro = copiar e colar nessa janela.">Every dark code block = copy and paste into that window.</span></div></div>
+<main class="steps">
+
+<section class="step active-step" id="step1" data-step="1"><div class="geo-tri"><svg viewBox="0 0 32 32"><polygon points="16,2 30,30 2,30" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/></svg></div><div class="step-header"><div class="step-number">1</div><div><div class="step-title" data-en="Install prerequisites" data-pt="Instalar pre-requisitos">Install prerequisites</div><div class="step-time">~5 min</div></div></div><div class="step-body">
+<p data-en="Three tools: Python (Vera's language), Git (download code), uv (manage dependencies)." data-pt="Tres ferramentas: Python, Git e uv.">Three tools: Python (Vera's language), Git (download code), uv (manage dependencies).</p>
+<h3>Python 3.11+</h3>
+<div class="os-tabs"><button class="os-tab" data-os="windows" onclick="setOS('windows')">Windows</button><button class="os-tab" data-os="macos" onclick="setOS('macos')">macOS</button><button class="os-tab" data-os="linux" onclick="setOS('linux')">Linux</button></div>
+<div class="os-content" data-os="windows"><p>Download from <a href="https://www.python.org/downloads/" target="_blank">python.org/downloads</a>. Check <strong>"Add Python to PATH"</strong>.</p></div>
+<div class="os-content" data-os="macos"><div class="code-block"><pre>brew install python</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div></div>
+<div class="os-content" data-os="linux"><div class="code-block"><pre>sudo apt install python3 python3-pip</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div></div>
+<h3>Git</h3>
+<div class="os-content" data-os="windows"><p>Download from <a href="https://git-scm.com/download/win" target="_blank">git-scm.com</a>, install with defaults.</p></div>
+<div class="os-content" data-os="macos"><div class="code-block"><pre>brew install git</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div></div>
+<div class="os-content" data-os="linux"><div class="code-block"><pre>sudo apt install git</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div></div>
+<h3>uv</h3>
+<div class="os-content" data-os="windows"><p>Open <strong>PowerShell</strong> (not cmd):</p><div class="code-block"><pre>powershell -c "irm https://astral.sh/uv/install.ps1 | iex"</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div></div>
+<div class="os-content" data-os="macos"><div class="code-block"><pre>curl -LsSf https://astral.sh/uv | sh</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div></div>
+<div class="os-content" data-os="linux"><div class="code-block"><pre>curl -LsSf https://astral.sh/uv | sh</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div></div>
+<h3>Verify</h3>
+<p><strong>Close and reopen terminal</strong>, then:</p>
+<div class="code-block"><pre>python --version
+git --version
+uv --version</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<div class="success-signal">Version numbers for all three. Python must be 3.11+.</div>
+<div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)">Stuck?</button><div class="accordion-content"><p>"python" not recognized (Windows): reopen terminal. If broken, reinstall with "Add to PATH".</p><p>No Homebrew (macOS): <a href="https://brew.sh" target="_blank">brew.sh</a> first.</p><p>Linux: try <code>python3 --version</code>.</p></div></div>
+<div class="done-check"><input type="checkbox" id="done1" onchange="markDone(1)"><label for="done1">All three installed</label></div>
+</div></section>
+
+<section class="step" id="step2" data-step="2"><div class="geo-tri"><svg viewBox="0 0 32 32"><polygon points="16,2 30,30 2,30" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/></svg></div><div class="step-header"><div class="step-number">2</div><div><div class="step-title" data-en="Get the code" data-pt="Baixar o codigo">Get the code</div><div class="step-time">~5 min</div></div></div><div class="step-body">
+<h3>1. Fork</h3>
+<p>Open <a href="https://github.com/veralifeos/vera-open" target="_blank">github.com/veralifeos/vera-open</a>, click <strong>Fork</strong>, then <strong>Create fork</strong>.</p>
+<div class="warn-signal">Need a free <a href="https://github.com" target="_blank" style="color:#fbbf24">GitHub account</a>.</div>
+<h3>2. Clone</h3>
+<p>Replace <code>YOUR_USERNAME</code>:</p>
+<div class="code-block"><pre>git clone https://github.com/YOUR_USERNAME/vera-open.git
+cd vera-open
+uv sync</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<div class="success-signal"><code>uv sync</code> finishes without errors = ready.</div>
+<div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)">Fork? Clone? uv sync?</button><div class="accordion-content"><p><strong>Fork</strong> = your copy on GitHub.<br><strong>Clone</strong> = download to your machine.<br><strong>uv sync</strong> = install project dependencies.</p></div></div>
+<div class="done-check"><input type="checkbox" id="done2" onchange="markDone(2)"><label for="done2">Cloned and synced</label></div>
+</div></section>
+
+<section class="step" id="step3" data-step="3"><div class="geo-tri"><svg viewBox="0 0 32 32"><polygon points="16,2 30,30 2,30" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/></svg></div><div class="step-header"><div class="step-number">3</div><div><div class="step-title" data-en="Get your credentials" data-pt="Obter credenciais">Get your credentials</div><div class="step-time">~15 min</div></div></div><div class="step-body">
+<p>Tokens = passwords that let Vera access each service.</p>
+<h3>A. Notion</h3>
+<ol><li><a href="https://www.notion.so" target="_blank">notion.so</a> &#8594; Settings &#8594; Connections &#8594; "Develop or manage integrations"</li><li>New integration &#8594; name "Vera" &#8594; Internal &#8594; Read + Insert + Update &#8594; Save</li><li>Copy token (<code>ntn_</code> or <code>secret_</code>)</li></ol>
+<p><strong>Duplicate template:</strong> <a href="https://same-tiger-545.notion.site/Vera-Life-OS-31b487bf2603816aba1df400b86dbde3" target="_blank">Vera template</a></p>
+<p>Connect integration to <strong>EACH database</strong>: open it &#8594; &#8226;&#8226;&#8226; &#8594; Connections &#8594; "Vera"</p>
+<div class="warn-signal">Connect on each database, not the parent page. #1 mistake.</div>
+<h3>B. Telegram</h3>
+<ol><li><a href="https://t.me/BotFather" target="_blank">@BotFather</a> &#8594; <code>/newbot</code> &#8594; name + username &#8594; copy token</li><li>Send any message to your bot</li><li>Open in browser:</li></ol>
+<div class="code-block"><pre>https://api.telegram.org/botYOUR_TOKEN/getUpdates</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<p>Find <code>"chat":{"id": 123456789}</code> = your <strong>Chat ID</strong>.</p>
+<div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)">Empty result?</button><div class="accordion-content"><p>Send a message to the bot first, reload. Wait 10s if still empty.</p></div></div>
+<h3>C. Claude API</h3>
+<ol><li><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> &#8594; create account (free US$5)</li><li>API Keys &#8594; Create Key &#8594; copy (<code>sk-ant-api03-</code>)</li></ol>
+<div class="success-signal">US$5 lasts months (~$0.01-0.03/day).</div>
+<div class="done-check"><input type="checkbox" id="done3" onchange="markDone(3)"><label for="done3">All credentials ready</label></div>
+</div></section>
+
+<section class="step" id="step4" data-step="4"><div class="geo-tri"><svg viewBox="0 0 32 32"><polygon points="16,2 30,30 2,30" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/></svg></div><div class="step-header"><div class="step-number">4</div><div><div class="step-title" data-en="Configure and validate" data-pt="Configurar e validar">Configure and validate</div><div class="step-time">~5 min</div></div></div><div class="step-body">
+<div class="code-block"><pre>uv run vera setup</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<p>Paste each credential when prompted.</p>
+<h3>Test connections</h3>
+<div class="code-block"><pre>uv run vera validate</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<h3>If something fails</h3>
+<div class="code-block"><pre>uv run vera doctor</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<div class="success-signal">10 checks. All [OK] = ready. [FAIL] tells you what to fix.</div>
+<div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)">Common issues</button><div class="accordion-content"><p>"No module named vera" &#8594; <code>uv sync</code> first.</p><p>Notion not found &#8594; connect integration to each database (step 3A).</p><p>Telegram fails &#8594; CHAT_ID must be numeric, not username.</p></div></div>
+<div class="done-check"><input type="checkbox" id="done4" onchange="markDone(4)"><label for="done4">All [OK]</label></div>
+</div></section>
+
+<section class="step" id="step5" data-step="5"><div class="geo-tri"><svg viewBox="0 0 32 32"><polygon points="16,2 30,30 2,30" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/></svg></div><div class="step-header"><div class="step-number">5</div><div><div class="step-title" data-en="Your first briefing" data-pt="Seu primeiro briefing">Your first briefing</div><div class="step-time">~2 min</div></div></div><div class="step-body">
+<h3>Test (nothing sent)</h3>
+<div class="code-block"><pre>uv run vera briefing --dry-run --force</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<div class="success-signal">Briefing text in terminal = working.</div>
+<h3>Send for real</h3>
+<div class="code-block"><pre>uv run vera briefing --force</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<p>Check Telegram. <strong>That's your first briefing.</strong></p>
+<h3>Next</h3>
+<ul><li><strong>Personalize:</strong> edit <code>workspace/USER.md</code></li><li><strong>Research:</strong> <code>uv run vera packs install jobs</code></li><li><strong>Automate:</strong> GitHub Actions (below)</li><li><strong>Explore:</strong> <code>uv run vera --help</code></li></ul>
+<div class="accordion"><button class="accordion-trigger" onclick="toggleAccordion(this)">GitHub Actions setup</button><div class="accordion-content"><p>Your fork &#8594; Settings &#8594; Secrets and variables &#8594; Actions. Add 4 secrets:</p><div class="code-block"><pre>NOTION_TOKEN
+ANTHROPIC_API_KEY
+TELEGRAM_BOT_TOKEN
+TELEGRAM_CHAT_ID</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><p>Actions tab &#8594; "Vera Briefing" &#8594; Enable workflow.</p><div class="success-signal">Vera runs every weekday. Sat = retrospective, Sun = planning.</div></div></div>
+<div class="done-check"><input type="checkbox" id="done5" onchange="markDone(5)"><label for="done5">Briefing received</label></div>
+</div></section>
+
+</main></div>
+
+<a href="https://chatgpt.com/g/g-69bccc99698c8191b02717a0c7523395-vera-setup-assistant" target="_blank" class="help-float">&#128172; Stuck? Ask the Assistant</a>
+<footer class="footer"><a href="https://getvera.dev">getvera.dev</a> &#183; <a href="https://github.com/veralifeos/vera-open">GitHub</a> &#183; v0.5.0</footer>
+
+<script>
+function detectOS(){var p=(navigator.platform||'').toLowerCase(),u=(navigator.userAgent||'').toLowerCase();if(p.includes('win')||u.includes('windows'))return'windows';if(p.includes('mac')||u.includes('macintosh'))return'macos';return'linux'}
+var currentOS=localStorage.getItem('vera-os')||detectOS(),currentLang=localStorage.getItem('vera-lang')||(navigator.language&&navigator.language.startsWith('pt')?'pt':'en'),completedSteps=JSON.parse(localStorage.getItem('vera-steps')||'[]'),currentVisibleStep=1;
+function setOS(os){currentOS=os;localStorage.setItem('vera-os',os);updateOS()}
+function updateOS(){document.getElementById('detectedOS').textContent={windows:'Windows',macos:'macOS',linux:'Linux'}[currentOS]||currentOS;document.querySelectorAll('.os-tab').forEach(function(t){t.classList.toggle('active',t.dataset.os===currentOS)});document.querySelectorAll('.os-content').forEach(function(c){c.classList.toggle('active',c.dataset.os===currentOS)})}
+function setLang(l){currentLang=l;localStorage.setItem('vera-lang',l);updateLang()}
+function updateLang(){document.documentElement.lang=currentLang==='pt'?'pt-BR':'en';document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.textContent.trim().toLowerCase()===currentLang)});document.querySelectorAll('[data-'+currentLang+']').forEach(function(el){var t=el.getAttribute('data-'+currentLang);if(t&&el.children.length===0)el.textContent=t})}
+function markDone(s){var cb=document.getElementById('done'+s);if(cb.checked){if(completedSteps.indexOf(s)<0)completedSteps.push(s)}else{completedSteps=completedSteps.filter(function(x){return x!==s})}localStorage.setItem('vera-steps',JSON.stringify(completedSteps));updateProgress()}
+function updateProgress(){var lines=document.querySelectorAll('.progress-line');for(var i=1;i<=5;i++){var pb=document.querySelector('.progress-step[data-step="'+i+'"]'),sec=document.getElementById('step'+i),cb=document.getElementById('done'+i),done=completedSteps.indexOf(i)>=0;pb.classList.toggle('done',done);sec.classList.toggle('completed',done);if(cb)cb.checked=done;if(i<5)lines[i-1].classList.toggle('done',done)}updateActiveStep()}
+function updateActiveStep(){document.querySelectorAll('.progress-step').forEach(function(p){var s=parseInt(p.dataset.step),d=completedSteps.indexOf(s)>=0;p.classList.toggle('active',s===currentVisibleStep&&!d);p.classList.toggle('visited',s<currentVisibleStep&&!d)});document.querySelectorAll('.step').forEach(function(s){var n=parseInt(s.dataset.step);s.classList.toggle('active-step',n===currentVisibleStep&&completedSteps.indexOf(n)<0)})}
+function scrollToStep(n){var el=document.getElementById('step'+n);if(el)el.scrollIntoView({behavior:'smooth'})}
+function copyCode(btn){navigator.clipboard.writeText(btn.previousElementSibling.textContent).then(function(){btn.textContent='\u2713 Copied!';btn.classList.add('copied');setTimeout(function(){btn.textContent='Copy';btn.classList.remove('copied')},1500)})}
+function toggleAccordion(t){t.classList.toggle('open');t.nextElementSibling.classList.toggle('open')}
+var hero=document.getElementById('heroVideo'),bar=document.getElementById('progressBar'),langT=document.getElementById('langToggle');
+window.addEventListener('scroll',function(){var y=window.scrollY,h=hero.offsetHeight,r=Math.min(y/h,1);hero.style.opacity=1-r;hero.style.pointerEvents=r>0.8?'none':'auto';var show=y>h*0.7;bar.classList.toggle('visible',show);langT.classList.toggle('shifted',show)},{passive:true});
+(function(){var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){currentVisibleStep=parseInt(e.target.dataset.step)||1;updateActiveStep()}})},{root:null,rootMargin:'-30% 0px -50% 0px',threshold:0});document.querySelectorAll('.step').forEach(function(s){obs.observe(s)})})();
+updateOS();updateLang();updateProgress();
+</script>
+</body>
+</html>

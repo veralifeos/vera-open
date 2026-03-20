@@ -43,5 +43,4 @@ htmlcov/
 uv.lock
 
 # Landing page build artifacts
-assets/
 gh-pages/
