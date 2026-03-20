@@ -22,7 +22,7 @@ a{color:var(--orange);text-decoration:none}a:hover{text-decoration:underline}
 .hero-video-wrap video{position:absolute;top:50%;left:50%;min-width:100%;min-height:100%;transform:translate(-50%,-50%);object-fit:cover}
 .hero-video-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,22,40,.3) 0%,rgba(10,22,40,.55) 60%,rgba(10,22,40,1) 100%);z-index:1}
 .hero-content{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 20px}
-.hero-logo{width:200px;margin-bottom:24px;opacity:.85}
+.hero-logo{width:200px;margin-bottom:24px;opacity:.95}
 .hero-content h1{font-family:var(--font-display);font-size:clamp(28px,5vw,44px);font-weight:700;color:var(--text-bright);line-height:1.2;margin-bottom:12px}
 .hero-content h1 em{color:var(--orange);font-style:italic}
 .hero-content .subtitle{color:var(--slate-300);font-size:17px;max-width:480px;margin:0 auto}
@@ -55,7 +55,7 @@ a{color:var(--orange);text-decoration:none}a:hover{text-decoration:underline}
 .progress-line.done{background:var(--green-dim)}
 @media(max-width:600px){.progress-label{display:none}.progress-line{width:8px}}
 .content-area{position:relative;z-index:1}
-.os-row{display:flex;align-items:center;justify-content:center;gap:16px;padding:24px 20px 8px;max-width:var(--max-w);margin:0 auto}
+.os-row{display:flex;align-items:center;justify-content:flex-start;gap:16px;padding:24px 20px 8px;max-width:var(--max-w);margin:0 auto}
 .os-badge{display:inline-flex;align-items:center;gap:6px;background:var(--navy-mid);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:6px 14px;font-size:13px;color:var(--slate-300)}
 .os-badge strong{color:var(--text-bright)}
 .terminal-note{max-width:var(--max-w);margin:0 auto 32px;padding:0 20px}
@@ -296,8 +296,21 @@ TELEGRAM_CHAT_ID</pre><button class="copy-btn" data-en="Copy" data-pt="Copiar" o
 
 </main></div>
 
-<a href="https://chatgpt.com/g/g-69bccc99698c8191b02717a0c7523395-vera-setup-assistant" target="_blank" class="help-float"><span>&#128172;</span> <span data-en="Stuck? Ask the Assistant" data-pt="Travou? Pergunte ao Assistente">Stuck? Ask the Assistant</span></a>
-<footer class="footer"><a href="https://getvera.dev">getvera.dev</a> &#183; <a href="https://github.com/veralifeos/vera-open">GitHub</a> &#183; v0.5.0</footer>
+<a href="https://chatgpt.com/g/g-69bccc99698c8191b02717a0c7523395-vera-setup-assistant" target="_blank" class="help-float"><svg style="width:18px;height:18px;flex-shrink:0" viewBox="0 0 32 32"><polygon points="16,4 28,28 4,28" fill="#fff"/></svg> <span data-en="Stuck? Ask the Assistant" data-pt="Travou? Pergunte ao Assistente">Stuck? Ask the Assistant</span></a>
+<footer class="footer">
+<div style="max-width:var(--max-w);margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:0 20px">
+  <div style="display:flex;align-items:center;gap:8px">
+    <svg style="height:14px;width:auto;opacity:.6" viewBox="757 -2052 1010 152" xmlns="http://www.w3.org/2000/svg"><g><path fill="#fff" d="M814.92-2044.75c-17.4,0-57.2,16-57.2,57.8h-.4v-59.2h141.6v.4c-20.4,0-20.8,21-20.8,22.2v94.8c0,2.2.8,22,20.8,22v.6h-83.4v-.6c20.4,0,20.8-21,20.8-22.2v-46.6s-7.4,0-7.4,0c-4.2,0-34.8,1.2-34.8,31.8h-.4v-65h.4c0,30.2,30.6,31.6,34.8,31.6h7.4s0-67.6,0-67.6h-21.4Z"/><path fill="#fff" d="M959.52-2044.75v67.6h7.4c4.2,0,34.8-1.4,34.8-31.6h.4v65h-.4c0-30.6-30.6-31.8-34.8-31.8h-7.4v46.6c0,1.2.4,22.2,20.8,22.2v.6h-83.4v-.6c20,0,20.8-19.8,20.8-22v-94.8c0-1.2-.4-22.2-20.8-22.2v-.4h141.6v59.2h-.4c0-41.8-39.8-57.8-57.2-57.8h-21.4Z"/></g><path fill="#fff" d="M1107.5-1928.95c0,1.2.4,22.2,20.8,22.2v.6h-83.4v-.6c20,0,20.8-19.8,20.8-22v-95c0-2.2-.8-22-20.8-22v-.4h83.4v.4c-20,0-20.8,19.8-20.8,22v94.8Z"/><path fill="#fff" d="M1238.5-2046.15c33,0,56,26.2,56,70.2s-23,69.8-56,69.8h-105.2v-.6c20,0,20.8-19.6,20.8-21.8v-95c0-1.2-.4-22.2-20.8-22.2v-.4h105.2ZM1202.1-2044.75h-6.2v137.2h6.2c33.4,0,50.2-26.8,50.2-67.6s-16.8-69.6-50.2-69.6Z"/><path fill="#fff" d="M1299.51-1906.15v-.6c20,0,20.8-19.6,20.8-21.8v-95c0-1.2-.4-22.2-20.8-22.2v-.4h141.6v59.2h-.4c0-41.8-39.8-57.8-57.2-57.8h-21.4v67.8h7.4c4.2,0,34.8-1.4,34.8-31.6h.4v65h-.4c0-30.6-30.6-31.8-34.8-31.8h-7.4v67.8h21.4c17.4,0,57.2-16,57.2-57.8h.4v59.2h-141.6Z"/><path fill="#fff" d="M1513.7-1910.55h.8c2.2,0,13.82.51,16.35-.66,17.85-8.3,41.45-29.18,41.45-64.74h.4v69.8h-121.6v-.6c20,0,20.8-19.6,20.8-21.8v-95.2c0-2.2-.8-22-20.8-22v-.4h83.4v.4c-20,0-20.8,19.8-20.8,22v113.2Z"/><path fill="#fff" d="M1737.1-1991.75l-22.4-11.4c-15.2-7.8-23.6-12.4-23.6-24.2,0-16,9.4-19.8,15.6-19.8,19.2,0,24.4,24.2,44,24.2,16,0,12.2-25.2,12.2-25.2h-.6c-1.6,8.6-27.6-.8-46.8-.8-50.4,0-58.4,26.4-58.4,40.6,0,21.2,18.6,29.2,37.6,38.8l22.2,11.2c11.4,5.8,19.2,11.8,19.2,25.2,0,16.8-14.2,25.8-30.6,25.8-22.8,0-49.8-27.49-49.8-64.68h-.6v.14s0,46.09,0,46.09c0,8.84,8.4,19.65,28.8,19.65h-8,31.8c22.8,0,62.8-5,62.8-45,0-20-13.4-30.4-33.4-40.6Z"/><g><path fill="#fff" d="M1655.1-2045.75v-.4h-83.4v.4c20,0,20.8,19.8,20.8,22v17.18h0v100.42h62.6v-.6c-20.4,0-20.8-21-20.8-22.2v-94.8c0-2.2.8-22,20.8-22Z"/><path fill="#fff" d="M1564.43-1906.81c-.56.03-1.13.05-1.72.05v.6h1.72v-.65Z"/></g></svg>
+    <span style="font-size:12px;color:var(--orange)">vera.open</span>
+  </div>
+  <div style="display:flex;gap:20px">
+    <a href="https://getvera.dev" style="font-size:13px;color:var(--slate-400)">Home</a>
+    <a href="https://github.com/veralifeos/vera-open" target="_blank" style="font-size:13px;color:var(--slate-400)">GitHub</a>
+    <a href="https://same-tiger-545.notion.site/Vera-Life-OS-31b487bf2603816aba1df400b86dbde3" target="_blank" style="font-size:13px;color:var(--slate-400)">Notion</a>
+  </div>
+  <div style="font-size:12px;color:var(--slate-500)">Apache 2.0 · v0.5.0 · <a href="https://github.com/veralifeos/vera-open/blob/main/README.md" target="_blank" style="color:var(--slate-500);text-decoration:underline;text-underline-offset:3px">Docs</a></div>
+</div>
+</footer>
 
 <script>
 function detectOS(){var p=(navigator.platform||'').toLowerCase(),u=(navigator.userAgent||'').toLowerCase();if(p.includes('win')||u.includes('windows'))return'windows';if(p.includes('mac')||u.includes('macintosh'))return'macos';return'linux'}
