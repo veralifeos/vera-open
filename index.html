@@ -177,10 +177,10 @@ nav {
 .vera-icon-3d {
   position: absolute; top: -40px; right: -20px; width: 120px; height: 120px;
   border-radius: 20px; overflow: hidden; opacity: .9;
-  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  background: transparent;
   z-index: 2;
 }
-.vera-icon-3d img { width: 100%; height: 100%; object-fit: cover; }
+.vera-icon-3d img { width: 100%; height: 100%; object-fit: contain; }
 .briefing-card {
   background: var(--bg2); border: 1px solid var(--border); border-radius: 16px;
   overflow: hidden; font-family: var(--font-mono); font-size: 12px;
@@ -334,7 +334,7 @@ section { position: relative; z-index: 1; }
 .packs-header { text-align: center; margin-bottom: 56px; }
 .packs-header .section-p { margin: 0 auto; }
 .packs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
-.pack-card { background: #1a2d45; border: 1px solid rgba(255,255,255,.1); border-radius: 16px; overflow: hidden; transition: border-color .25s, box-shadow .25s; }
+.pack-card { background: #132238; border: 1px solid rgba(255,255,255,.1); border-radius: 16px; overflow: hidden; transition: border-color .25s, box-shadow .25s; }
 .pack-card:hover { border-color: rgba(255,255,255,.18); box-shadow: 0 4px 24px rgba(0,0,0,.35); }
 .pack-bar { height: 4px; }
 .pack-bar.jobs { background: var(--green); }
@@ -371,7 +371,7 @@ section { position: relative; z-index: 1; }
   background: var(--accent); border-radius: 8px; padding: 4px 10px;
   font-family: var(--font-mono); font-size: 10px; color: #fff;
 }
-.persona-messages-col { padding-top: 8px; }
+.persona-messages-col { padding: 8px 48px 0; }
 .persona-image-col { display: flex; align-items: center; justify-content: center; }
 .persona-hero-img { height: 320px; width: auto; max-width: 100%; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 24px 60px rgba(0,0,0,.5); }
 .persona-messages { display: flex; flex-direction: column; gap: 14px; margin-top: 24px; }
@@ -504,7 +504,6 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
   body { padding-bottom: 72px; }
   .hero-ctas .btn-secondary { display: none; }
   .persona-inner { grid-template-columns: 1fr; }
-  .persona-image-col { order: -1; }
   .persona-hero-img { width: 60%; max-width: 280px; }
 }
 @media (max-width: 540px) {
@@ -707,7 +706,7 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
             <span class="t-pt">Começar grátis</span>
             →
           </a>
-          <a href="#how" class="btn-secondary">
+          <a href="#crossing" class="btn-secondary">
             <span class="t-en">How it works</span>
             <span class="t-pt">Como funciona</span>
           </a>
@@ -769,7 +768,7 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
 <!-- GPT BANNER -->
 <div class="gpt-banner anim">
   <div class="container">
-    <a href="https://chatgpt.com/g/g-684e8e4a0d4c8191b1fe0c7af3fa9ebb-vera-open-setup-assistant" class="gpt-banner-inner" target="_blank">
+    <a href="#how" class="gpt-banner-inner">
       <img src="/assets/VeraIUcon-02.webp" alt="Vera" class="gpt-banner-icon">
       <span class="gpt-banner-text">
         <span class="t-en"><strong>Setup assistant available via GPT</strong> — get guided through installation step by step</span>
@@ -781,7 +780,7 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
 </div>
 
 <!-- CROSSING -->
-<section id="crossing">
+<section id="crossing" class="architecture-section">
   <div class="container">
     <div class="crossing-inner">
       <div class="crossing-col anim">
@@ -1057,10 +1056,12 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
 <section id="persona">
   <div class="container">
     <div class="persona-inner">
-      
+      <div class="persona-image-col anim anim-delay-1">
+        <img src="/assets/vera-persona.png" alt="Vera" class="persona-hero-img">
+      </div>
       <div class="persona-messages-col">
         <div class="anim">
-          <p class="section-label"><span class="t-en">Vera speaks</span><span class="t-pt">Vera fala</span></p>
+          <p class="section-label"><span class="t-en">Vera speaks</span><span class="t-pt">Uma deusa, uma louca, uma feiticeira</span></p>
           <h2 class="section-h2">
             <span class="t-en">Not just a dashboard.<br><em>An intelligence.</em></span>
             <span class="t-pt">Não é um dashboard.<br><em>Uma inteligência.</em></span>
@@ -1088,9 +1089,6 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
           </div>
         </div>
       </div>
-      <div class="persona-image-col anim anim-delay-3">
-        <img src="/assets/vera-persona.png" alt="Vera" class="persona-hero-img">
-      </div>
     </div>
   </div>
 </section>
@@ -1102,85 +1100,65 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
       <p class="section-label"><span class="t-en">Setup</span><span class="t-pt">Configuração</span></p>
       <h2 class="section-h2"><span class="t-en">Set up in <em>under an hour.</em></span><span class="t-pt">Configurado em <em>menos de uma hora.</em></span></h2>
       <p class="section-p" style="max-width:780px">
-        <span class="t-en">Five steps. No servers. GitHub Actions handles everything on your configured schedule, for free.</span>
-        <span class="t-pt">Cinco etapas. Sem servidores. GitHub Actions executa tudo no horário configurado, de graça.</span>
-      </p>
-      <div class="inline-cta" style="margin-top:24px">
-        <a href="#" class="btn-primary" onclick="openGate(event)">
-          <span class="t-en">Install now</span><span class="t-pt">Instalar agora</span> →
-        </a>
-        <p class="cta-support"><span class="t-en">Five steps. No surprises.</span><span class="t-pt">Cinco etapas. Sem surpresas.</span></p>
-      </div>
-      <p class="section-p" style="max-width:780px;margin-top:16px;font-size:.95rem">
-        <span class="t-en">Or follow our <a href="#" onclick="openGate(event)" style="color:var(--accent)">interactive setup guide</a> for a step-by-step walkthrough.</span>
-        <span class="t-pt">Ou siga nosso <a href="#" onclick="openGate(event)" style="color:var(--accent)">guia interativo de instalação</a> para um passo a passo completo.</span>
+        <span class="t-en">Vera was designed to be installed by real people, not just developers. The process takes under an hour and you won't be doing it alone: alongside detailed documentation available after sign-up, there's a GPT-powered Setup Assistant that guides you step by step, from clone to your first briefing delivered on Telegram.</span>
+        <span class="t-pt">Vera foi pensada para ser instalada por pessoas reais, não só por devs. O processo leva menos de uma hora e você não precisa fazer isso no escuro: além de uma documentação detalhada acessível após o cadastro, há um Assistente de Instalação disponível via GPT que te guia passo a passo, do clone ao primeiro briefing entregue no Telegram.</span>
       </p>
     </div>
     <div class="how-steps">
       <div class="step anim anim-delay-1">
         <div class="step-header" onclick="toggleStep(this)">
           <div class="step-num">01</div>
-          <div class="step-title t-en">Clone the repo & run vera setup</div>
-          <div class="step-title t-pt">Clone o repo & rode vera setup</div>
+          <div class="step-title t-en">Clone the repository</div>
+          <div class="step-title t-pt">Clone o repositório</div>
           <div class="step-chevron">▾</div>
         </div>
         <div class="step-body"><div class="step-detail">
-          <p class="t-en">Fork <code>veralifeos/vera-open</code>. Run <code>vera setup</code>: the wizard walks you through every credential: Notion, Telegram, Claude API, JSearch.</p>
-          <p class="t-pt">Fork <code>veralifeos/vera-open</code>. Rode <code>vera setup</code>: o wizard te guia em cada credencial: Notion, Telegram, Claude API, JSearch.</p>
-          <p class="t-en">Run <code>vera doctor</code> to validate your environment before first run.</p>
-          <p class="t-pt">Rode <code>vera doctor</code> para validar seu ambiente antes da primeira execução.</p>
+          <p class="t-en">One terminal command and you have the project locally. No advanced experience needed — just an open terminal.</p>
+          <p class="t-pt">Um comando no terminal e você tem o projeto localmente. Não precisa de experiência avançada, só de um terminal aberto.</p>
         </div></div>
       </div>
       <div class="step anim anim-delay-2">
         <div class="step-header" onclick="toggleStep(this)">
           <div class="step-num">02</div>
-          <div class="step-title t-en">Set up your Notion template</div>
-          <div class="step-title t-pt">Configure seu template Notion</div>
+          <div class="step-title t-en">Set up your credentials</div>
+          <div class="step-title t-pt">Configure suas credenciais</div>
           <div class="step-chevron">▾</div>
         </div>
         <div class="step-body"><div class="step-detail">
-          <p class="t-en">Duplicate the official Vera Notion template. Tasks DB, Job Pipeline, Weekly Check-in, Linha do Céu, all pre-structured.</p>
-          <p class="t-pt">Duplique o template oficial Vera no Notion. Banco de Tarefas, Pipeline de Vagas, Check Semanal, Linha do Céu, tudo pré-estruturado.</p>
+          <p class="t-en">Create a .env file with your tokens: Notion, Telegram and Claude API. The GPT Assistant shows you exactly where to find each one.</p>
+          <p class="t-pt">Crie um arquivo .env com seus tokens: Notion, Telegram e Claude API. O Assistente GPT te mostra exatamente onde encontrar cada um.</p>
         </div></div>
       </div>
       <div class="step anim anim-delay-3">
         <div class="step-header" onclick="toggleStep(this)">
           <div class="step-num">03</div>
-          <div class="step-title t-en">Configure your Research Packs</div>
-          <div class="step-title t-pt">Configure seus Research Packs</div>
+          <div class="step-title t-en">Run the interactive setup</div>
+          <div class="step-title t-pt">Rode o setup interativo</div>
           <div class="step-chevron">▾</div>
         </div>
         <div class="step-body"><div class="step-detail">
-          <p class="t-en">Edit <code>research.yml</code> to enable packs and set schedules. Each pack has a <code>notify_min</code> score threshold; results below it are silently filtered.</p>
-          <p class="t-pt">Edite <code>research.yml</code> para ativar packs e definir schedules. Cada pack tem um threshold <code>notify_min</code>; resultados abaixo são filtrados em silêncio.</p>
-          <p class="t-en">Use <code>vera packs list</code> to see available packs and their status. Use <code>vera validate</code> to check your config before deploying.</p>
-          <p class="t-pt">Use <code>vera packs list</code> para ver packs disponíveis e seu status. Use <code>vera validate</code> para checar seu config antes de fazer deploy.</p>
+          <p class="t-en">The <code>vera setup</code> command opens a wizard that automatically creates the databases in Notion and validates all connections before proceeding.</p>
+          <p class="t-pt">O comando <code>vera setup</code> abre um assistente que cria automaticamente os bancos de dados no Notion e valida todas as conexões antes de continuar.</p>
         </div></div>
       </div>
       <div class="step anim anim-delay-4">
         <div class="step-header" onclick="toggleStep(this)">
           <div class="step-num">04</div>
-          <div class="step-title t-en">Add secrets to GitHub Actions</div>
-          <div class="step-title t-pt">Adicione secrets ao GitHub Actions</div>
+          <div class="step-title t-en">Test with a dry run</div>
+          <div class="step-title t-pt">Teste com um dry-run</div>
           <div class="step-chevron">▾</div>
         </div>
         <div class="step-body"><div class="step-detail">
-          <p class="t-en">Copy your <code>.env</code> values as GitHub repository secrets. The workflow picks them up automatically, no code changes needed.</p>
-          <p class="t-pt">Copie os valores do seu <code>.env</code> como secrets do repositório GitHub. O workflow os captura automaticamente.</p>
+          <p class="t-en">Before activating real delivery, run a test briefing. You see exactly what would be sent to Telegram without committing any state.</p>
+          <p class="t-pt">Antes de ativar o envio real, rode um briefing de teste. Você vê exatamente o que seria entregue no Telegram sem comprometer nenhum estado.</p>
         </div></div>
       </div>
-      <div class="step anim anim-delay-5">
-        <div class="step-header" onclick="toggleStep(this)">
-          <div class="step-num">05</div>
-          <div class="step-title t-en">First briefing in your Telegram</div>
-          <div class="step-title t-pt">Primeiro briefing no seu Telegram</div>
-          <div class="step-chevron">▾</div>
-        </div>
-        <div class="step-body"><div class="step-detail">
-          <p class="t-en">Trigger manually: <code>vera run --briefing</code>. If green, Vera runs automatically on your configured schedule. Done.</p>
-          <p class="t-pt">Dispare manualmente: <code>vera run --briefing</code>. Se tudo verde, Vera executa automaticamente no horário configurado. Pronto.</p>
-        </div></div>
-      </div>
+    </div>
+    <div class="inline-cta anim" style="text-align:center;margin-top:48px">
+      <a href="#" class="btn-primary" onclick="openGate(event)">
+        <span class="t-en">Install now</span><span class="t-pt">Instalar agora</span> →
+      </a>
+      <p class="cta-support"><span class="t-en">Five steps. No surprises.</span><span class="t-pt">Cinco etapas. Sem surpresas.</span></p>
     </div>
   </div>
 </section>
