@@ -124,7 +124,11 @@ nav {
 .nav-link:hover { color: var(--text); background: var(--bg3); }
 
 /* GPT BANNER */
-.gpt-banner { background: var(--bg-strip); border-bottom: 1px solid var(--border2); padding: 10px 0; }
+.gpt-banner { background: var(--bg-strip); border-bottom: 1px solid var(--border2); padding: 22px 0; transition: background .2s; }
+.gpt-banner:hover { background: var(--accent); }
+.gpt-banner:hover .gpt-banner-text,
+.gpt-banner:hover .gpt-banner-text strong,
+.gpt-banner:hover .gpt-banner-arrow { color: #1a1a1a; }
 .gpt-banner-inner {
   display: flex; align-items: center; gap: 12px; text-decoration: none;
   justify-content: center; color: var(--muted); transition: color .2s;
@@ -158,6 +162,8 @@ nav {
   text-decoration: none; cursor: pointer; transition: background .2s, transform .15s;
 }
 .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+.inline-cta { margin-top: 32px; }
+.inline-cta .cta-support { font-size: 13px; color: var(--dim); margin-top: 10px; }
 .btn-secondary {
   display: inline-flex; align-items: center; gap: 8px; padding: 13px 26px;
   background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 10px;
@@ -219,7 +225,7 @@ section { position: relative; z-index: 1; }
 .section-p { font-size: 16px; color: var(--muted); line-height: 1.75; max-width: 560px; }
 
 /* CROSSING */
-#crossing { padding: 100px 0; background: var(--bg-strip); border-top: 1px solid var(--border2); border-bottom: 1px solid var(--border2); }
+#crossing { padding: 96px 0; background: var(--bg-strip); border-top: 1px solid var(--border2); border-bottom: 1px solid var(--border2); }
 .crossing-inner { display: grid; grid-template-columns: 1fr 180px 1fr; gap: 40px; align-items: center; }
 .crossing-col { display: flex; flex-direction: column; gap: 14px; }
 .node {
@@ -264,7 +270,7 @@ section { position: relative; z-index: 1; }
 .vera-persona-block img { width: 100%; height: auto; display: block; }
 
 /* PAIN */
-#pain { padding: 100px 0; background: var(--bg-strip); border-top: 1px solid var(--border2); }
+#pain { padding: 96px 0; background: var(--bg-strip); border-top: 1px solid var(--border2); }
 .pain-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 48px; }
 .pain-item {
   background: var(--bg3); border: 1px solid var(--border); border-radius: 12px;
@@ -282,7 +288,7 @@ section { position: relative; z-index: 1; }
 .solution-strip p { font-size: 14px; color: var(--muted); }
 
 /* PREVIEW */
-#preview { padding: 100px 0; overflow: hidden; }
+#preview { padding: 96px 0; overflow: hidden; }
 .preview-header { text-align: center; margin-bottom: 56px; }
 .preview-header .section-p { margin: 0 auto; }
 .preview-terminal {
@@ -311,20 +317,20 @@ section { position: relative; z-index: 1; }
 .t-hr { border: none; border-top: 1px solid var(--border2); margin: 12px 0; }
 
 /* FEATURES */
-#features { padding: 100px 0; }
+#features { padding: 96px 0; }
 .features-header { max-width: 560px; margin-bottom: 56px; }
 .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
 .feat-card {
-  background: var(--bg3); border: 1px solid var(--border); border-radius: 14px; padding: 26px;
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 14px; padding: 24px;
   transition: border-color .25s, box-shadow .25s;
 }
 .feat-card:hover { border-color: var(--accent); box-shadow: 0 8px 40px var(--glow); }
-.feat-icon { font-size: 28px; margin-bottom: 16px; }
-.feat-title { font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.feat-icon { font-size: 28px; margin-bottom: 12px; }
+.feat-title { font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
 .feat-desc { font-size: 13.5px; color: var(--muted); line-height: 1.65; }
 
 /* PACKS */
-#packs { padding: 100px 0; background: var(--bg-strip); border-top: 1px solid var(--border2); border-bottom: 1px solid var(--border2); }
+#packs { padding: 96px 0; background: var(--bg-strip); border-top: 1px solid var(--border2); border-bottom: 1px solid var(--border2); }
 .packs-header { text-align: center; margin-bottom: 56px; }
 .packs-header .section-p { margin: 0 auto; }
 .packs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
@@ -335,16 +341,16 @@ section { position: relative; z-index: 1; }
 .pack-bar.news { background: var(--teal); }
 .pack-bar.finance { background: var(--indigo); }
 .pack-body { padding: 24px; }
-.pack-name { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 10px; }
+.pack-name { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; }
 .pack-name.jobs { color: var(--green); }
 .pack-name.news { color: var(--teal); }
 .pack-name.finance { color: var(--indigo); }
 .pack-h { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: #f1f5f9; margin-bottom: 12px; }
-.pack-vera-quote { font-family: var(--font-display); font-style: italic; font-size: 13px; color: var(--accent); line-height: 1.6; margin-bottom: 16px; padding-left: 12px; border-left: 2px solid var(--accent); }
+.pack-vera-quote { font-family: var(--font-display); font-style: normal; font-size: 13px; color: var(--accent); line-height: 1.6; margin-bottom: 16px; padding-left: 12px; border-left: 2px solid var(--accent); }
 .pack-sources { font-family: var(--font-mono); font-size: 11px; color: #94a3b8; line-height: 1.8; }
 
 /* PERSONA — with portrait photo */
-#persona { padding: 100px 0; }
+#persona { padding: 96px 0; }
 .persona-inner { display: grid; grid-template-columns: 1fr; gap: 60px; align-items: start; max-width: 700px; margin: 0 auto; }
 .persona-portrait-col { position: relative; }
 .persona-portrait {
@@ -378,7 +384,7 @@ section { position: relative; z-index: 1; }
 .msg-content em { font-style: italic; color: var(--muted); }
 
 /* HOW IT WORKS */
-#how { padding: 100px 0; background: var(--bg-strip); border-top: 1px solid var(--border2); border-bottom: 1px solid var(--border2); }
+#how { padding: 96px 0; background: var(--bg-strip); border-top: 1px solid var(--border2); border-bottom: 1px solid var(--border2); }
 .how-steps { display: flex; flex-direction: column; gap: 12px; margin-top: 48px; }
 .step { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
 .step-header { display: flex; align-items: center; gap: 16px; padding: 18px 22px; cursor: pointer; user-select: none; }
@@ -397,15 +403,15 @@ section { position: relative; z-index: 1; }
 .step-detail code { font-family: var(--font-mono); font-size: 11.5px; color: var(--accent); background: var(--bg3); padding: 2px 6px; border-radius: 4px; }
 
 /* UNDER THE HOOD */
-#under { padding: 100px 0; background: var(--bg-strip); }
+#under { padding: 96px 0; background: var(--bg-strip); }
 .under-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-top: 56px; }
 .under-item { text-align: center; }
-.under-num { font-family: var(--font-display); font-size: 48px; font-weight: 700; color: var(--accent); line-height: 1; margin-bottom: 8px; }
+.under-num { font-family: var(--font-display); font-size: 48px; font-weight: 700; color: var(--accent); line-height: 1; margin-bottom: 12px; }
 .under-label { font-family: var(--font-mono); font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .1em; }
 .under-label strong { display: block; font-size: 13px; color: var(--muted); text-transform: none; letter-spacing: 0; margin-bottom: 4px; }
 
 /* CTA FINAL */
-#cta-final { padding: 120px 0; text-align: center; position: relative; }
+#cta-final { padding: 96px 0; text-align: center; position: relative; }
 #cta-final::before {
   content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
   width: 600px; height: 400px;
@@ -761,8 +767,8 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
     <a href="https://chatgpt.com/g/g-684e8e4a0d4c8191b1fe0c7af3fa9ebb-vera-open-setup-assistant" class="gpt-banner-inner" target="_blank">
       <img src="/assets/VeraIUcon-02.webp" alt="Vera" class="gpt-banner-icon">
       <span class="gpt-banner-text">
-        <span class="t-en">🤖 <strong>Setup assistant available via GPT</strong> — get guided through installation step by step</span>
-        <span class="t-pt">🤖 <strong>Assistente de instalação disponível via GPT</strong> — instalação guiada passo a passo</span>
+        <span class="t-en"><strong>Setup assistant available via GPT</strong> — get guided through installation step by step</span>
+        <span class="t-pt"><strong>Assistente de instalação disponível via GPT</strong> — instalação guiada passo a passo</span>
       </span>
       <span class="gpt-banner-arrow">→</span>
     </a>
@@ -805,6 +811,12 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
         <span class="t-en">Vera gathers signals from your tools, research sources and personal context, then assembles a structured daily briefing with Claude.</span>
         <span class="t-pt">Vera reúne sinais das suas ferramentas, fontes de pesquisa e contexto pessoal, e monta um briefing diário estruturado com a Claude API.</span>
       </p>
+      <div class="inline-cta anim anim-delay-3">
+        <a href="#" class="btn-primary" onclick="openGate(event)">
+          <span class="t-en">I want my briefing</span><span class="t-pt">Quero o meu briefing</span> →
+        </a>
+        <p class="cta-support"><span class="t-en">Free. Open-source. No server to manage.</span><span class="t-pt">Grátis. Open-source. Sem servidor pra gerenciar.</span></p>
+      </div>
     </div>
   </div>
 </section>
@@ -971,6 +983,12 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
         <div class="feat-desc t-pt">Vera aprende seu comportamento: detecta sobrecarga, reconhece prioridades reais, sinaliza tarefas mortas. Inferências automáticas atualizam seu USER.md toda semana.</div>
       </div>
     </div>
+    <div class="inline-cta anim" style="text-align:center;margin-top:48px">
+      <a href="#" class="btn-primary" onclick="openGate(event)">
+        <span class="t-en">Get started</span><span class="t-pt">Começar agora</span> →
+      </a>
+      <p class="cta-support"><span class="t-en">Set it up once. Wake up better every day.</span><span class="t-pt">Configure uma vez. Acorde melhor todo dia.</span></p>
+    </div>
   </div>
 </section>
 
@@ -1020,6 +1038,12 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
         <div class="pack-sources t-pt">Fontes: Qualquer API REST · Parsers customizados<br>Roda: Seu horário · seus filtros</div>
       </div></div>
 
+    </div>
+    <div class="inline-cta anim" style="text-align:center;margin-top:48px">
+      <a href="#" class="btn-primary" onclick="openGate(event)">
+        <span class="t-en">Activate my modules</span><span class="t-pt">Ativar meus módulos</span> →
+      </a>
+      <p class="cta-support"><span class="t-en">Enable the packs that make sense for your routine.</span><span class="t-pt">Escolha os packs que fazem sentido para sua rotina.</span></p>
     </div>
   </div>
 </section>
@@ -1073,7 +1097,13 @@ footer { padding: 32px 0; border-top: 1px solid var(--border2); background: var(
         <span class="t-en">Five steps. No servers. GitHub Actions handles everything on your configured schedule, for free.</span>
         <span class="t-pt">Cinco etapas. Sem servidores. GitHub Actions executa tudo no horário configurado, de graça.</span>
       </p>
-      <p class="section-p" style="max-width:680px;margin-top:.5rem;font-size:.95rem">
+      <div class="inline-cta" style="margin-top:24px">
+        <a href="#" class="btn-primary" onclick="openGate(event)">
+          <span class="t-en">Install now</span><span class="t-pt">Instalar agora</span> →
+        </a>
+        <p class="cta-support"><span class="t-en">Five steps. No surprises.</span><span class="t-pt">Cinco etapas. Sem surpresas.</span></p>
+      </div>
+      <p class="section-p" style="max-width:680px;margin-top:16px;font-size:.95rem">
         <span class="t-en">Or follow our <a href="/setup" style="color:var(--accent)">interactive setup guide</a> for a step-by-step walkthrough.</span>
         <span class="t-pt">Ou siga nosso <a href="/setup" style="color:var(--accent)">guia interativo de instalação</a> para um passo a passo completo.</span>
       </p>
