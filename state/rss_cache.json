@@ -1,0 +1,13 @@
+{
+  "https://feeds.arstechnica.com/arstechnica/technology-lab": {
+    "last_modified": "Tue, 24 Mar 2026 13:56:53 GMT"
+  },
+  "https://techcrunch.com/feed/": {
+    "etag": "W/\"f04f8cc9e17a080575aeb9ad752d8ff9\"",
+    "last_modified": "Tue, 24 Mar 2026 15:42:55 GMT"
+  },
+  "https://www.aljazeera.com/xml/rss/all.xml": {
+    "etag": "W/\"d5f5e7e9e4c2dbfc16ebdb87f9e7932a\"",
+    "last_modified": "Tue, 24 Mar 2026 15:10:33 GMT"
+  }
+}
