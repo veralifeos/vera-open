@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "observations": [
+    {
+      "date": "2026-03-28",
+      "tasks_suggested": [],
+      "tasks_completed": [],
+      "energy_score": 0,
+      "dia_num": 5,
+      "pack_results": {
+        "tasks": 1
+      },
+      "mention_counts_snapshot": {},
+      "task_titles": {}
+    }
+  ],
+  "weekly_snapshots": []
+}
