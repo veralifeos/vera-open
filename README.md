@@ -2,9 +2,18 @@
 
 **AI-powered Life Operating System. Open source.**
 
+[![Tests](https://img.shields.io/badge/tests-510%20passed-2ea44f)](https://github.com/veralifeos/vera-open/actions)
+[![Python](https://img.shields.io/badge/python-3.11%2B-3776ab)](pyproject.toml)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/veralifeos/vera-open)](https://github.com/veralifeos/vera-open/releases/latest)
+
+![Vera AI life operating system](assets/vera-og.png)
+
 Vera reads your Notion workspace, calculates what matters most, and sends you a daily briefing via Telegram. No app to open, no dashboard to check. Your priorities arrive where you already are.
 
 It runs on GitHub Actions (free tier) and costs ~$0.01-0.03/day in AI API usage. Zero infrastructure to maintain.
+
+[Website](https://getvera.dev) | [Setup guide](docs/SETUP.md) | [Latest release](https://github.com/veralifeos/vera-open/releases/latest)
 
 ---
 
@@ -293,5 +302,7 @@ vera-open/
 Apache 2.0 -- fork it, customize it, make it yours.
 
 ---
+
+Created by [Fernando Fidelis](https://github.com/ffidelis16).
 
 *Built for people who want their productivity system to talk to them, not the other way around.*
