@@ -61,6 +61,10 @@ python -m vera briefing --force
 # 7. (Optional) Tell Vera about yourself
 cp workspace/USER.example.md workspace/USER.md
 # Edit USER.md — makes briefings dramatically better
+
+# 8. (Optional) Calibrate job scoring
+cp config/candidate_profile.example.yaml config/candidate_profile.yaml
+cp config/target_companies.example.yaml config/target_companies.yaml
 ```
 
 For the full setup guide including Telegram bot creation and GitHub Actions deployment, see [docs/SETUP.md](docs/SETUP.md).
@@ -149,6 +153,8 @@ Vera is config-driven. Everything lives in `config.yaml`:
 
 See [config/config.example.yaml](config/config.example.yaml) for all options with comments.
 
+Personal files are intentionally ignored by Git: `.env`, `config/config.yaml`, `workspace/USER.md`, `workspace/AGENT.md`, `workspace/SOUL.md`, `state/`, and job-search calibration files copied from `config/*.example.yaml`. Keep those in your fork or local environment only.
+
 ## Project structure
 
 ```
@@ -178,7 +184,8 @@ vera-open/
 │   ├── AGENT.example.md     # Persona template
 │   └── USER.example.md      # Personal context template
 ├── config/
-│   └── config.example.yaml  # Full configuration reference
+│   ├── config.example.yaml  # Full configuration reference
+│   └── *.example.yaml       # Optional public templates for personal scoring
 ├── state/                   # Persisted state (gitignored in production)
 ├── tests/                   # 359 tests, zero external calls
 └── docs/

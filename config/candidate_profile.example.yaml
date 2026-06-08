@@ -1,0 +1,60 @@
+# Candidate/job scoring profile example.
+# Copy to config/candidate_profile.yaml and edit for your own goals.
+
+identity:
+  name: "Your Name"
+  location: "Remote"
+  experience_years: 5
+  target_salary:
+    brl_min: 0
+    brl_target: 0
+    brl_max: 0
+    usd_min: 0
+  contract: both
+  work_model: remote
+
+target_roles:
+  exact:
+    - "Product Marketing Manager"
+    - "Growth Manager"
+  close:
+    - "Lifecycle Marketing"
+    - "Demand Generation"
+  adjacent:
+    - "Marketing Operations"
+    - "Revenue Operations"
+
+stack:
+  strong: ["GA4", "HubSpot", "Figma"]
+  familiar: ["Salesforce", "Looker"]
+  learning: ["SQL"]
+
+sectors_preferred:
+  - "b2b saas"
+  - "fintech"
+
+blockers:
+  titles:
+    - "data analyst"
+    - "paid media specialist"
+  stacks: []
+  role_signals: []
+
+scoring_weights:
+  title_exact: 3.0
+  title_close: 2.0
+  title_adjacent: 1.0
+  cro_keywords: 0.5
+  b2b_saas: 1.5
+  stack_match_2plus: 1.0
+  remote: 1.0
+  clt_or_usd: 0.5
+  clt_explicit: 1.0
+  brasil_location: 0.5
+  portugues: 0.3
+  beneficios: 0.3
+  preferred_sector: 0.5
+  easy_apply: 0.3
+  small_pipeline: 0.2
+  referral: 0.5
+  target_company: 2.0

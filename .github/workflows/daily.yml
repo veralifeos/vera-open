@@ -1,8 +1,8 @@
 # ============================================================
-# Vera Open — Daily Research + Briefing
+# Vera Open — Daily Briefing
 # ============================================================
 # Runs every day at 9:00 AM BRT (12:00 UTC).
-# Also triggerable manually via workflow_dispatch.
+# Research foi movido para research.yml (dia sim/dia nao).
 # ============================================================
 
 name: Daily Briefing
@@ -25,9 +25,19 @@ concurrency:
 env:
   VERA_CONFIG: config/config.ci.yaml
   NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+  NOTION_DB_ACOES: ${{ secrets.NOTION_DB_ACOES }}
+  NOTION_DB_PIPELINE: ${{ secrets.NOTION_DB_PIPELINE }}
+  NOTION_DB_CONTATOS: ${{ secrets.NOTION_DB_CONTATOS }}
+  NOTION_DB_CHECK: ${{ secrets.NOTION_DB_CHECK }}
+  NOTION_DB_LINHA_CEU: ${{ secrets.NOTION_DB_LINHA_CEU }}
+  NOTION_DB_METRICAS: ${{ secrets.NOTION_DB_METRICAS }}
+  NOTION_DB_PARALELOS: ${{ secrets.NOTION_DB_PARALELOS }}
+  NOTION_PAGE_NATAL: ${{ secrets.NOTION_PAGE_NATAL }}
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+  GOOGLE_OAUTH_TOKEN: ${{ secrets.GOOGLE_OAUTH_TOKEN }}
 
 jobs:
   research-and-briefing:
@@ -44,15 +54,7 @@ jobs:
         uses: astral-sh/setup-uv@v4
 
       - name: Install dependencies
-        run: uv sync
-
-      - name: Research — All packs
-        run: uv run python -m vera research --all --force 2>&1 || true
-        env:
-          JOOBLE_API_KEY: ${{ secrets.JOOBLE_API_KEY }}
-          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
-          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
-          COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+        run: uv sync --extra calendar --extra personal
 
       - name: Run briefing
         run: |

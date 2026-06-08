@@ -3,6 +3,8 @@
 import logging
 
 from vera.research.base import ResearchItem, ResearchPack, ResearchResult
+from vera.research.packs.jobs.blockers import check_blockers
+from vera.research.packs.jobs.profile import load_profile
 from vera.research.packs.jobs.scorer import JobScorer
 from vera.research.packs.jobs.sources import ALL_SOURCES, FALLBACK_SOURCES
 from vera.research.scoring import ScoringEngine, create_embedder
@@ -100,7 +102,12 @@ class JobSearchPack(ResearchPack):
         return all_items
 
     async def score(self, items: list[ResearchItem], config: dict) -> list[ResearchItem]:
-        """3 camadas: rule-based -> embedding -> LLM (opcional)."""
+        """3 camadas: rule-based -> embedding -> LLM (opcional).
+
+        Aplica blockers antes do scoring: vagas bloqueadas recebem score 0
+        e o motivo vai pra metadata['blocked_reason'] — podem ser filtradas
+        depois pelo threshold de relevancia.
+        """
         criteria = config.get("criteria", {})
         scoring_cfg = config.get("scoring", {})
         weights = scoring_cfg.get("weights", {})
@@ -113,12 +120,21 @@ class JobSearchPack(ResearchPack):
         llm_threshold = scoring_cfg.get("llm_threshold", 0.6)
 
         scorer = self._get_scorer()
+        profile = load_profile()
 
         # CV text para embedding (keywords + stack)
         cv_parts = criteria.get("keywords", []) + criteria.get("stack", [])
         cv_text = " ".join(cv_parts)
 
         for item in items:
+            # Blockers: se bloqueada, score=0 e motivo gravado
+            if profile:
+                blocker = check_blockers(item, profile=profile)
+                if blocker:
+                    item.score = 0.0
+                    item.metadata["blocked_reason"] = blocker["reason"]
+                    continue
+
             # Camada 1: Rules
             rule_score = scorer.score_rules(item, criteria)
 

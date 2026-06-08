@@ -174,24 +174,27 @@ class TestJobScorer:
         scorer = JobScorer(ScoringEngine())
         item = _make_item("Growth Marketing Lead")
         item.content = "Growth marketing CRO role with HubSpot and GA4. Senior."
-        score = scorer.score_rules(item, _CRITERIA)
+        with patch("vera.research.packs.jobs.scorer.load_profile", return_value={}):
+            score = scorer.score_rules(item, _CRITERIA)
         assert score > 0.5
 
     def test_score_rules_exclude_keyword(self):
         scorer = JobScorer(ScoringEngine())
         item = _make_item("Junior Growth Intern")
         item.content = "Junior intern position for growth marketing"
-        score = scorer.score_rules(item, _CRITERIA)
-        # Should be penalized by exclude keywords
         item2 = _make_item("Senior Growth Lead")
         item2.content = "Senior growth marketing lead with CRO"
-        score2 = scorer.score_rules(item2, _CRITERIA)
+        with patch("vera.research.packs.jobs.scorer.load_profile", return_value={}):
+            score = scorer.score_rules(item, _CRITERIA)
+            score2 = scorer.score_rules(item2, _CRITERIA)
+        # Should be penalized by exclude keywords
         assert score < score2
 
     def test_score_rules_empty_criteria(self):
         scorer = JobScorer(ScoringEngine())
         item = _make_item()
-        score = scorer.score_rules(item, {})
+        with patch("vera.research.packs.jobs.scorer.load_profile", return_value={}):
+            score = scorer.score_rules(item, {})
         # With empty criteria, only remote dimension fires (item has "remote")
         assert 0.0 <= score <= 1.0
 
@@ -223,7 +226,8 @@ class TestJobScorer:
         item = _make_item("Role")
         item.content = "Remote position worldwide"
         item.metadata["remote"] = True
-        score = scorer.score_rules(item, {"location": "remote"})
+        with patch("vera.research.packs.jobs.scorer.load_profile", return_value={}):
+            score = scorer.score_rules(item, {"location": "remote"})
         assert score > 0.5
 
 

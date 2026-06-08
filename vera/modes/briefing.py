@@ -681,15 +681,29 @@ Gere o briefing começando com:
 
     max_tokens = 800 if dia_num == 0 else 700
 
+    from vera import llm_health
+
+    # Circuit breaker: se LLM ja falhou N vezes seguidas, nao tenta de novo
+    if llm_health.is_circuit_open():
+        return llm_health.humanized_offline_message(
+            llm_health.get_status().get("last_failure_error")
+        )
+
     try:
-        return await llm.generate(
+        result = await llm.generate(
             system_prompt=system_prompt,
             user_prompt=user_prompt,
             max_tokens=max_tokens,
             temperature=0.7,
         )
+        llm_health.record_success()
+        return result
     except Exception as e:
-        return f"{cabecalho}\n\nErro técnico: {str(e)[:200]}"
+        count = llm_health.record_failure(str(e))
+        if count >= 3:
+            return llm_health.humanized_offline_message(str(e))
+        # 1a ou 2a falha: ainda mostra mensagem curta (sem stacktrace completo)
+        return f"{cabecalho}\n\nVera com probleminha tecnico. Tentando de novo na proxima."
 
 
 # ─── Pipeline principal ─────────────────────────────────────────────────────
@@ -801,6 +815,19 @@ async def run_async(
         except Exception as e:
             print(f"   [calendar] Erro: {e}")
 
+    # Astro — leitura do ceu do dia (opcional, silencioso se falhar)
+    astro_ctx = ""
+    try:
+        from vera.personal.astro import gerar_leitura_ceu
+        leitura = gerar_leitura_ceu()
+        if leitura:
+            astro_ctx = f"=== CÉU DO DIA ===\n{leitura}"
+            print("   [astro] leitura gerada")
+    except ImportError:
+        pass  # pyswisseph nao instalado — silencioso
+    except Exception as e:
+        print(f"   [astro] Erro (briefing continua): {e}")
+
     # Source health alerts
     source_health_ctx = ""
     try:
@@ -883,9 +910,12 @@ async def run_async(
         except Exception as e:
             print(f"   [research] Erro: {e}")
 
-    # Injeta calendar, source health e research nos domain_contexts
+    # Injeta calendar, astro, source health e research nos domain_contexts
+    # Ordem de insercao importa: calendar -> astro -> tasks (default) -> research
     if calendar_ctx:
         domain_contexts["_calendar"] = calendar_ctx
+    if astro_ctx:
+        domain_contexts["_astro"] = astro_ctx
     if source_health_ctx:
         domain_contexts["_source_health"] = source_health_ctx
     if research_ctx:
@@ -1061,7 +1091,8 @@ async def _buscar_eventos_calendar(config: VeraConfig) -> list[dict]:
         credentials_json=credentials,
         calendar_ids=gcal_cfg.calendar_ids,
     )
-    return await provider.get_events_today(config.timezone)
+    days_ahead = getattr(gcal_cfg, "days_ahead", 0)
+    return await provider.get_events_today(config.timezone, days_ahead=days_ahead)
 
 
 def _research_habilitado(config: VeraConfig) -> bool:

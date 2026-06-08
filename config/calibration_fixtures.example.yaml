@@ -1,0 +1,35 @@
+# Job scoring calibration fixtures example.
+# Copy to config/calibration_fixtures.yaml and replace with your own annotated jobs.
+
+fixtures:
+  - name: "Ideal PMM role"
+    stage: "Process"
+    manual_fit: 9
+    expected: "high"
+    job:
+      id: "example_001"
+      source: "fixture"
+      title: "Senior Product Marketing Manager"
+      company: "Example Company"
+      description: >
+        B2B SaaS company looking for a PMM to lead launches, positioning,
+        funnel analysis, and growth experiments. GA4 and HubSpot preferred.
+      location: "Remote"
+      is_remote: true
+      url: "https://example.com/jobs/001"
+      salary_currency: "USD"
+      contract_type: "Full-time"
+      tags: ["Marketing", "Growth"]
+
+  - name: "Blocked role"
+    stage: "Rejected"
+    manual_fit: 1
+    expected: "blocked"
+    job:
+      id: "example_002"
+      source: "fixture"
+      title: "Data Analyst"
+      company: "Example Company"
+      description: "Pure SQL reporting role with no ownership of growth strategy."
+      location: "Remote"
+      is_remote: true

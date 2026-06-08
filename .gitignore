@@ -5,6 +5,11 @@ config.yaml
 # Personal data
 workspace/USER.md
 workspace/AGENT.md
+workspace/SOUL.md
+config/candidate_profile.yaml
+config/target_companies.yaml
+config/calibration_fixtures.yaml
+config/natal_chart.json
 
 # Python
 __pycache__/

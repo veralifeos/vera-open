@@ -1,42 +1,40 @@
 # ============================================================
-# Vera Open — Weekly Review
+# Vera Open — Bot Telegram (batch a cada 30 min)
 # ============================================================
-# Runs every Saturday at 10:00 AM BRT (13:00 UTC).
+# Processa comandos Telegram pendentes (/status /check /feito /ceu).
+# Roda a cada 30 min para dar resposta rapida mesmo nos dias sem
+# research/briefing. Commits state/bot_state.json automaticamente.
 # ============================================================
 
-name: Weekly Review
+name: Bot
 
 on:
   schedule:
-    # 13:00 UTC = 10:00 BRT (UTC-3)
-    - cron: "0 13 * * 6"
+    - cron: "*/30 * * * *"  # A cada 30 min
   workflow_dispatch:
 
 concurrency:
-  group: vera-weekly
+  group: vera-bot
   cancel-in-progress: false
 
 env:
   VERA_CONFIG: config/config.ci.yaml
   NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
   NOTION_DB_ACOES: ${{ secrets.NOTION_DB_ACOES }}
-  NOTION_DB_PIPELINE: ${{ secrets.NOTION_DB_PIPELINE }}
-  NOTION_DB_CONTATOS: ${{ secrets.NOTION_DB_CONTATOS }}
   NOTION_DB_CHECK: ${{ secrets.NOTION_DB_CHECK }}
+  NOTION_DB_PIPELINE: ${{ secrets.NOTION_DB_PIPELINE }}
   NOTION_DB_LINHA_CEU: ${{ secrets.NOTION_DB_LINHA_CEU }}
-  NOTION_DB_METRICAS: ${{ secrets.NOTION_DB_METRICAS }}
-  NOTION_DB_PARALELOS: ${{ secrets.NOTION_DB_PARALELOS }}
   NOTION_PAGE_NATAL: ${{ secrets.NOTION_PAGE_NATAL }}
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-  GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-  GOOGLE_OAUTH_TOKEN: ${{ secrets.GOOGLE_OAUTH_TOKEN }}
 
 jobs:
-  weekly-review:
+  bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 3
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -46,7 +44,15 @@ jobs:
         uses: astral-sh/setup-uv@v4
 
       - name: Install dependencies
-        run: uv sync --extra calendar --extra personal
+        run: uv sync --extra personal
 
-      - name: Run weekly review
-        run: uv run python -m vera briefing --weekly --force
+      - name: Process pending Telegram commands
+        run: uv run python -m vera bot
+
+      - name: Commit bot state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f state/bot_state.json state/bot_pending.json || true
+          git diff --cached --quiet || git commit -m "chore: update bot state [skip ci]"
+          git push

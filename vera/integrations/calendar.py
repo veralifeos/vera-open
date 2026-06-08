@@ -64,20 +64,20 @@ class GoogleCalendarProvider(CalendarProvider):
         self._service = build("calendar", "v3", credentials=credentials)
         return self._service
 
-    async def get_events_today(self, timezone: str) -> list[dict]:
-        """Busca eventos de hoje em todos os calendarios configurados."""
+    async def get_events_today(self, timezone: str, days_ahead: int = 0) -> list[dict]:
+        """Busca eventos de hoje (+ opcionalmente N dias adicionais)."""
         import asyncio
 
         # Google Calendar API e sync, roda em thread
-        return await asyncio.to_thread(self._fetch_events_sync, timezone)
+        return await asyncio.to_thread(self._fetch_events_sync, timezone, days_ahead)
 
-    def _fetch_events_sync(self, timezone: str) -> list[dict]:
+    def _fetch_events_sync(self, timezone: str, days_ahead: int = 0) -> list[dict]:
         """Busca eventos (sync) — roda em thread."""
         service = self._get_service()
         tz = ZoneInfo(timezone)
         now = datetime.now(tz)
         start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        end_of_day = start_of_day + timedelta(days=1)
+        end_of_day = start_of_day + timedelta(days=max(1, days_ahead + 1))
 
         time_min = start_of_day.isoformat()
         time_max = end_of_day.isoformat()

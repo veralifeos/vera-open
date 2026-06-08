@@ -621,31 +621,95 @@ def _create_llm_provider(config, provider_name: str):
 
 
 @app.command()
-def bot() -> None:
-    """Inicia bot Telegram (polling). Responde /status, /next, /help."""
-    from vera.config import load_config
-    from vera.integrations.telegram_bot import VeraBot
+def bot(
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Processa comandos mas nao envia respostas."
+    ),
+    continuous: bool = typer.Option(
+        False,
+        "--continuous",
+        help="Modo polling continuo (legado). Default e batch via workflow.",
+    ),
+) -> None:
+    """Processa comandos Telegram pendentes: /status /check /feito /ceu.
 
+    Default: modo batch (busca mensagens acumuladas, processa, sai). Usado
+    pelo workflow bot.yml a cada 30 min. Use --continuous para polling
+    continuo (legado).
+    """
+    if continuous:
+        from vera.config import load_config
+        from vera.integrations.telegram_bot import VeraBot
+
+        try:
+            config = load_config()
+        except (FileNotFoundError, ValueError) as e:
+            typer.echo(f"Erro ao carregar config: {e}")
+            raise typer.Exit(code=1)
+
+        bot_token = os.environ.get(config.delivery.telegram.bot_token_env, "")
+        chat_id = os.environ.get(config.delivery.telegram.chat_id_env, "")
+        if not bot_token or not chat_id:
+            typer.echo("TELEGRAM_BOT_TOKEN e TELEGRAM_CHAT_ID sao obrigatorios.")
+            raise typer.Exit(code=1)
+
+        typer.echo("Vera Bot iniciando (continuo)... Ctrl+C para parar.")
+        vera_bot = VeraBot(bot_token, chat_id, config)
+        try:
+            asyncio.run(vera_bot.start())
+        except KeyboardInterrupt:
+            typer.echo("\nBot encerrado.")
+        return
+
+    from vera.personal.bot import process_pending_updates
+    process_pending_updates(dry_run=dry_run)
+
+
+# ─── Ceu ─────────────────────────────────────────────────────────────────────
+
+
+@app.command()
+def ceu(
+    notify: bool = typer.Option(
+        False,
+        "--notify",
+        help="Envia a leitura pro Telegram alem de imprimir no stdout.",
+    ),
+) -> None:
+    """Gera leitura astrologica do dia sob demanda.
+
+    Requer pyswisseph (`uv sync --group personal`). Usa cache diario em
+    state/bot_state.json — a mesma leitura e reusada no /ceu do bot.
+    """
     try:
-        config = load_config()
-    except (FileNotFoundError, ValueError) as e:
-        typer.echo(f"Erro ao carregar config: {e}")
+        from vera.personal.astro import gerar_leitura_ceu
+    except ImportError:
+        typer.echo("pyswisseph nao instalado. Rode: uv sync --group personal")
         raise typer.Exit(code=1)
 
-    bot_token = os.environ.get(config.delivery.telegram.bot_token_env, "")
-    chat_id = os.environ.get(config.delivery.telegram.chat_id_env, "")
-
-    if not bot_token or not chat_id:
-        typer.echo("TELEGRAM_BOT_TOKEN e TELEGRAM_CHAT_ID são obrigatórios.")
+    try:
+        texto = gerar_leitura_ceu()
+    except Exception as e:
+        typer.echo(f"Erro ao gerar leitura: {e}", err=True)
         raise typer.Exit(code=1)
 
-    typer.echo("Vera Bot iniciando... (Ctrl+C para parar)")
-    vera_bot = VeraBot(bot_token, chat_id, config)
+    typer.echo(texto)
 
-    try:
-        asyncio.run(vera_bot.start())
-    except KeyboardInterrupt:
-        typer.echo("\nBot encerrado.")
+    if notify:
+        from vera.personal.bot import save_bot_state, load_bot_state, send_reply
+        from vera.personal.config import BRT
+        from datetime import datetime
+
+        # Atualiza cache diario para evitar Claude duplicado no bot
+        state = load_bot_state()
+        state["last_ceu"] = datetime.now(BRT).date().isoformat()
+        state["last_ceu_text"] = texto
+        save_bot_state(state)
+
+        if send_reply(texto):
+            typer.echo("\n[enviado ao Telegram]")
+        else:
+            typer.echo("\n[falha ao enviar ao Telegram]", err=True)
 
 
 # ─── Setup ───────────────────────────────────────────────────────────────────
@@ -723,3 +787,35 @@ def doctor() -> None:
     results = asyncio.run(run_all_checks())
     exit_code = print_results(results)
     raise typer.Exit(code=exit_code)
+
+
+# ─── Calibrate ──────────────────────────────────────────────────────────────
+
+
+@app.command()
+def calibrate(
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Imprime cada fixture."),
+) -> None:
+    """Valida o rule scorer do jobs pack contra fixtures anotadas.
+
+    Le config/calibration_fixtures.yaml e compara o score calculado com
+    a faixa esperada ("high" >=7, "medium" 3-7, "low" <3, "blocked").
+    Exit code 0 se 100% accuracy, 1 caso contrario.
+    """
+    from vera.research.packs.jobs.calibration import (
+        format_report,
+        run_calibration,
+    )
+
+    try:
+        cal = run_calibration(verbose=verbose)
+    except FileNotFoundError:
+        typer.echo(
+            "config/calibration_fixtures.yaml nao encontrado. "
+            "Crie fixtures anotadas para calibrar o scorer.",
+            err=True,
+        )
+        raise typer.Exit(code=2)
+
+    typer.echo(format_report(cal))
+    raise typer.Exit(code=0 if cal["failed"] == 0 else 1)

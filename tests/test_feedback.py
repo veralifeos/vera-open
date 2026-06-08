@@ -249,7 +249,7 @@ def test_writer_creates_section_if_missing(tmp_path):
 
     try:
         from vera.feedback.patterns import Inference
-        inf = Inference("abc", "carga", "Teste", "2026-03-20", "2026-04-20", 5)
+        inf = Inference("abc", "carga", "Teste", "2026-03-20", "2026-12-20", 5)
         result = writer.update([inf])
 
         content = user_md.read_text(encoding="utf-8")
@@ -277,7 +277,7 @@ def test_writer_does_not_modify_other_sections(tmp_path):
 
     try:
         from vera.feedback.patterns import Inference
-        inf = Inference("xyz", "zona_morta", "Teste zona", "2026-03-20", "2026-04-20", 7)
+        inf = Inference("xyz", "zona_morta", "Teste zona", "2026-03-20", "2026-12-20", 7)
         writer.update([inf])
 
         content = user_md.read_text(encoding="utf-8")
@@ -315,7 +315,7 @@ def test_writer_preserves_manual_content(tmp_path):
 
     try:
         from vera.feedback.patterns import Inference
-        inf = Inference("new1", "carga", "Nova inferência", "2026-03-20", "2026-04-20", 5)
+        inf = Inference("new1", "carga", "Nova inferência", "2026-03-20", "2026-12-20", 5)
         writer.update([inf])
 
         content = user_md.read_text(encoding="utf-8")

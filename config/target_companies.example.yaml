@@ -1,0 +1,16 @@
+# Target companies example.
+# Copy to config/target_companies.yaml and edit for your own monitoring/scoring.
+
+companies:
+  - name: "Example Company"
+    tier: 1
+    category: "B2B SaaS"
+    careers_url: "https://example.com/careers"
+    notes: "Why this company matters to your search."
+
+  - name: "Another Example"
+    tier: 2
+    category: "Fintech"
+    ats: greenhouse
+    board_id: "example"
+    notes: "Optional ATS metadata can power direct monitoring."

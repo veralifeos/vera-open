@@ -1,0 +1,44 @@
+# ============================================================
+# Vera Open — Fill Missing Task Fields (manual)
+# ============================================================
+# Preenche Esforço + Projeto em tarefas ativas do Notion.
+# Default: dry-run. Pra aplicar de verdade, marcar apply=true.
+# ============================================================
+
+name: Fill Missing Task Fields
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Aplicar mudanças no Notion (default: dry-run)"
+        type: boolean
+        required: false
+        default: false
+
+env:
+  NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+  NOTION_DB_ACOES: ${{ secrets.NOTION_DB_ACOES }}
+
+jobs:
+  fill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync --extra personal
+
+      - name: Run fill script
+        run: |
+          if [ "${{ github.event.inputs.apply }}" = "true" ]; then
+            uv run python scripts/fill_missing_tasks.py --apply
+          else
+            uv run python scripts/fill_missing_tasks.py
+          fi

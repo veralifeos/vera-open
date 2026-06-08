@@ -1,14 +1,16 @@
-# CI config — used by GitHub Actions workflows.
-# Database IDs are public (useless without NOTION_TOKEN).
-# All secrets come from GitHub Actions secrets / env vars.
+# CI config — usado pelos workflows do GitHub Actions.
+# Todos os valores sensiveis vem de secrets via ${VAR_NAME}.
+# Nenhum ID de database hardcoded aqui.
 
 name: "Vera"
 language: "pt-BR"
 timezone: "America/Sao_Paulo"
+
 backend:
   type: "notion"
   notion:
     token_env: "NOTION_TOKEN"
+
 llm:
   default: "claude"
   advanced: "claude"
@@ -16,13 +18,20 @@ llm:
     claude:
       model: "claude-sonnet-4-6"
       api_key_env: "ANTHROPIC_API_KEY"
+
 delivery:
   telegram:
     bot_token_env: "TELEGRAM_BOT_TOKEN"
     chat_id_env: "TELEGRAM_CHAT_ID"
+
 integrations:
   google_calendar:
-    enabled: false
+    enabled: true
+    credentials_env: "GOOGLE_CREDENTIALS"
+    oauth_token_env: "GOOGLE_OAUTH_TOKEN"
+    calendar_ids: ["primary"]
+    days_ahead: 2
+
 schedule:
   briefing: "09:00"
   urgency_update: "08:00"
@@ -32,38 +41,75 @@ schedule:
   week_setup:
     day: "sunday"
     time: "18:00"
+
 persona:
   preset: "executive"
   custom_prompt_file: null
+
 domains:
   tasks:
     enabled: true
-    collection: "59c4e7b82ebb4db5b7a5ab6ef91e686f"
+    collection: "${NOTION_DB_ACOES}"
     fields:
-      title: "Nome"
+      title: "Name"
       status: "Status"
-      priority: "Prioridade"
-      deadline: "Deadline"
+      # "Tipo" e a prioridade real (🔥 Critico / ⚠️ Importante / 🧠 Estrategico)
+      priority: "Tipo"
       category: "Tipo"
-      status_active: ["A Fazer", "Fazendo", "Aguardando"]
-      status_done: ["Concluído", "Arquivado"]
+      # Urgencia e formula (readOnly) — nunca escrever
+      urgencia: "Urgência Real"
+      deadline: "Deadline"
+      area: "Área"
+      esforco: "Esforço"
+      projeto: "Projeto"
+      proximo_passo: "Próximo Passo"
+      bloqueador: "Bloqueador?"
+      status_active: ["To Do", "Doing"]
+      status_done: ["Done"]
   pipeline:
     enabled: true
-    collection: "f53f490c5ebe416482106d4bd1f3e108"
+    collection: "${NOTION_DB_PIPELINE}"
     fields:
-      title: "Nome"
+      # "Empresa" e o title; "Vaga" e rich_text com o cargo
+      title: "Empresa"
+      vaga: "Vaga"
       stage: "Estágio"
       priority: "Prioridade"
+      fit: "Fit"
       next_action: "Próximo Passo"
       last_contact: "Data Último Contato"
+      fonte: "Fonte"
   contacts:
     enabled: true
-    collection: "498dff6eaa58422da1a3d471a4bb60e6"
+    collection: "${NOTION_DB_CONTATOS}"
     fields:
       name: "Nome"
       status: "Status"
       type: "Tipo"
       last_interaction: "Última Interação"
+      cargo: "Cargo"
+      empresa: "Empresa Atual"
+  check_semanal:
+    enabled: true
+    collection: "${NOTION_DB_CHECK}"
+    fields:
+      title: "Semana"
+      energia: "Energia"
+      vida_pratica: "Vida Pratica"
+      carreira: "Carreira"
+      sanidade: "Sanidade"
+      highlight: "Highlight"
+
+research:
+  enabled: true
+  packs:
+    jobs:
+      enabled: true
+      config_path: "config/packs/jobs.yaml"
+    news:
+      enabled: false
+      config_path: "config/packs/news.yaml"
+
 debug:
   dry_run: false
   verbose: false

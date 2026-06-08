@@ -4,6 +4,7 @@ Carrega config.yaml + fallback env vars. Erro claro no startup se inválida.
 """
 
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -81,6 +82,7 @@ class GoogleCalendarConfig(BaseModel):
     credentials_env: str = "GOOGLE_CREDENTIALS"
     oauth_token_env: str = "GOOGLE_OAUTH_TOKEN"
     calendar_ids: list[str] = Field(default_factory=lambda: ["primary"])
+    days_ahead: int = 0  # 0 = so hoje; 2 = hoje + 2 dias
 
 
 class IntegrationsConfig(BaseModel):
@@ -147,6 +149,26 @@ def _find_config_file() -> Path | None:
     return None
 
 
+_ENV_VAR_RE = re.compile(r"\$\{([A-Z0-9_]+)\}")
+
+
+def _expand_env_vars(obj):
+    """Substitui ${VAR} em strings por os.environ[VAR] (recursivo).
+
+    Permite que config.yaml referencie secrets: collection: "${NOTION_DB_ACOES}".
+    Se a env var nao existe, substitui por string vazia.
+    """
+    if isinstance(obj, str):
+        return _ENV_VAR_RE.sub(
+            lambda m: os.environ.get(m.group(1), ""), obj
+        )
+    if isinstance(obj, dict):
+        return {k: _expand_env_vars(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_expand_env_vars(v) for v in obj]
+    return obj
+
+
 def load_config(path: str | Path | None = None) -> VeraConfig:
     """Carrega configuração de YAML + env vars.
 
@@ -175,6 +197,7 @@ def load_config(path: str | Path | None = None) -> VeraConfig:
     with open(config_path, encoding="utf-8") as f:
         raw = yaml.safe_load(f) or {}
 
+    raw = _expand_env_vars(raw)
     return VeraConfig(**raw)
 
 

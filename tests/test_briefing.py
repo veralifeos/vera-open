@@ -311,8 +311,10 @@ def test_gerar_briefing_domingo():
     assert "VERA" in result
 
 
-def test_gerar_briefing_erro_llm():
-    """Erro no LLM retorna mensagem de erro."""
+def test_gerar_briefing_erro_llm(tmp_path, monkeypatch):
+    """Erro no LLM retorna mensagem humanizada — nao stacktrace no Telegram."""
+    from vera import llm_health
+    monkeypatch.setattr(llm_health, "DEFAULT_PATH", tmp_path / "llm_health.json")
 
     class FailLLM:
         async def generate(self, **kwargs):
@@ -321,7 +323,29 @@ def test_gerar_briefing_erro_llm():
     llm = FailLLM()
     config = _minimal_config()
     result = asyncio.run(gerar_briefing(llm, "system", "contexto", 2, "VERA — Quarta", config))
-    assert "Erro técnico" in result
+    # Primeira falha: mensagem curta sem stacktrace
+    assert "probleminha" in result or "silencio" in result.lower()
+    assert "API down" not in result  # stacktrace nao vaza
+
+
+def test_gerar_briefing_circuit_breaker_opens(tmp_path, monkeypatch):
+    """Apos 3 falhas consecutivas, circuit abre e retorna mensagem offline."""
+    from vera import llm_health
+    monkeypatch.setattr(llm_health, "DEFAULT_PATH", tmp_path / "llm_health.json")
+
+    class FailLLM:
+        async def generate(self, **kwargs):
+            raise Exception("credit balance is too low")
+
+    llm = FailLLM()
+    config = _minimal_config()
+    for _ in range(3):
+        asyncio.run(gerar_briefing(llm, "system", "ctx", 2, "VERA", config))
+
+    # 4a chamada: circuit ja aberto, retorna mensagem offline humanizada
+    result = asyncio.run(gerar_briefing(llm, "system", "ctx", 2, "VERA", config))
+    assert "silencio" in result.lower()
+    assert "saldo da Anthropic" in result
 
 
 # ─── Pipeline completo ──────────────────────────────────────────────────────

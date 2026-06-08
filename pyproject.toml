@@ -41,11 +41,15 @@ calendar = [
 embeddings = ["sentence-transformers>=2.0"]
 embeddings-light = ["light-embed>=1.0"]
 financial = ["edgartools>=5.0"]
+personal = [
+    "pyswisseph>=2.10",
+    "requests>=2.31",
+]
 setup = [
     "InquirerPy>=0.3.4",
     "tzlocal>=5.0",
 ]
-all = ["vera-open[embeddings,financial,calendar,setup]"]
+all = ["vera-open[embeddings,financial,calendar,setup,personal]"]
 dev = [
     "pytest>=7.0",
     "pytest-asyncio>=0.21",
