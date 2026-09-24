@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — Vera Open</title>
+<meta name="description" content="Privacy Policy for Vera Open, getvera.dev and Vera local integrations.">
+<link rel="canonical" href="https://getvera.dev/privacy-policy">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://getvera.dev/privacy-policy">
+<meta property="og:title" content="Privacy Policy — Vera Open">
+<meta property="og:description" content="How Vera Open and its local integrations handle data.">
+<meta name="theme-color" content="#0F1A28">
+<link rel="icon" type="image/webp" href="/assets/VeraIUcon-02.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root { --bg:#0F1A28; --bg2:#162234; --bg3:#1E2F44; --strip:#0B1520; --border:#2A3D54; --border2:#1E3248; --text:#F0EBE3; --muted:#9AABBF; --dim:#6A7A8E; --accent:#FF5722; --accent2:#FF7043; --font-display:'Playfair Display',Georgia,serif; --font-body:'DM Sans',system-ui,sans-serif; --font-mono:'JetBrains Mono',monospace; }
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; min-width:320px; background:var(--bg); color:var(--text); font:16px/1.7 var(--font-body); }
+body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:-1; opacity:.35; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.03'/%3E%3C/svg%3E"); }
+.container { width:min(100% - 48px, 900px); margin:0 auto; }
+nav { position:sticky; top:0; z-index:10; background:rgba(15,26,40,.94); backdrop-filter:blur(12px); border-bottom:1px solid var(--border2); }
+.nav-inner { height:60px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.wordmark { color:var(--accent); font:500 14px var(--font-mono); letter-spacing:.03em; text-decoration:none; }
+.nav-right { display:flex; align-items:center; gap:12px; }
+.back { color:var(--muted); font:12px var(--font-mono); text-decoration:none; padding:7px 10px; border:1px solid var(--border); border-radius:8px; }
+.back:hover { color:var(--text); border-color:var(--accent); }
+.lang-toggle { display:flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; font:11px var(--font-mono); }
+.lang-btn { border:0; padding:7px 11px; color:var(--muted); background:transparent; cursor:pointer; }
+.lang-btn.active { background:var(--accent); color:#fff; }
+.hero { position:relative; padding:82px 0 54px; overflow:hidden; border-bottom:1px solid var(--border2); }
+.hero::before { content:''; position:absolute; top:0; left:0; height:100%; width:3px; background:linear-gradient(var(--accent),transparent); }
+.hero::after { content:''; position:absolute; right:-80px; top:-110px; width:420px; height:420px; border:1px solid rgba(255,87,34,.18); border-radius:50%; box-shadow:0 0 90px rgba(255,87,34,.08); }
+.eyebrow { position:relative; margin:0 0 18px; color:var(--accent); font:11px var(--font-mono); letter-spacing:.13em; text-transform:uppercase; }
+h1 { position:relative; max-width:730px; margin:0 0 16px; font:700 clamp(38px,7vw,62px)/1.1 var(--font-display); letter-spacing:-.03em; }
+h1 em { color:var(--accent); font-style:italic; }
+.intro { position:relative; max-width:660px; margin:0; color:var(--muted); font-size:17px; }
+.updated { position:relative; display:inline-flex; margin-top:24px; padding:5px 10px; border:1px solid var(--border); border-radius:999px; color:var(--dim); font:11px var(--font-mono); }
+main { padding:56px 0 80px; }
+.notice { margin:0 0 38px; padding:20px 22px; border:1px solid rgba(255,87,34,.32); border-radius:12px; background:rgba(255,87,34,.06); color:var(--muted); }
+.notice strong { color:var(--text); }
+.policy-grid { display:grid; grid-template-columns:190px minmax(0,1fr); gap:50px; align-items:start; }
+.toc { position:sticky; top:84px; padding:16px; border:1px solid var(--border); border-radius:12px; background:var(--bg2); }
+.toc-title { display:block; margin-bottom:8px; color:var(--dim); font:10px var(--font-mono); letter-spacing:.12em; text-transform:uppercase; }
+.toc a { display:block; padding:5px 0; color:var(--muted); font-size:13px; text-decoration:none; }
+.toc a:hover { color:var(--accent); }
+.policy section { padding:0 0 35px; margin:0 0 35px; border-bottom:1px solid var(--border2); scroll-margin-top:90px; }
+.policy section:last-child { border-bottom:0; }
+h2 { margin:0 0 12px; color:var(--text); font:700 28px/1.2 var(--font-display); }
+h3 { margin:22px 0 7px; color:var(--text); font:500 15px var(--font-body); }
+p, li { color:var(--muted); }
+p { margin:0 0 14px; }
+ul { margin:8px 0 14px; padding-left:22px; }
+li + li { margin-top:7px; }
+a { color:var(--accent2); }
+a:hover { color:var(--text); }
+.data-card { margin:18px 0; padding:18px; border:1px solid var(--border); border-radius:12px; background:var(--bg2); }
+.data-card p:last-child { margin-bottom:0; }
+.label { display:block; margin-bottom:5px; color:var(--accent); font:10px var(--font-mono); letter-spacing:.12em; text-transform:uppercase; }
+.local { color:var(--text); font:500 14px var(--font-mono); }
+footer { padding:30px 0; border-top:1px solid var(--border2); background:var(--strip); }
+.footer-inner { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.footer-copy { color:var(--dim); font-size:12px; }
+.footer-links { display:flex; gap:18px; }
+.footer-links a { color:var(--dim); font-size:13px; text-decoration:none; }
+.footer-links a:hover { color:var(--text); }
+.t-pt { display:none; }
+html[lang='pt-BR'] .t-en { display:none; }
+html[lang='pt-BR'] .t-pt { display:inline; }
+html[lang='pt-BR'] .t-pt.block { display:block; }
+@media (max-width:720px) { .container { width:min(100% - 32px, 900px); } .hero { padding:60px 0 42px; } .policy-grid { grid-template-columns:1fr; gap:28px; } .toc { position:static; } .toc a { display:inline-block; margin-right:13px; } .nav-right { gap:8px; } .back { padding:6px 8px; } h1 { font-size:40px; } main { padding-top:36px; } }
+</style>
+</head>
+<body>
+<nav>
+  <div class="container nav-inner">
+    <a class="wordmark" href="/" aria-label="Vera Open home">vera.open</a>
+    <div class="nav-right">
+      <a class="back" href="/"><span class="t-en">← getvera.dev</span><span class="t-pt">← getvera.dev</span></a>
+      <div class="lang-toggle" aria-label="Language selector">
+        <button class="lang-btn active" type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button class="lang-btn" type="button" data-lang="pt" aria-pressed="false">PT</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <p class="eyebrow"><span class="t-en">Vera Open · privacy</span><span class="t-pt">Vera Open · privacidade</span></p>
+    <h1><span class="t-en">Clear terms.<br><em>Plain handling.</em></span><span class="t-pt">Termos claros.<br><em>Tratamento direto.</em></span></h1>
+    <p class="intro"><span class="t-en">This policy explains what getvera.dev and Vera local integrations process, why, and where that information stays.</span><span class="t-pt">Esta política explica quais dados o getvera.dev e as integrações locais da Vera tratam, por que os tratam e onde essas informações ficam.</span></p>
+    <span class="updated"><span class="t-en">Last updated: September 24, 2026</span><span class="t-pt">Última atualização: 24 de setembro de 2026</span></span>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <div class="notice">
+      <span class="t-en"><strong>Short version:</strong> Vera Open is built to run in your own environment. When you use a local integration, such as the Pinterest MCP, its access credentials are kept locally and it acts only when you request an operation.</span>
+      <span class="t-pt"><strong>Versão curta:</strong> a Vera Open foi feita para rodar no seu próprio ambiente. Quando você usa uma integração local, como o MCP do Pinterest, as credenciais de acesso ficam localmente e a ferramenta só executa uma operação quando você a solicita.</span>
+    </div>
+
+    <div class="policy-grid">
+      <aside class="toc" aria-label="Privacy policy sections">
+        <span class="toc-title"><span class="t-en">On this page</span><span class="t-pt">Nesta página</span></span>
+        <a href="#scope"><span class="t-en">Scope</span><span class="t-pt">Escopo</span></a>
+        <a href="#data"><span class="t-en">Data we handle</span><span class="t-pt">Dados tratados</span></a>
+        <a href="#use"><span class="t-en">How it is used</span><span class="t-pt">Como usamos</span></a>
+        <a href="#sharing"><span class="t-en">Sharing and storage</span><span class="t-pt">Compartilhamento</span></a>
+        <a href="#rights"><span class="t-en">Your choices</span><span class="t-pt">Suas escolhas</span></a>
+        <a href="#contact"><span class="t-en">Contact</span><span class="t-pt">Contato</span></a>
+      </aside>
+
+      <article class="policy">
+        <section id="scope">
+          <h2><span class="t-en">1. Scope</span><span class="t-pt">1. Escopo</span></h2>
+          <p><span class="t-en">This policy applies to <strong>getvera.dev</strong>, Vera Open, and local tools or integrations distributed under the Vera name. It includes the Vera integration for Pinterest made available through an MCP (Model Context Protocol).</span><span class="t-pt">Esta política se aplica ao <strong>getvera.dev</strong>, à Vera Open e às ferramentas ou integrações locais distribuídas sob o nome Vera. Ela inclui a integração da Vera com o Pinterest disponibilizada por meio de um MCP (Model Context Protocol).</span></p>
+          <p><span class="t-en">Vera Open is open source and designed for self-hosting. If you install it in your own account or environment, you control the credentials and services you connect to it.</span><span class="t-pt">A Vera Open é open source e foi pensada para auto-hospedagem. Se você a instala na sua própria conta ou ambiente, você controla as credenciais e os serviços conectados a ela.</span></p>
+        </section>
+
+        <section id="data">
+          <h2><span class="t-en">2. Data we handle</span><span class="t-pt">2. Dados tratados</span></h2>
+          <div class="data-card">
+            <span class="label"><span class="t-en">Website</span><span class="t-pt">Site</span></span>
+            <p><span class="t-en">The site may collect basic technical information through analytics, such as pages viewed, device/browser data, approximate location and interaction events. If you request the install pack, we process the information you enter in the form: name, email address and professional role.</span><span class="t-pt">O site pode coletar informações técnicas básicas por analytics, como páginas visualizadas, dados de dispositivo/navegador, localização aproximada e eventos de interação. Se você solicitar o kit de instalação, tratamos as informações preenchidas no formulário: nome, e-mail e atuação profissional.</span></p>
+          </div>
+          <div class="data-card">
+            <span class="label"><span class="t-en">Self-hosted Vera Open</span><span class="t-pt">Vera Open auto-hospedada</span></span>
+            <p><span class="t-en">A Vera installation can process the data sources you choose to connect, such as Notion, calendar, Telegram or an AI provider. The website does not automatically receive the contents of those sources. They are handled in the environment and accounts you configure.</span><span class="t-pt">Uma instalação da Vera pode processar as fontes de dados que você escolher conectar, como Notion, agenda, Telegram ou um provedor de IA. O site não recebe automaticamente o conteúdo dessas fontes. Elas são tratadas no ambiente e nas contas que você configurar.</span></p>
+          </div>
+          <div class="data-card">
+            <span class="label"><span class="t-en">Local integrations, including Pinterest</span><span class="t-pt">Integrações locais, incluindo Pinterest</span></span>
+            <p><span class="t-en">A local integration may process OAuth access and refresh tokens, the account identifiers and content returned by the service API, and the information needed to complete an action you request. For the Pinterest MCP, this can include account, board and Pin information, plus a Pin title, description, destination link and image URL when you ask to create a Pin.</span><span class="t-pt">Uma integração local pode processar tokens OAuth de acesso e renovação, identificadores da conta e conteúdo retornado pela API do serviço, além das informações necessárias para realizar uma ação solicitada. No MCP do Pinterest, isso pode incluir dados de conta, pastas e Pins, além de título, descrição, link de destino e URL da imagem quando você pede a criação de um Pin.</span></p>
+            <p class="local"><span class="t-en">Credentials are stored locally in the integration's environment file; they are not embedded in the source code.</span><span class="t-pt">As credenciais ficam armazenadas localmente no arquivo de ambiente da integração; elas não são incluídas no código-fonte.</span></p>
+          </div>
+        </section>
+
+        <section id="use">
+          <h2><span class="t-en">3. How data is used</span><span class="t-pt">3. Como os dados são usados</span></h2>
+          <p><span class="t-en">We use website data to operate and improve the site, understand aggregate usage and send the material requested through the form. We do not sell personal information.</span><span class="t-pt">Usamos os dados do site para operá-lo e melhorá-lo, entender o uso agregado e enviar o material solicitado no formulário. Não vendemos informações pessoais.</span></p>
+          <p><span class="t-en">Local integrations use connected-service data only to provide the capability you invoke. The Pinterest MCP can read account, board and Pin data after authorization, and it creates a Pin only when you explicitly ask it to do so.</span><span class="t-pt">As integrações locais usam dados dos serviços conectados apenas para entregar a capacidade que você aciona. O MCP do Pinterest pode consultar dados de conta, pastas e Pins após autorização e cria um Pin somente quando você pede isso de forma explícita.</span></p>
+        </section>
+
+        <section id="sharing">
+          <h2><span class="t-en">4. Sharing, storage and security</span><span class="t-pt">4. Compartilhamento, armazenamento e segurança</span></h2>
+          <p><span class="t-en">The website uses service providers needed to run it, including analytics and the form delivery flow. Information from the form is sent to the storage configured for that flow. Connected-service data is exchanged with the provider you authorize, such as Pinterest, Notion, Telegram or an AI provider.</span><span class="t-pt">O site usa provedores necessários para funcionar, incluindo analytics e o fluxo de envio do formulário. As informações do formulário são enviadas ao armazenamento configurado para esse fluxo. Dados de serviços conectados são trocados com o provedor que você autorizar, como Pinterest, Notion, Telegram ou um provedor de IA.</span></p>
+          <p><span class="t-en">For the local Pinterest MCP, OAuth tokens are kept in the local environment used to run the tool. You can revoke access through Pinterest and remove the local token file at any time. No system is perfectly secure, but access is limited to the configured credentials and the permissions granted to them.</span><span class="t-pt">No MCP local do Pinterest, os tokens OAuth ficam no ambiente local usado para executar a ferramenta. Você pode revogar o acesso pelo Pinterest e remover o arquivo local de tokens a qualquer momento. Nenhum sistema é perfeitamente seguro, mas o acesso é limitado às credenciais configuradas e às permissões concedidas a elas.</span></p>
+        </section>
+
+        <section id="rights">
+          <h2><span class="t-en">5. Your choices</span><span class="t-pt">5. Suas escolhas</span></h2>
+          <ul>
+            <li><span class="t-en">You can avoid analytics cookies through your browser controls.</span><span class="t-pt">Você pode recusar cookies de analytics pelos controles do seu navegador.</span></li>
+            <li><span class="t-en">You can ask to access, correct or delete information submitted through the site form.</span><span class="t-pt">Você pode solicitar acesso, correção ou exclusão das informações enviadas pelo formulário do site.</span></li>
+            <li><span class="t-en">You can disconnect any self-hosted integration by revoking the provider's authorization and removing its local credentials.</span><span class="t-pt">Você pode desconectar qualquer integração auto-hospedada revogando a autorização no provedor e removendo suas credenciais locais.</span></li>
+          </ul>
+          <p><span class="t-en">Where applicable, these requests may be exercised under the Brazilian General Data Protection Law (LGPD) and other relevant data-protection laws.</span><span class="t-pt">Quando aplicável, esses pedidos podem ser exercidos nos termos da Lei Geral de Proteção de Dados (LGPD) e de outras normas de proteção de dados pertinentes.</span></p>
+        </section>
+
+        <section id="changes">
+          <h2><span class="t-en">6. Changes to this policy</span><span class="t-pt">6. Alterações nesta política</span></h2>
+          <p><span class="t-en">This policy may be updated when the website or an integration changes. The date at the top of this page identifies the latest revision.</span><span class="t-pt">Esta política pode ser atualizada quando o site ou uma integração mudar. A data no início da página identifica a revisão mais recente.</span></p>
+        </section>
+
+        <section id="contact">
+          <h2><span class="t-en">7. Contact</span><span class="t-pt">7. Contato</span></h2>
+          <p><span class="t-en">Vera Open is maintained by Fernando Fidelis in Brazil. For privacy requests or questions about this policy, contact <a href="https://wa.me/5531995888807" target="_blank" rel="noopener noreferrer">Fernando via WhatsApp</a>.</span><span class="t-pt">A Vera Open é mantida por Fernando Fidelis, no Brasil. Para solicitações de privacidade ou dúvidas sobre esta política, entre em contato com <a href="https://wa.me/5531995888807" target="_blank" rel="noopener noreferrer">Fernando pelo WhatsApp</a>.</span></p>
+        </section>
+      </article>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container footer-inner">
+    <span class="wordmark">vera.open</span>
+    <div class="footer-links">
+      <a href="https://github.com/veralifeos/vera-open" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="/">getvera.dev</a>
+    </div>
+    <span class="footer-copy"><span class="t-en">Privacy Policy · Vera Open</span><span class="t-pt">Política de Privacidade · Vera Open</span></span>
+  </div>
+</footer>
+
+<script>
+  const buttons = document.querySelectorAll('[data-lang]');
+  function setLanguage(language) {
+    const portuguese = language === 'pt';
+    document.documentElement.lang = portuguese ? 'pt-BR' : 'en';
+    buttons.forEach((button) => {
+      const active = button.dataset.lang === language;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    localStorage.setItem('vera-language', language);
+  }
+  buttons.forEach((button) => button.addEventListener('click', () => setLanguage(button.dataset.lang)));
+  const savedLanguage = localStorage.getItem('vera-language');
+  if (savedLanguage === 'pt' || savedLanguage === 'en') setLanguage(savedLanguage);
+</script>
+</body>
+</html>
