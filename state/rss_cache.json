@@ -1,13 +1,13 @@
 {
   "https://feeds.arstechnica.com/arstechnica/technology-lab": {
-    "last_modified": "Mon, 5 Oct 2026 19:28:39 GMT"
+    "last_modified": "Wed, 7 Oct 2026 18:17:36 GMT"
   },
   "https://techcrunch.com/feed/": {
-    "etag": "W/\"93dac2204551eb688f1d315f0dc77182\"",
-    "last_modified": "Mon, 05 Oct 2026 20:58:14 GMT"
+    "etag": "W/\"2805a4d7d75f5dcf5243e7b9d13de580\"",
+    "last_modified": "Wed, 07 Oct 2026 19:03:59 GMT"
   },
   "https://www.aljazeera.com/xml/rss/all.xml": {
-    "etag": "W/\"80c5c4d86764461802d2176d9fda515f\"",
-    "last_modified": "Mon, 05 Oct 2026 20:52:24 GMT"
+    "etag": "W/\"40532c6e7ce0ee8e638c866afc904f7e\"",
+    "last_modified": "Wed, 07 Oct 2026 19:04:09 GMT"
   }
 }
